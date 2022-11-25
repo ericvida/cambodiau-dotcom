@@ -18,7 +18,7 @@ def logTime fn
 	let startTime = performance.now!
 	let res = fn
 	let endTime = performance.now!
-	console.log "function took {startTime - endTime} ms"
+	# console.log "function took {startTime - endTime} ms"
 	return res
 
 let state = {
@@ -77,7 +77,7 @@ class Api
 			learned_usage: 0
 		}
 		save!
-		console.log "cleared local storage"
+		# console.log "cleared local storage"
 	def toggleLearned word
 		if state.user_learned.hasOwnProperty(word)
 			delete state.user_learned[word]
@@ -188,7 +188,7 @@ class Api
 	def load
 		state = imba.locals.state if imba.locals.state
 		# state = store.get(STATEKEY) if store.get(STATEKEY)
-		console.log 'loaded', state
+		# console.log 'loaded', state
 
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
@@ -223,7 +223,7 @@ class Api
 	def logOut
 		if state.auth is yes
 			state.auth = no
-			console.log 'logged out'
+			# console.log 'logged out'
 		save!
 	def search feather, haystack
 		let haystackLength = haystack.length # tlen
@@ -246,7 +246,7 @@ class Api
 			
 			while haystackLetter < haystackLength
 				if haystack.charCodeAt(haystackLetter++) is featherLetterCode
-					console.log 'matched?'
+					# console.log 'matched?'
 					break match = true
 			
 			continue if match
@@ -948,7 +948,7 @@ tag DefinitionCard
 		let word_object = dictionary[state.active_word]
 		if word_object.hasOwnProperty('def')
 			<h2> "Definition"
-			<> console.log word_object
+			# <> console.log word_object
 			<ol>
 				for item in word_object.def
 					let line = item.split('=')
