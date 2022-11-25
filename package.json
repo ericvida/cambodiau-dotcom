@@ -1,0 +1,17 @@
+{
+	"name": "11-cambodiau-benj",
+	"scripts": {
+		"dev": "imba -w src/index.html",
+		"start": "npm run dev",
+		"build": "imba build src/index.html",
+		"preview": "npx http-server dist"
+	},
+	"devDependencies": {
+		"imba": "^2.0.0-alpha.223"
+	},
+	"dependencies": {
+		"fitty": "^2.3.6",
+		"localforage": "^1.10.0",
+		"store2": "^2.14.2"
+	}
+}

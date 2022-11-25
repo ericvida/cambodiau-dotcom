@@ -1,0 +1,4 @@
+- Add toggle for ipa/vida.
+- Move Lesson Bar to the bottom of the lesson
+- Make regexes for capturing groups under word spelling
+- 
