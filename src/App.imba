@@ -946,7 +946,7 @@ tag AudioPlayer
 tag DefinitionCard
 	<self>
 		let word_object = dictionary[state.active_word]
-		if word_object.hasOwnProperty('def')
+		if word_object.def isnt false
 			<h2> "Definition"
 			# <> console.log word_object
 			<ol>
