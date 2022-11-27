@@ -3779,7 +3779,7 @@ export let dictionary = {
 	"ព្រៀង": {rank: false, vida: "p̣ṛiạṇg", vida_auto: false, google: "Preang", ipa: false, def: false},
 	"ភ": {rank: false, vida: false, vida_auto: "phoo", google: false, ipa: "pʰɔɔ", def: false},
 	"ភា": {rank: false, vida: false, vida_auto: "phiạ", google: false, ipa: "pʰie", def: false},
-	"ភាពងងឹត": {rank: false, vida: "p̣hiạp̣-ṇgooṇgụt", vida_auto: false, google: "Darkness", ipa: false, def: false},
+	"ភាពងងឹត": {rank: false, vida: "p̣hiạp̣-ṇgooṇgụt", vida_auto: false, google: "Darkness", ipa: "pʰiep ŋɔŋɨt", def: false},
 	"ភាពស្ងៀមស្ងាត់": {rank: false, vida: "p̣hiạp̣-sṇgiạm-sṇgat", vida_auto: false, google: "Silence", ipa: false, def: false},
 	"ភាវៈ": {rank: false, vida: "p̣hiạṿeaq", vida_auto: false, google: "Creatures", ipa: false, def: false},
 	"ភីលីព": {rank: false, vida: "p̣hiiḷiip̣", vida_auto: false, google: "Philip", ipa: false, def: false},
