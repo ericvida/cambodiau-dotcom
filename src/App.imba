@@ -664,10 +664,10 @@ tag WordNav
 			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
 			
 			<global 
-				@hotkey('e')=prevPhraseZero
-				@hotkey('r')=nextPhrase
-				@hotkey('d')=prevWord 
-				@hotkey('f')=nextWord
+				@hotkey('e|up')=prevPhraseZero
+				@hotkey('r|down')=nextPhrase
+				@hotkey('d|left')=prevWord 
+				@hotkey('f|right')=nextWord
 			>
 			<div.word-wrapper>
 				for khmer_word, ki in phrase.khmer.split('|')
@@ -891,10 +891,12 @@ tag WordCard
 		width:100px
 		bg:hue4
 		overflow:hidden
+	css .phonetic-wrapper
+		cursor:pointer
 	def mount
 		fit_settings = {
 			minSize: 16
-			maxSize: 50
+			maxSize: 40
 		}
 		fitty($fit, fit_settings)
 	def render
@@ -904,18 +906,21 @@ tag WordCard
 			let ipa = dictionary[state.active_word]..ipa
 			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={state.active_word}&service=dictionary" target="_blank"> 
 				state.active_word
-			if state.ipa
-				if ipa
-					<div.phonetic> ipa
+			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=api.toggleIpa!>
+				if state.ipa
+					<span[fs:xs c:gray5]> "ipa"
+					if ipa
+						<div.phonetic> ipa
+					else
+						<div.phonetic[fs:xs]> "ipa coming soon"
 				else
-					<div.phonetic[fs:xs]> "ipa coming soon"
-			else
-				if vida
-					<div.phonetic> vida
-				elif vida_auto
-					<div.phonetic> vida_auto
-				else
-					<div.phonetic> "vida coming soon"
+					<span[fs:xs c:gray5]> "vida"
+					if vida
+						<div.phonetic> vida
+					elif vida_auto
+						<div.phonetic> vida_auto
+					else
+						<div.phonetic> "vida coming soon"
 			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)>
 				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
 			if audio.hasOwnProperty(state.active_word)
@@ -929,7 +934,7 @@ tag AudioPlayer
 		
 		<.button-wrapper[d:hflex ai:center]>
 			if $track.paused # when paused
-				<div .play-audio[w:2em cursor:pointer] @hotkey('space') @click=$track.play> 
+				<div .play-audio[w:2em cursor:pointer] @hotkey('space|a') @click=$track.play> 
 					<svg[size:24px] stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">
 						<path[stroke:indigo6 fill:indigo6]  d="M6.906 4.537A.6.6 0 006 5.053v13.894a.6.6 0 00.906.516l11.723-6.947a.6.6 0 000-1.032L6.906 4.537z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 			
@@ -941,7 +946,7 @@ tag AudioPlayer
 					# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 					# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 					# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
-			<div.key[ml:.5sp]> "space"
+			<div.key[ml:.5sp]> "a"
 	
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
@@ -965,7 +970,8 @@ tag DefinitionCard
 
 # CARD[epic=CARD, seq=32] ShortcutCard
 tag ShortcutCard
-
+	css .key
+		mx:.5sp
 			
 	<self .shortcuts.card>
 		# TAG[epic=SHORTCUTS, seq=20] Global Shortcuts
@@ -974,39 +980,48 @@ tag ShortcutCard
 			@hotkey("shift+i")=api.toggleIpa!
 			@hotkey("shift+a")=api.toggleAuth!
 			@hotkey("shift+c+l")=api.clear!
-			@hotkey('enter')=api.toggleLearned(state.active_word)
-			@hotkey('g')=api.toggleLearned(state.active_word)
+			@hotkey('enter|s')=api.toggleLearned(state.active_word)
 			>
 		<h2> "Shortcuts"
 		<div>
 			<span.key-text> "toggle learned"
-			<span.key.ondark[mx:.5sp]> "enter"
+			<span.key> "s"
 			<span.key-text> "or"
-			<span.key.ondark[ml:.5sp]> "g"
+			<span.key> "enter"
 		<div>
 			<span.key-text> "play audio "
-			<span.key.ondark[ml:.5sp]> "space" 
-		<div>
-			<span.key-text> "next lesson"
-			<span.key.ondark[ml:.5sp]> "r" 
+			<span.key> "a"
+			<span.key-text> "or"
+			<span.key> "space" 
 		<div>
 			<span.key-text> "previous lesson"
-			<span.key.ondark[ml:.5sp]> "e"
+			<span.key> "e"
+			<span.key-text> "or"
+			<span.key> "↑"
+		<div>
+			<span.key-text> "next lesson"
+			<span.key> "r"
+			<span.key-text> "or"
+			<span.key> "↓" 
 		<div>
 			<span.key-text> "previous word"
-			<span.key.ondark[ml:.5sp]> "d"
+			<span.key> "d"
+			<span.key-text> "or"
+			<span.key> "←"
 		<div>
 			<span.key-text> "next word"
-			<span.key.ondark[ml:.5sp]> "f"
+			<span.key> "f"
+			<span.key-text> "or"
+			<span.key> "→"
 		# <div>
 		# 	<span.key-text> "play audio if available"
-		# 	<span.key.ondark[ml:.5sp]> "a"
+		# 	<span.key[ml:.5sp]> "a"
 		<div>
-			<span.key-text> "Toggle Darkmode"
-			<span.key.ondark[ml:.5sp]> "shift+d"
+			<span.key-text> "toggle dark mode"
+			<span.key[ml:.5sp]> "shift & d"
 		<div>
-			<span.key-text> "Clear Progress"
-			<span.key.ondark[ml:.5sp]> "shift+c+l"
+			<span.key-text> "clear all progres"
+			<span.key[ml:.5sp]> "shift & c & l"
 # CARD[epic=CARD, seq=33] SpellingCard
 	
 tag SpellingCard

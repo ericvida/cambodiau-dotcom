@@ -1300,7 +1300,7 @@ export let dictionary = {
 	"ចេះតែ": {rank: "1977", vida: "cehtaė", vida_auto: "ceh-taė", google: "Always", ipa: "ceh tae", def: false},
 	"ជាមុន": {rank: "1978", vida: false, vida_auto: "ciạ-ṃun", google: false, ipa: "cie mun", def: false},
 	"ស្លឹក": {rank: "1983", vida: "sḷẹk", vida_auto: "slẹk", google: "Leaves", ipa: "slǝk", def: false},
-	"ទ្រង់": {rank: "1990", vida: "ṭruṇg", vida_auto: false, google: "He", ipa: false, def: false},
+	"ទ្រង់": {rank: "1990", vida: "ṭruṇg", vida_auto: false, google: "He", ipa: "trʊəŋ", def: false},
 	"អឺ": {rank: "1991", vida: false, vida_auto: "ẹụ", google: false, ipa: "ʔǝɨ", def: false},
 	"ប្រជាប្រិយភាព": {rank: "1992", vida: false, vida_auto: "prȯciạprẹỵ-phiạp", google: false, ipa: "prɑcieprǝy pʰiep", def: false},
 	"នរោត្តម": {rank: "1995", vida: false, vida_auto: "noroodȯṃ", google: false, ipa: "nɔroodɑm", def: false},
