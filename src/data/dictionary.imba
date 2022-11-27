@@ -3742,7 +3742,7 @@ export let dictionary = {
 	"ព្រះគម្ពីរ": {rank: false, vida: "p̣ṛeahḳoṃp̣iiṛ", vida_auto: false, google: "The Bible", ipa: "preah kumpii", def: false},
 	"ព្រះគុណ": {rank: false, vida: "p̣ṛeahḳun", vida_auto: false, google: "Grace", ipa: false, def: false},
 	"ព្រះគ្រីស្ទ": {rank: false, vida: "p̣ṛeah-ḳṛiih", vida_auto: false, google: "Christ", ipa: false, def: false},
-	"ព្រះច័ន្ទ": {rank: false, vida: "p̣ṛeahcaaṇ", vida_auto: false, google: "Moon", ipa: false, def: false},
+	"ព្រះច័ន្ទ": {rank: false, vida: "p̣ṛeahcaaṇ", vida_auto: false, google: "Moon", ipa: "preah caan", def: false},
 	"ព្រះចេស្ដា": {rank: false, vida: "p̣reah-ceesdaa", vida_auto: false, google: "Power", ipa: false, def: false},
 	"ព្រះចេស្តា": {rank: false, vida: "p̣ṛeahcesdaa", vida_auto: false, google: "Power", ipa: false, def: false},
 	"ព្រះ‌ជន្ម": {rank: false, vida: "p̣ṛeahc̣uṇ", vida_auto: false, google: "Life", ipa: false, def: false},
