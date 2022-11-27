@@ -924,6 +924,7 @@ tag AudioPlayer
 	<self>
 		# if state.module > 0
 		let word = state.active_word
+		console.log audio[word]
 		<audio$track @ended.commit src=audio[word] type="audio/mpeg" preload="metadata">
 		
 		<.button-wrapper[d:hflex ai:center]>
