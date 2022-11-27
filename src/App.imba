@@ -977,7 +977,7 @@ tag ShortcutCard
 		# TAG[epic=SHORTCUTS, seq=20] Global Shortcuts
 		<global 
 			@hotkey("shift+d")=api.toggleDark!
-			@hotkey("shift+i")=api.toggleIpa!
+			@hotkey("shift+i|v")=api.toggleIpa!
 			@hotkey("shift+a")=api.toggleAuth!
 			@hotkey("shift+c+l")=api.clear!
 			@hotkey('enter|s')=api.toggleLearned(state.active_word)
@@ -1018,10 +1018,16 @@ tag ShortcutCard
 		# 	<span.key[ml:.5sp]> "a"
 		<div>
 			<span.key-text> "toggle dark mode"
-			<span.key[ml:.5sp]> "shift & d"
+			<span.key> "shift & d"
+		<div>
+			<span.key-text> "change phonetics system"
+		<div>
+			<span.key> "v"
+			<span.key-text> "or"
+			<span.key> "shift & i"
 		<div>
 			<span.key-text> "clear all progres"
-			<span.key[ml:.5sp]> "shift & c & l"
+			<span.key> "shift & c & l"
 # CARD[epic=CARD, seq=33] SpellingCard
 	
 tag SpellingCard
