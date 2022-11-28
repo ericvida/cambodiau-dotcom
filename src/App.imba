@@ -2,6 +2,7 @@
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
 import store from 'store2'
+import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
 import {clusters} from './data/clusters'
 import {dictionary} from './data/dictionary'
@@ -12,6 +13,7 @@ import './components'
 import './icons'
 import './styles.imba'
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
+const fuzzy = new Fuzzy
 const STATEKEY = 'app-state-20221119'
 
 def logTime fn
@@ -226,6 +228,7 @@ class Api
 			# console.log 'logged out'
 		save!
 	def search feather, haystack
+		console.log feather, haystack
 		let haystackLength = haystack.length # tlen
 		let featherLength = feather.length # qlen
 		if featherLength > haystackLength
@@ -243,12 +246,10 @@ class Api
 			let haystackLetter = 0
 			let match = false
 			let featherLetterCode = feather.charCodeAt(featherLetter++)
-			
 			while haystackLetter < haystackLength
 				if haystack.charCodeAt(haystackLetter++) is featherLetterCode
 					# console.log 'matched?'
 					break match = true
-			
 			continue if match
 			return false
 		return true
@@ -261,7 +262,7 @@ class RemoteAPI
 	# API[epic=Remote, seq=13] callAPI
 	# wrapper to call API
 	def callAPI method, endpoint, data, token
-		let url = serverAddress + endpoint
+		# let url = serverAddress + endpoint
 		let body = data ? JSON.stringify(data) : null
 		let headers = {
 			'Content-Type': 'application/json',
@@ -371,59 +372,119 @@ tag App
 
 	def render
 		<self>
-			<HomeCourse route="/">
-			<Dictionary route="/dictionary">
+			<global 
+				@hotkey("shift+d")=api.toggleDark!
+				@hotkey("shift+i|v")=api.toggleIpa!
+				@hotkey("shift+a")=api.toggleAuth!
+				@hotkey("shift+c+l")=api.clear!
+				@hotkey('enter|s')=api.toggleLearned(state.active_word)
+			>
+			<Home route="/">
+			<DictionaryLayout route="/dictionary">
+			<PhoneticsLayout route="/phonetics">
 			<CourseLayout route="/course">
 			if router.pathname is "/login"
 				<ModalLogin[o@off:0% y@off:-200px ease:2dur] ease route="/login">
 	
 	# def rendered
 	# 	api.save! # This saves state after everything has been rendered
+tag DictionaryLayout
+	css p:1sp w:100%
+	css .page-wrapper
+		d:hflex gap:1sp
+		max-width:800px
+		mx:auto
+		
+	def render
+		<self>
+			<.row[order:0]>
+				<button[bg:gray2 @darkmode:gray7 p:1sp] route-to="/"> "Go Home"
+			<.page-wrapper>
+				<Dictionary>
+				<WordCard.card[w:200px h:260px]>
 # LAYOUT[epic=LAYOUT, seq=21] Dictionary
 tag Dictionary
 	css c:gray8 @darkmode:gray2
-		bg:gray2 @darkmode:gray9
-		
-		w:800px mx:auto
-		p:1sp
+		w:600px mx:auto
 		d:vflex gap:.4sp
 	css .row
 		bg:gray1 @darkmode:gray8
-		width:100% mx:auto
+		cursor:pointer
+		@hover
+			bg:hue1 @darkmode:hue8
 		d:hgrid gap:1sp jc:space-between
 		order:2
 		px:1sp
 		py:0.4sp
 		rd:md
 		&.learned
-			bg:gray2 @darkmode:gray7
+			bg:hue3/50 @darkmode:hue8/50
 	css .mono
 		ff:mono
 	css .err
 		c:red4 fs:xs
+	css button-wrapper
+		d:hflex
+		ai:center
+	css .play-audio
+		w:2em
+		cursor:pointer
+	css svg size:24px
+		path stroke:indigo6 fill:indigo6
+	prop track = ""
+	def toggleDictionaryAudio arg
+		track = audio[arg]
+		$track.src = audio[arg]
+		console.log $track
+		if $track.paused
+			$track.play
+		else
+			$track.pause
+	css .searchbar
+		input
+			d:hflex gap:1sp
+			ai:center
+			py:1sp
+			px:1sp
+			bg:gray3 @darkmode:gray7
+			rd:md
+			w:100%
+			max-width:800px
+			mx:auto
+			order:1
+			@focus
+				bg:gray2 @darkmode:gray7
+	prop query = ""
 	def render
 		<self>
+			<.searchbar[order:0]>
+				<h1>
+				<input type="text" bind=query placeholder="search khmer | vida | ipa | definition">
 			<.row[order:0]>
-				<button[bg:gray2 @darkmode:gray7 p:1sp] route-to="/"> "Go Home"
-			<.row[order:0]>
-				<span> "rank"
 				<span> "khmer"
-				<span> "vida"
-				<span> "vida_auto"
+				<span> 
+					if state.ipa then "ipa" else "vida"
 				<span> "google"
-				<span> "ipa	"
 			for own word, info of dictionary
-				<div.row>
-					if info..rank then <span.mono> info..rank else <span.err> 'n/a (rank)'
-					<a href="http://sealang.net/api/api.pl?query={word}&service=dictionary" target="_blank"> 
-						<span.khmer> word
-					if info..vida then <span.mono> info..vida else <span.err> 'n/a (vida)'
-					if info..vida_auto then <span.mono> info..vida_auto else <span.err> 'n/a (auto)'
-					if info..google	then <span> info..google else <span.err> 'n/a (google)'
-					if info..ipa then <span.mono> info..ipa else <span.err> 'n/a (ipa)'
-# LAYOUT[epic=LAYOUT, seq=21] HomeCourse
-tag HomeCourse
+				if fuzzy.search(query, word) | fuzzy.search(query, info..vida) | fuzzy.search(query, info..google) | fuzzy.search(query, info..ipa)
+					<div.row .learned=(state.user_learned.hasOwnProperty(word)) @click=(state.active_word = word)>
+						# if info..rank then <span.mono> info..rank else <span.err> '-'
+						<a href="http://sealang.net/api/api.pl?query={word}&service=dictionary" target="_blank"> 
+							<span.khmer> word
+						if state.ipa
+							if info..ipa then <span.mono> info..ipa else <span.err> '-'
+						else
+							if (info..vida and info..vida_auto)
+								<span.mono> info..vida
+							elif (info..vida_auto and !info..vida)
+								<span.mono.err> info..vida_auto 
+							else
+								<span.err> '-'
+						if info..google	then <span> info..google else <span.err> '-'
+# LAYOUT[epic=LAYOUT, seq=21] Home
+tag Home
 	css w:100%
+		py:1sp
 	css .wrapper
 		max-width: calc(900px + 4sp)
 		mx:auto
@@ -431,10 +492,13 @@ tag HomeCourse
 	def render
 		<self>
 			<.wrapper>
-				<HomeCourseNav>
+				<HomeNav>
 				<PurchasedModules>
 				# <LockedModules>
-tag HomeCourseNav
+
+tag HomeNav
+	css self
+		d:hflex gap:1sp
 	css button
 		bg:gray2 @darkmode:gray7
 		c:gray7	@darkmode:gray2
@@ -443,6 +507,135 @@ tag HomeCourseNav
 		<self>
 			<button route-to="/dictionary">
 				<.dictionary> "Dictionary"
+			<button route-to="/phonetics">
+				<.dictionary> "Phonetics"
+tag PhoneticsLayout
+	css self
+		d:box
+		w:100%
+		# bg:red
+		# bg:gray1 @darkmode:gray9/50
+		# pt:1sp
+		pos:relative
+	css .bg
+		bg:gray1
+		w:100% h:100vh
+		d:block pos:absolute 
+		zi:0
+	css .phonetics-layout
+		zi:10
+		max-width:800px mx:auto
+		d:hflex gap:1sp
+	
+	def render
+		<self>
+			<.bg route-to="/">
+			<.phonetics-layout>
+				<PhoneticVowels>
+				<WordCard.card>
+tag PhoneticVowels
+	css .chart-wrapper
+		# c:gray9 @darkmode:gray0
+		p:1sp
+		d:vflex gap:2sp
+		ai:end
+	css .row
+		d:hflex jc:space-between
+		&.one
+			w:200px
+		&.two
+			w:180px
+		&.three
+			w:160px
+		&.four
+			w:140px
+	# css .dot
+	# 	size:20px 
+	# 	bg:gray9 @darkmode:gray2
+	# 	rd:full
+	# 	pos:relative
+	# 	cursor:pointer
+	# 	@hover
+	# 		bg:hue7 @darkmode:hue3
+	css span
+		ff:monospace
+		ta:center
+		cursor:pointer
+		bg:gray2 @darkmode:gray7
+		@hover
+			bg:hue2 @darkmode:hue7
+		px:1sp py:.6sp rd:md
+		# w:max-content
+		# bd:1px solid red
+		w:50px
+	prop ipa = 1
+	prop char = [
+		["i","i","ពី"]
+		["ụ","ɨ/v","ឈឺ"]
+		["u","u","គូ"]
+		["e","e","លេង"]
+		["ẹ","ǝ","ឈើ"]
+		["ọ","o/ʊə","គង់"]
+		["ė","ɛ","ភ្នែក"] # លែង មែន
+		["ạ","ɐ/ǝ","ដី"]
+		["o","ɔ","គរ"]
+		["a","a","ការ"]
+		["ȯ","ɑ","ក៏"]
+	]
+	css nav
+		d:hflex gap:1sp
+		ai:center ja:center
+		button
+			px:1sp
+			px:0.6sp
+			rd:md
+			cursor:pointer ta:center
+			bg:gray4 @darkmode:gray6
+			@hover
+				bg:hue4 @darkmode:hue6
+	def activeWord word
+		state.active_word = char[word][2]
+		api.save!
+	
+	def render
+		<self>
+			<nav>
+				<button @click=api.toggleIpa!> 
+					"Phonetic System: "
+					if state.ipa then "IPA" else "Vida"
+			if state.ipa is true
+				ipa = 1
+			else
+				ipa = 0
+			<.chart-wrapper>
+				<div.row.one>
+					<div.dot @click.activeWord(0)> 
+						<span> char[0][ipa]
+					<div.dot @click.activeWord(1)>
+						<span> char[1][ipa]
+					<div.dot @click.activeWord(2)>
+						<span> char[2][ipa]
+				<div.row.two>
+					<div.dot @click.activeWord(3)> 
+						<span> char[3][ipa]
+					<div.dot @click.activeWord(4)>
+						<span> char[4][ipa]
+					<div.dot @click.activeWord(5)>
+						<span> char[5][ipa]
+				<div.row.three>
+					<div.dot @click.activeWord(6)>
+						<span> char[6][ipa]
+					<div.dot @click.activeWord(7)>
+						<span> char[7][ipa]
+					<div.dot @click.activeWord(8)>
+						<span> char[8][ipa]
+				<div.row.four>
+					<div.dot @click.activeWord(9)>
+						<span> char[9][ipa]
+					<div.dot>
+					<div.dot @click.activeWord(10)>
+						<span> char[10][ipa]
+		
 # LAYOUT[epic=LAYOUT, seq=21] CourseLayout
 tag CourseLayout
 	css w:100%
@@ -479,7 +672,7 @@ tag CourseLayout
 						<PhraseNav[mr:auto] route="/course/:course/:lesson" course=courses_data.courses[state.course]>
 						<UserThumb>
 					<.main>
-						<LessonPanel route="/course/:course/:lesson/:phrase" course=courses_data.courses[state.course]>
+						<LessonLayout route="/course/:course/:lesson/:phrase" course=courses_data.courses[state.course]>
 # LAYOUT[epic=LAYOUT, seq=22] PurchasedModules
 tag PurchasedModules
 	css self
@@ -518,8 +711,8 @@ tag LockedModules
 				for own id, course of bible_data.courses
 					<HomeCard route-to="/buy/{id}" id=id course=course>
 
-# LAYOUT[epic=LAYOUT, seq=23] LessonPanel
-tag LessonPanel
+# LAYOUT[epic=LAYOUT, seq=23] LessonLayout
+tag LessonLayout
 	css p:1sp d:vflex @lg:hflex g:1sp
 		min-height: calc(100vh - 1topbar)
 		max-width:1000px mx:auto
@@ -527,7 +720,7 @@ tag LessonPanel
 		# flg:1 d:vflex g:1sp
 		d:grid g:1sp
 		w:800px
-		gtc: 2fr 250px
+		gtc: 2fr 1rightbar
 		# gta: "image word" "tk to google" "lk lo english" "nav nav shortcuts"
 	
 	css .image 
@@ -852,7 +1045,7 @@ tag SellCard
 tag WordCard
 	css self 
 		d:vflex ai:center gap:1sp
-		w:100%
+		w:1rightbar
 	css .khmer
 		lh:60px
 		mt:20px
@@ -925,11 +1118,15 @@ tag WordCard
 				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
 			if audio.hasOwnProperty(state.active_word)
 				<AudioPlayer>
+
 tag AudioPlayer
 	<self>
 		# if state.module > 0
-		let word = state.active_word
-		console.log audio[word]
+		let word = ""
+		if manual
+			word = manual
+		else
+			word = state.active_word
 		<audio$track @ended.commit src=audio[word] type="audio/mpeg" preload="metadata">
 		
 		<.button-wrapper[d:hflex ai:center]>
@@ -946,7 +1143,8 @@ tag AudioPlayer
 					# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 					# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 					# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
-			<div.key[ml:.5sp]> "a"
+			unless manual
+				<div.key[ml:.5sp]> "a"
 	
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
@@ -975,13 +1173,7 @@ tag ShortcutCard
 			
 	<self .shortcuts.card>
 		# TAG[epic=SHORTCUTS, seq=20] Global Shortcuts
-		<global 
-			@hotkey("shift+d")=api.toggleDark!
-			@hotkey("shift+i|v")=api.toggleIpa!
-			@hotkey("shift+a")=api.toggleAuth!
-			@hotkey("shift+c+l")=api.clear!
-			@hotkey('enter|s')=api.toggleLearned(state.active_word)
-			>
+		
 		<h2> "Shortcuts"
 		<div>
 			<span.key-text> "toggle learned"
