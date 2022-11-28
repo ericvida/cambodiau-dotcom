@@ -25,9 +25,10 @@ class CalculateCourseUsageData
 		# convert array tree into object tree
 	def consolidateBibleStoryData
 		# make a regex that selects a space that has no space before or no space after
-		let singlespace = /(?<!\s)\s(?!\s)/gi
+		let singlespace = /(?:\b)\s(?:\b)/gi
+		# rege
 		# make a regext that selects two spaces that have a word before and after it
-		let doublespace = /(?<!\s)\s\s(?!\s)/gi
+		let doublespace = /(?:\b)\s\s(?:\b)/gi
 		let user_updated = []
 		let res_user = titles
 		let courses_updated = []
