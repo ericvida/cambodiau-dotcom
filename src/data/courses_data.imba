@@ -25,10 +25,9 @@ class CalculateCourseUsageData
 		# convert array tree into object tree
 	def consolidateBibleStoryData
 		# make a regex that selects a space that has no space before or no space after
-		let singlespace = /(?:\b)\s(?:\b)/gi
-		# rege
+		# let singlespace = /(?<!\s)\s(?!\s)/gi
 		# make a regext that selects two spaces that have a word before and after it
-		let doublespace = /(?:\b)\s\s(?:\b)/gi
+		# let doublespace = /(?<!\s)\s\s(?!\s)/gi
 		let user_updated = []
 		let res_user = titles
 		let courses_updated = []
@@ -42,7 +41,7 @@ class CalculateCourseUsageData
 				let lesson_num_en = li
 				for phrase, si in lesson.phrases
 					let new_phrase = {}
-					let str = phrase.replace(singlespace, "|").replace(doublespace, '| |')
+					let str = phrase.replace(/\s\s/gi, '| |').replace(/\s/gi, "|")
 					let arr = str.split('|')
 					let phrase_num_en = si
 					let phrase_num_kh = arr[0]
