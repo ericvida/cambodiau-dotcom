@@ -380,7 +380,7 @@ tag App
 			if router.pathname is "/login"
 				<ModalLogin[o@off:0% y@off:-200px ease:2dur] ease route="/login">
 			<layout-pancakes>
-				css gtr: calc(1topbar+2sp) 1fr 40px # sidebar content sidebar
+				css gtr: calc(1topbar+2sp) auto 40px # sidebar content sidebar
 					# >> * p:1sp # padding around immediate children
 					# >> header d:flex ai:center px:1sp
 					>> main bg:gray1 @darkmode:gray9/50
@@ -393,8 +393,9 @@ tag App
 					<PhoneticsLayout route="/phonetics">
 					<.width-container>
 						<CourseLayout route="/course">
-				<footer slot="bottom">
+				<div slot="bottom">
 						css c:gray9 @darkmode:gray1
+							h:1bottombar
 							d:hflex
 							ai:center
 							jc:center
@@ -482,7 +483,7 @@ tag Dictionary
 			ai:center
 			py:1sp
 			px:1sp
-			bg:gray3 @darkmode:gray7
+			bg:gray2 @darkmode:gray7
 			rd:md
 			w:100%
 			max-width:800px
@@ -529,11 +530,9 @@ tag HomeLayout
 
 tag PhoneticsLayout
 	css self
-		d:box
-		w:100%
-		# bg:red
-		# bg:gray1 @darkmode:gray9/50
-		# pt:1sp
+		p:1sp
+		d:vflex
+		# pt:1s
 		pos:relative
 	css .bg
 		bg:gray1
@@ -547,7 +546,6 @@ tag PhoneticsLayout
 	
 	def render
 		<self>
-			<.bg route-to="/">
 			<.phonetics-layout>
 				<PhoneticVowels>
 				<WordCard.card>
@@ -579,7 +577,7 @@ tag PhoneticVowels
 		ff:monospace
 		ta:center
 		cursor:pointer
-		bg:gray2 @darkmode:gray7
+		bg:gray3 @darkmode:gray5
 		@hover
 			bg:hue2 @darkmode:hue7
 		px:1sp py:.6sp rd:md
