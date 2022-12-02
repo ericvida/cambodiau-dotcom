@@ -716,6 +716,7 @@ tag LessonLayout
 	css .image 
 		rd:1rd
 		aspect-ratio: 2 / 1
+		w:100%
 	css .left, .right
 		d:vflex
 		gap:1sp
@@ -1102,7 +1103,8 @@ tag WordBar
 tag WordCard
 	css self 
 		d:vflex ai:center gap:1sp
-		w:1rightbar
+		min-width:1rightbar
+		w:100%
 	css .khmer
 		lh:60px
 		mt:20px
