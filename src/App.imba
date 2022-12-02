@@ -399,13 +399,13 @@ tag App
 							d:hflex
 							ai:center
 							jc:center
-							gap:1sp
 							bg:hue3 @darkmode:hue8
 							fs:xs
-						css a c:hue7
-						<span> "Give us feedback via"
+							gap:.20sp
+						css a c:hue7 @darkmode:hue4
+						<span> "Currently in Development. Give us feedback via "
 						<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
-						<span> "or"
+						<span> " or "
 						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
 
 tag TopNav
@@ -1411,10 +1411,8 @@ tag LessonNav
 		d:vflex
 		g:1sp
 	css .title-card 
-		bg:gray2 @darkmode:gray8/50
-		cursor:pointer rd:md
-		@hover
-			bg:gray2 @darkmode:gray8
+		bg:white @darkmode:gray9
+		rd:md
 		p:1sp
 	css .icon-title
 		d:hflex
@@ -1423,7 +1421,7 @@ tag LessonNav
 	def render
 		<self>
 			
-			<.title-card route-to="/">
+			<.title-card>
 				<.icon-title>
 					<i-{course.icon}[pr:5px]>
 					<h2 [fs:xl]> course.title
