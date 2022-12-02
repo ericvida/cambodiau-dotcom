@@ -2,6 +2,7 @@
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
 import store from 'store2'
+import './layouts'
 import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
 import {clusters} from './data/clusters'
@@ -349,13 +350,10 @@ tag App
 	css d:hflex
 		tween: margin-left 2dur
 		min-height: 100vh
-		w:100% bg:white @darkmode:black
+		w:100% 
+		bg:white @darkmode:black
 		&.open
 			ml:0px
-	css .course
-		bg:warm1 @darkmode:hsla(0,0%,7%,1)
-		w:100vw
-		d:block
 	def saveRouteToState
 		let route_array = router.pathname.replace('/','').split('/')
 		state.course = route_array[1]
@@ -379,15 +377,55 @@ tag App
 				@hotkey("shift+c+l")=api.clear!
 				@hotkey('enter|s')=api.toggleLearned(state.active_word)
 			>
-			<Home route="/">
-			<DictionaryLayout route="/dictionary">
-			<PhoneticsLayout route="/phonetics">
-			<CourseLayout route="/course">
 			if router.pathname is "/login"
 				<ModalLogin[o@off:0% y@off:-200px ease:2dur] ease route="/login">
-	
-	# def rendered
-	# 	api.save! # This saves state after everything has been rendered
+			<layout-pancakes>
+				css gtr: calc(1topbar+2sp) 1fr 40px # sidebar content sidebar
+					# >> * p:1sp # padding around immediate children
+					# >> header d:flex ai:center px:1sp
+					>> main bg:gray1 @darkmode:gray9/50
+				<nav slot="top">
+					<.width-container[p:1sp]>
+						<TopNav>
+				<div slot="middle">
+					<HomeLayout route="/">
+					<DictionaryLayout route="/dictionary">
+					<PhoneticsLayout route="/phonetics">
+					<.width-container>
+						<CourseLayout route="/course">
+				<footer slot="bottom">
+						css c:gray9 @darkmode:gray1
+							d:hflex
+							ai:center
+							jc:center
+							gap:1sp
+							bg:hue3 @darkmode:hue8
+							fs:xs
+						css a c:hue7
+						<span> "Give us feedback via"
+						<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
+						<span> "or"
+						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
+
+tag TopNav
+	css self
+		d:hflex gap:1sp
+	css a, button
+		bg:gray2 @darkmode:gray7
+		c:gray7	@darkmode:gray2
+		p:1sp rd:md
+	def toggleLeftNav
+		state.left = !state.left
+		api.save!
+		console.log 'toggled nav', state.left
+		imba.commit!
+	def render
+		<self>
+			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
+			<a route-to="/dictionary">
+				<.dictionary> "Dictionary"
+			<a route-to="/phonetics">
+				<.dictionary> "Phonetics"
 tag DictionaryLayout
 	css p:1sp w:100%
 	css .page-wrapper
@@ -397,8 +435,6 @@ tag DictionaryLayout
 		
 	def render
 		<self>
-			<.row[order:0]>
-				<button[bg:gray2 @darkmode:gray7 p:1sp] route-to="/"> "Go Home"
 			<.page-wrapper>
 				<Dictionary>
 				<WordCard.card[w:200px h:260px]>
@@ -460,7 +496,7 @@ tag Dictionary
 			<.searchbar[order:0]>
 				<h1>
 				<input type="text" bind=query placeholder="search khmer | vida | ipa | definition">
-			<.row[order:0]>
+			<.row[order:0] @click=api.toggleIpa!>
 				<span> "khmer"
 				<span> 
 					if state.ipa then "ipa" else "vida"
@@ -482,33 +518,15 @@ tag Dictionary
 								<span.err> '-'
 						if info..google	then <span> info..google else <span.err> '-'
 # LAYOUT[epic=LAYOUT, seq=21] Home
-tag Home
+tag HomeLayout
 	css w:100%
 		py:1sp
-	css .wrapper
-		max-width: calc(900px + 4sp)
-		mx:auto
-		d:vflex gap:1sp
 	def render
 		<self>
-			<.wrapper>
-				<HomeNav>
-				<PurchasedModules>
-				# <LockedModules>
+			<.width-container>
+				<OwnedModules>
+			# <LockedModules>
 
-tag HomeNav
-	css self
-		d:hflex gap:1sp
-	css button
-		bg:gray2 @darkmode:gray7
-		c:gray7	@darkmode:gray2
-		p:1sp rd:md
-	def render
-		<self>
-			<button route-to="/dictionary">
-				<.dictionary> "Dictionary"
-			<button route-to="/phonetics">
-				<.dictionary> "Phonetics"
 tag PhoneticsLayout
 	css self
 		d:box
@@ -638,60 +656,37 @@ tag PhoneticVowels
 		
 # LAYOUT[epic=LAYOUT, seq=21] CourseLayout
 tag CourseLayout
-	css w:100%
+	css w:100% d:hgrid
+		gtc: 1lessonbar 1phrasebar auto
+		p:1sp
 	css .module-course
 		d:hflex w:100% 
-		bg:gray1 @darkmode:gray9/50
+	css .close-leftbar
+		ml: -1lessonbar
 	css .left-bar
-		flb:1leftbar
+		flb:1lessonbar
 		h:100vh
-		overflow-y:scroll
-	css .main-wrapper
-		w:100%
-		h:100vh
-		pos:relative
-	css .top-nav
-		pos:absolute w:100%
-		d:hflex ai:center
-		h:1topbar
-		px:1sp
-		bg:white @darkmode:gray9
-	css .main
-		mt:1topbar
-		h: calc(100vh - 1topbar)
-		overflow-y:scroll
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
 		# console.warn course
 		<self>
-			<.module-course>
-				<.leftbar>
-					<LessonNav course=courses_data.courses[state.course]>
-				<.main-wrapper>
-					<.top-nav>
-						<PhraseNav[mr:auto] route="/course/:course/:lesson" course=courses_data.courses[state.course]>
-						<UserThumb>
-					<.main>
-						<LessonLayout route="/course/:course/:lesson/:phrase" course=courses_data.courses[state.course]>
-# LAYOUT[epic=LAYOUT, seq=22] PurchasedModules
-tag PurchasedModules
-	css self
-		d:vflex gap:1sp
-		p:1sp
-		rd:md
-		bg:gray2 @darkmode:gray8
-		c:gray8 @darkmode:gray3
-	css .card-wrapper
-		d:hflex gap:1sp jc:start 
-		@lt-lg
-			d:vflex gap:1sp jc:start 
-		flex-wrap:wrap 
+			# <.lesson-nav-wrapper>
+			<LessonNav route="/course/:lesson" course=courses_data.courses[state.course]>
+			# <.phrase-nav-wrapper>
+			<PhraseNav course=courses_data.courses[state.course]>
+			<LessonLayout course=courses_data.courses[state.course]>
+			# 	<.main-wrapper[mx:auto]>
+# LAYOUT[epic=LAYOUT, seq=22] OwnedModules
+tag OwnedModules
 	def render
 		<self>
-			<h2> "Purchased Modules"
-			<.card-wrapper route="/">
+			<h2[px:1sp fs:xl]> "Owned Modules"
+			<.layout-card-grid>
 				for own id, course of courses_data.courses
-					<HomeCard route-to="/course/{id}/0/0/0/" id=id course=course>
+					<ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
+					# <ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
+					# <ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
+					# <ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
 tag LockedModules
 	css self
 		d:vflex gap:1sp
@@ -709,20 +704,17 @@ tag LockedModules
 			<h2> "Purchased Modules"
 			<.card-wrapper route="/">
 				for own id, course of bible_data.courses
-					<HomeCard route-to="/buy/{id}" id=id course=course>
+					<ModuleCard route-to="/buy/{id}" id=id course=course>
 
 # LAYOUT[epic=LAYOUT, seq=23] LessonLayout
 tag LessonLayout
-	css p:1sp d:vflex @lg:hflex g:1sp
-		min-height: calc(100vh - 1topbar)
-		max-width:1000px mx:auto
+	css d:vflex @lg:hflex g:1sp
+		# bg:red
 	css .module-grid
 		# flg:1 d:vflex g:1sp
 		d:grid g:1sp
-		w:800px
-		gtc: 2fr 1rightbar
-		# gta: "image word" "tk to google" "lk lo english" "nav nav shortcuts"
-	
+		gtc: 1fr @md: minmax(1rightbar, 3rightbar) 1rightbar
+		# grid-template-areas: "a a b", "a a b"
 	css .image 
 		rd:1rd
 		aspect-ratio: 2 / 1
@@ -732,13 +724,14 @@ tag LessonLayout
 	css .phonetics
 		ff:mono d:flex gap:0.5sp flex-wrap:wrap
 	def render
-		phrase = course.lessons[state.lesson].phrases[state.phrase]
+		let phrase = course.lessons[state.lesson].phrases[state.phrase]
 		<self>
 			<main.module-grid>
 				<.left>
 					if phrase.image
 						<img src=phrase.image .image> phrase.image
-					<WordNav.card course=course phrase=phrase rt=route>					
+					# <WordBar>
+					<WordNav.card @click.commit course=course phrase=phrase rt=route>
 					<.card> 
 						<h2> "Phonetics"
 						<p.phonetics>
@@ -864,7 +857,7 @@ tag WordNav
 			>
 			<div.word-wrapper>
 				for khmer_word, ki in phrase.khmer.split('|')
-					<.word .active=(khmer_word is state.active_word) route-to="{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
+					<.word .active=(khmer_word is state.active_word) route-to="/course/{state.course}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
 
 # LAYOUT[epic=LAYOUT, seq=26] ModulePreview
 tag ModulePreview
@@ -886,26 +879,27 @@ tag ModulePreview
 			fs:20px d:flex gap:1sp
 			&.outline
 				bg:none
-	<self>
-		<main.module-grid>
-			<div.image> "image"
-			<[d:hgrid w:100% g:1sp gtc: 2fr 1fr]>
-				<div.card> "card"
-				<rightbar-module-contents>
-			<[d:hgrid w:100% g:1sp gtc:1fr]> 
-				<rightbar-graduated-students>
-		let buy-cards = [
-			name: "Market Module"
-			price: 5
-			benefits: ['One Module','5 chapters','400 words']
-			---
-			name: "All Modules"
-			price: 20
-			benefits: ['5 modoules','40 chapters','2200 words']
-		]
-		<.buy-cards>
-			for card in buy-cards
-				<SellCard name=card.name price=card.price benefits=card.benefits>
+	def render
+		<self>
+			<main.module-grid>
+				<div.image> "image"
+				<[d:hgrid w:100% g:1sp gtc: 2fr 1fr]>
+					<div.card> "card"
+					<rightbar-module-contents>
+				<[d:hgrid w:100% g:1sp gtc:1fr]> 
+					<rightbar-graduated-students>
+			let buy-cards = [
+				name: "Market Module"
+				price: 5
+				benefits: ['One Module','5 chapters','400 words']
+				---
+				name: "All Modules"
+				price: 20
+				benefits: ['5 modoules','40 chapters','2200 words']
+			]
+			<.buy-cards>
+				for card in buy-cards
+					<SellCard name=card.name price=card.price benefits=card.benefits>
 
 
 # CARD[epic=CARD, seq=27] UserCard
@@ -943,39 +937,41 @@ tag UserCard
 					<a.user-settings route-to="/settings/"> "settings"
 					<a.user-settings @click=state.logout> "logout"
 
-# CARD[epic=CARD, seq=28] HomeCard
-tag HomeCard
+# CARD[epic=CARD, seq=28] ModuleCard
+tag ModuleCard
 	# prop chapters = []
 	prop link = "https://images.unsplash.com/photo-1599283787923-51b965a58b05?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Y2FtYm9kaWF8ZW58MHx8MHx8&auto=format&fit=crop&w=300&h=100&q=60"
 	prop locked = yes
 	prop module_active = no
-	css self 
-		w:300px
+	css self
 		d:vflex .module_active:vflex ai:center
 		rd:1rd cursor@hover:pointer
-		# mr: calc(1sp + 30px + 1sp)
 		@hover
 			bg:gray0 @darkmode:gray8/50
 		&.module_active
 			bg:gray2 @darkmode:gray8
 		# bxs:0 2px 10px 2px gray3
 	css .image
-		rd:xl
+		rd:md of:hidden
+		bg:hue1 bd:0
+		outline:none
+		w:100%
 		aspect-ratio: 16 / 9
-		w:300px h:168.75px
-	css .bottom
-		d:hflex w:100% gap:1sp
-		p:1sp
-	css .module-info
+	css .card-info
 		w:100% d:grid 
 		gtr:1fr
-	css .module-name
-		fs:20px 
-		ai:center d:hflex
-		mb:0.5sp
-	css .module-wordcount
-		c:gray6 @darkmode:gray5 ff:monospace fs:xs
-		mb:.2sp
+	css .card-title
+		d:hflex
+		jc:space-between
+		ai:center
+		pt:0.6sp
+		pb:0.4sp
+		h2
+			fs:2xl
+			fw:bold
+	css .progress-percent
+		c:gray4 @darkmode:gray5 
+		ff:monospace
 	
 	css .module-actions
 		d:hflex jc:space-between
@@ -989,19 +985,18 @@ tag HomeCard
 		.module-price
 			c:hue6 @darkmode:hue4
 			ff:monospace
-	# css .unlocked bg:red3
 	
 	def render
-		<self .locked=course.locked .module_active=module_active>
-			<img.image src=course.image> 
-			<.bottom>
-				<.module-info>
-					<h2.module-name>
-						<i-{course.icon}>
-						<span[ml:0.3sp]> "{course.title}"
-					# TODO: Calculate Wordcount of used words for course, Lesson, Phrase
-					<.module-wordcount> "{state.learning_data.course_learned_usage[id]}/{course.word_usage_count}"
-					<ProgressBar[hue:indigo $bg:gray3 @darkmode:gray7]=module_active progress=state.learning_data.course_progress[id]>
+		<self .locked=course.locked>
+			<div.not-image> unless course.image
+			<img.image src=course.image> if course.image
+			<.card-info>
+				<.card-title>
+					<h2> "{course.title}"
+					<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_count)* 1000) / 10}%"
+				<ProgressBar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.course_progress[id]>
+				# TODO: Calculate Wordcount of used words for course, Lesson, Phrase
+				<> console.log state.learning_data.course_progress[state.course]
 				# if course.locked
 				# 	<.icon-lock>
 				# 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" .w-6.h-6>
@@ -1041,6 +1036,70 @@ tag SellCard
 			<li> item
 		<.button> "Get Started"
 
+# CARD[epic=CARD, seq=30] WordBar
+tag WordBar
+	css self
+		d:hflex jc:space-between
+		bg:gray0 @darkmode:gray9 
+		p:1sp rd:md
+		ai:center
+	css .khmer
+		c:hue5
+	css .switch-wrapper
+		h:30px w:110px rd:full
+		bg:gray3 @darkmode:black/60
+		cursor:pointer
+		tween:all 1dur back-in-out
+		&.learned
+			bg:hue4 @darkmode:hue8
+		# mt:auto
+	css .switch
+		ml:0px
+		tween:all 1dur back-in-out
+		h:30px rd:full 
+		bd:3px fs:xs c:black d:box
+		w:fit-content px:1sp
+		bc:gray3 @darkmode:gray8
+		bg:gray0 @darkmode:gray7
+		c:gray4
+		w:90px
+		&.learned
+			bc:hue4 @darkmode:hue8
+			bg:hue2 @darkmode:hue5
+			c:hue8 @darkmode:hue1
+			ml:20px
+	def mount
+		fit_settings = {
+			minSize: 16
+			maxSize: 26
+		}
+		fitty($fit2, fit_settings)
+	def render
+		<self>
+			let vida = dictionary[state.active_word]..vida
+			let vida_auto = dictionary[state.active_word]..vida_auto
+			let ipa = dictionary[state.active_word]..ipa
+			<a$fit2.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={state.active_word}&service=dictionary" target="_blank"> 
+				state.active_word
+			if audio.hasOwnProperty(state.active_word)
+				<AudioPlayerForBar>
+			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=api.toggleIpa!>
+				if state.ipa
+					<span[fs:xs c:gray5]> "ipa"
+					if ipa
+						<div.phonetic> ipa
+					else
+						<div.phonetic[fs:xs]> "ipa coming soon"
+				else
+					<span[fs:xs c:gray5]> "vida"
+					if vida
+						<div.phonetic> vida
+					elif vida_auto
+						<div.phonetic> vida_auto
+					else
+						<div.phonetic> "vida coming soon"
+			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)>
+				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
 # CARD[epic=CARD, seq=30] WordCard
 tag WordCard
 	css self 
@@ -1119,6 +1178,29 @@ tag WordCard
 			if audio.hasOwnProperty(state.active_word)
 				<AudioPlayer>
 
+tag AudioPlayerForBar
+	<self>
+		# if state.module > 0
+		let word = ""
+		if manual
+			word = manual
+		else
+			word = state.active_word
+		<audio$track2 @ended.commit src=audio[word] type="audio/mpeg" preload="metadata">
+		
+		<.button-wrapper[d:hflex ai:center]>
+			if $track2.paused # when paused
+				<div .play-audio[w:2em cursor:pointer] @hotkey('space|a') @click=$track2.play> 
+					<svg[size:24px] stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">
+						<path[stroke:indigo6 fill:indigo6]  d="M6.906 4.537A.6.6 0 006 5.053v13.894a.6.6 0 00.906.516l11.723-6.947a.6.6 0 000-1.032L6.906 4.537z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+			
+			else # when playing
+				<div .play-audio[w:2em cursor:pointer] @hotkey('space') @click=$track2.pause> 
+					<svg[size:24px] stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000" viewBox="0 0 24 24">
+						<path[stroke:indigo6 fill:indigo2] d="M6 18.4V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6H6.6a.6.6 0 0 1-.6-.6zm8 0V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6h-2.8a.6.6 0 0 1-.6-.6z"/>
+					# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+					# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
 tag AudioPlayer
 	<self>
 		# if state.module > 0
@@ -1136,15 +1218,12 @@ tag AudioPlayer
 						<path[stroke:indigo6 fill:indigo6]  d="M6.906 4.537A.6.6 0 006 5.053v13.894a.6.6 0 00.906.516l11.723-6.947a.6.6 0 000-1.032L6.906 4.537z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 			
 			else # when playing
-
 				<div .play-audio[w:2em cursor:pointer] @hotkey('space') @click=$track.pause> 
 					<svg[size:24px] stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000" viewBox="0 0 24 24">
 						<path[stroke:indigo6 fill:indigo2] d="M6 18.4V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6H6.6a.6.6 0 0 1-.6-.6zm8 0V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6h-2.8a.6.6 0 0 1-.6-.6z"/>
 					# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 					# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 					# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
-			unless manual
-				<div.key[ml:.5sp]> "a"
 	
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
@@ -1324,14 +1403,11 @@ tag SpellingCard
 # TAG[epic=NAV, seq=34] LessonNav
 tag LessonNav
 	css self
-		# ml:-1leftbar
+		# ml:-1lessonbar
 		h:100vh
 		overflow-y:scroll
-		w:1leftbar
-		bg:gray0 @darkmode:gray9
-		bdr:1px solid gray2 @darkmode:gray9
+		w:1lessonbar
 		ofy: scroll
-		p:1sp
 		d:vflex
 		g:1sp
 	css .title-card 
@@ -1346,7 +1422,7 @@ tag LessonNav
 		fs:xxs ff:mono c:gray6
 	def render
 		<self>
-		
+			
 			<.title-card route-to="/">
 				<.icon-title>
 					<i-{course.icon}[pr:5px]>
@@ -1360,19 +1436,15 @@ tag LessonNav
 tag LessonNavItem
 	css self
 		cursor:pointer
-		rd:md
-		&.active
-			bg:gray1 @darkmode:gray8/50
-		
-	css .lesson-button
-		px:1sp py:1sp rd:1rd
+		rd:1rd
+		px:1sp py:1sp
 		c:gray5
-		bg:none
+		bg:white/50 @darkmode:gray8/20
 		@hover
-			bg:gray1 @darkmode:gray8/50
+			bg:white @darkmode:gray8/50
 	css ProgressBar 
 			$bg:gray3
-			$fg:gray
+			$fg:gray7
 		@hover
 			bg:gray1
 			ProgressBar
@@ -1389,23 +1461,21 @@ tag LessonNavItem
 					$bg:gray8
 					$fg:indigo4
 	def render
-		<self>
-			let progress = "4/{lesson.word_usage_count}"
-			<div[w:100%].lesson-button .chapter_active=no>
-				<.chapter-text[d:hflex jc:space-between ai:end]>
-					<.chapter-name> lesson.title	
-				let progress_string = "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count}"
-				<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress_string} words"
-				<ProgressBar .color progress=state.learning_data.lesson_progress[state.course][id]>
+		let progress = "4/{lesson.word_usage_count}"
+		<self[w:100%].lesson-button .chapter_active=no>
+			<.chapter-text[d:hflex jc:space-between ai:end]>
+				<.chapter-name> lesson.title	
+			let progress_string = "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count}"
+			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress_string} words"
+			<ProgressBar .color progress=state.learning_data.lesson_progress[state.course][id]>
 
 # TAG[epic=NAV, seq=36] PhraseNav
 tag PhraseNav
 	css self
 		c:gray9
-		bg:white @darkmode:gray9
-		h:1phrasenav
+		w:1phrasebar
 		g:1sp
-		d:hflex ai:center
+		d:vflex ai:center
 	css .number-toggle 
 		rd:full s:30px
 		d:box
@@ -1415,12 +1485,31 @@ tag PhraseNav
 		c:gray5 @darkmode:gray4
 		pos:relative
 		cursor:pointer
+	# Goes to the first verse of the next phrase
+	def nextPhrase
+		if phrase_index < last_phrase_index
+			phrase_index++
+			word_index = 0
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+	
+	# Goes to the last word of hte previous phrase
+	def prevPhraseLast
+		if phrase_index > 0
+			phrase_index--
+			word_index = phrases[phrase_index].khmer.split('|').length - 1
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+	# Goes to the first word of the previous phrase
+	def prevPhraseZero
+		if phrase_index > 0
+			phrase_index--
+			word_index = 0
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 	def render
 		let phrases = courses_data.courses[state.course].lessons[state.lesson].phrases
 		let progress = 0
 		<self>
 			for own id, phrase of phrases
-				<.number-toggle route-to="{id}/0">
+				<.number-toggle route-to="/course/{state.course}/{state.lesson}/{id}/0">
 					let isActive = state.phrase is id
 					let progress = state.learning_data.phrase_progress[state.course][state.lesson][id]
 					<ElemProgressRing .active=isActive progress=progress size=30> 
@@ -1503,7 +1592,6 @@ tag IconRightChevron
 # ELEMENT[epic=ELEMENT, seq=41] Progress Bar
 tag ProgressBar
 	css w:100%
-		hue:gray
 		$bg:gray2
 		$fg:hue4
 		@darkmode

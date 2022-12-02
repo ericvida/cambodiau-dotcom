@@ -1,7 +1,7 @@
 tag left-bar
 	css self
-		# ml:-1leftbar
-		w:1leftbar
+		# ml:-1lessonbar
+		w:1lessonbar
 		bg:warm0 @darkmode:gray9
 		bdr:1px solid warm2 @darkmode:warm8
 		ofy: scroll

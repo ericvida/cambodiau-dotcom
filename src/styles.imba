@@ -6,10 +6,10 @@ global css
 		fw:400
 		1sp:16px # space for gaps and paddings
 		1dur:.20s # animation duration
-		1leftbar: 300px # sidebar-width
+		1lessonbar: 300px # sidebar-width
 		1topbar: 60px # top bar height and menu button size
-		1rightbar: 260px # right bar size
-		1phrasenav:60px # right bar size
+		1rightbar: 240px # right bar size
+		1phrasebar:60px # right bar size
 		1rd:6px # border radius standard
 		# * tween:all 1dur
 		$heading: 'Merriweather', serif
