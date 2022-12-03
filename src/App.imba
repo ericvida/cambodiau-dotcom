@@ -403,7 +403,7 @@ tag App
 							fs:xs
 							gap:.20sp
 						css a c:hue7 @darkmode:hue4
-						<span> "Currently in Development. Give us feedback via "
+						<span> "Currently in Development. Give feedback via "
 						<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
 						<span> " or "
 						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
@@ -443,7 +443,7 @@ tag DictionaryLayout
 			let all_word_usage = courses_data.word_usage_count
 			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
 			<.page-wrapper>
-				<p[py:1sp mb:1sp ta:center w:100%]> "You have learned {dict_percent}% ({learned_length} of {dict_length}) of words in this dictionary {<br>} which represent {learned_percent}% of all word usage in all lessons ({learned_usage} of {all_word_usage})."
+				<p[py:1sp mb:1sp ta:center w:100%]> "You have learned {dict_percent}% ({learned_length} of {dict_length}) of words in this dictionary {<br>} which are used {learned_percent}% ({learned_usage} of {all_word_usage}) of the time in your lessons."
 					css bg:hue3 @darkmode: hue9
 						c:hue9 @darkmode: hue2
 						p:1sp
