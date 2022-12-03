@@ -436,6 +436,18 @@ tag DictionaryLayout
 		
 	def render
 		<self>
+			let learned_length = Object.keys(state.user_learned).length
+			let dict_length = Object.keys(dictionary).length
+			let learned_percent = state.learning_data.user_progress
+			let learned_usage = state.learning_data.user_progress_learned_usage
+			let all_word_usage = courses_data.word_usage_count
+			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
+			<.page-wrapper>
+				<p[py:1sp mb:1sp ta:center w:100%]> "You have learned {dict_percent}% ({learned_length} of {dict_length}) of words in this dictionary {<br>} which represent {learned_percent}% of all word usage in all lessons ({learned_usage} of {all_word_usage})."
+					css bg:hue3 @darkmode: hue9
+						c:hue9 @darkmode: hue2
+						p:1sp
+						rd:md
 			<.page-wrapper>
 				<Dictionary>
 				<WordCard.card[w:200px h:260px]>
