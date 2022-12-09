@@ -1047,7 +1047,7 @@ export let dictionary = {
 	"បេះដូង": {rank: "1441", vida: false, vida_auto: "beh-douṇg", google: false, ipa: "beh douŋ", def: false},
 	"អញ្ជើញ": {rank: "1444", vida: "aṇhc̣ẹẹṇh", vida_auto: "ȯṇhcẹẹṇh", google: "Invite", ipa: "ʔɑɲcǝǝɲ", def: false},
 	"តប": {rank: "1446", vida: "tȯȯp", vida_auto: false, google: "Reply", ipa: false, def: false},
-	"ចាកចេញ": {rank: "1449", vida: "caaq-ceeṇh", vida_auto: "caak-cẹṇh", google: "Leave", ipa: "caak cǝɲ", def: false},
+	"ចាកចេញ": {rank: "1449", vida: "caaq-ceeṇh", vida_auto: "caak-cẹṇh", google: "Leave", ipa: "caak cǝɲ", def: ["v=to depart|to leave"]},
 	"ចង": {rank: "1451", vida: "cȯȯṇg", vida_auto: "cȯȯṇg", google: "Bind", ipa: "cɑɑŋ", def: false},
 	"ដទៃទៀត": {rank: "1453", vida: false, vida_auto: "dȯteỵ-tiạt", google: false, ipa: "dɑtey tiǝt", def: false},
 	"ស្លៀក": {rank: "1455", vida: "sḷiạq", vida_auto: "sliạk", google: "Wear", ipa: "sliǝk", def: false},
