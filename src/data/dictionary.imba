@@ -3968,7 +3968,6 @@ export let dictionary = {
 	"សប្ដាហ៍": {rank: false, vida: "sapdaa", vida_auto: false, google: "Week", ipa: false, def: false},
 	"សប្តាហ៍": {rank: false, vida: "saapdaa", vida_auto: "sappdaa", google: "Week", ipa: "sappdaa", def: false},
 	"សប្ប័ទ": {rank: false, vida: "sabaaṭ", vida_auto: false, google: "Sabbath", ipa: false, def: false},
-	"សផ្ដល": {rank: false, vida: "sȯphdȯȯl", vida_auto: false, google: "White", ipa: false, def: false},
 	"សំពត់ហូល": {rank: false, vida: false, vida_auto: "sȯṃpuạt-houl", google: false, ipa: "sɑmpʊǝt houl", def: false},
 	"សព្វព្រះ‌ហឫទ័យ": {rank: false, vida: "sȯp̣-preah-harụṭay", vida_auto: false, google: "God willing", ipa: false, def: false},
 	"សម្ដេចសង្ឃ": {rank: false, vida: "sȯṃdaicsȯṇg", vida_auto: false, google: "Priest", ipa: false, def: false},
