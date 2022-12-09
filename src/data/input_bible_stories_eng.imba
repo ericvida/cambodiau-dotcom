@@ -12,7 +12,7 @@ export let en = [
 		`9 Then God said, “Let us make human beings in our image to be like us. They will rule over the earth and all the animals.”`
 		`10 So God took some soil, formed it into a man, and breathed life into him. This man's name was Adam. God planted a large garden where Adam could live, and put him there to care for it.`
 		`11 In the middle of the garden, God planted two special trees—the tree of life and the tree of the knowledge of good and evil. God told Adam that he could eat from any tree in the garden except from the tree of the knowledge of good and evil. If he ate from this tree, he would die.`
-		`12 Then God said, “It is not good for man to be alone.” But none of the animals could be Adam's helper.`
+		`12 Then God said, “It is not good for this man to be alone.”`
 		`13 So God made Adam fall into a deep sleep. Then God took one of Adam's ribs and made it into a woman and brought her to him.`
 		`14 When Adam saw her, he said, “At last! This one is like me! Let her be called 'Woman,' for she was made from Man.” This is why a man leaves his father and mother and becomes one with his wife.`
 		`15 God made man and woman in his own image. He blessed them and told them, “Have many children and grandchildren and fill the earth!” And God saw that everything he had made was very good,¬ and he was very pleased with all of it. This all happened on the sixth day of creation.`

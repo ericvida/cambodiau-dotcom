@@ -3946,8 +3946,7 @@ export let audio = {
 	"សប្ដាហ៍" : "/assets/audio/3960.mp3"
 	"សប្តាហ៍" : "/assets/audio/3961.mp3"
 	"សប្ប័ទ" : "/assets/audio/3962.mp3"
-	# not a word
-	# "សផ្ដល" : "/assets/audio/3963.mp3"
+	# "សផ្ដល" : "/assets/audio/3963.mp3" not a word
 	"សំពត់ហូល" : "/assets/audio/3964.mp3"
 	"សព្វព្រះ‌ហឫទ័យ" : "/assets/audio/3965.mp3"
 	"សម្ដេចសង្ឃ" : "/assets/audio/3966.mp3"

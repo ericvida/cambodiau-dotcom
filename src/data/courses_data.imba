@@ -41,12 +41,13 @@ class CalculateCourseUsageData
 				let lesson_num_en = li
 				for phrase, si in lesson.phrases
 					let new_phrase = {}
-					let str = phrase.replace(/\s\s/gi, '| |').replace(/\s/gi, "|")
+					let str = phrase.replace(/\s\s/gi, "|_|").replace(/\s/gi, "|")
 					let arr = str.split('|')
 					let phrase_num_en = si
 					let phrase_num_kh = arr[0]
 					arr.shift!
 					let text = arr.join('|')
+					text = text.replace(/_/gi, ' ')
 					let img = "0-0"
 					if si is 0
 						img = "{li + 1}-{lesson.image}"
@@ -161,7 +162,7 @@ class CalculateCourseUsageData
 		return counter
 
 export let courses_data = new CalculateCourseUsageData
-
+console.log courses_data
 # To improve application speed.
 # log courses_data above with command below
 # console.log courses_data 
