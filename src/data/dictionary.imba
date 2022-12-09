@@ -143,7 +143,7 @@ export let dictionary = {
 	"ព្រោះ": {rank: "142", vida: "p̣ṛuạh", vida_auto: "pruạh", google: "Because", ipa: "prʊǝh", def: false},
 	"រឿង": {rank: "143", vida: "ṛụẹṇg", vida_auto: "rụẹṇg", google: "Story", ipa: "rɨǝŋ", def: false},
 	"ប៉ុន្តែ": {rank: "144", vida: "pontaė", vida_auto: "pontaė", google: "But", ipa: "pontae", def: false},
-	"ឡើយ": {rank: "145", vida: "laẹy", vida_auto: "laẹỵ", google: "No", ipa: "laǝy", def: false},
+	"ឡើយ": {rank: "145", vida: "laẹy", vida_auto: "laẹỵ", google: "No", ipa: "laǝy", def: ["particle=at all|absolutely"]},
 	"មុខ": {rank: "146", vida: "ṃokh", vida_auto: "ṃuk", google: "Face", ipa: "muk", def: false},
 	"ថ្លែង": {rank: "147", vida: "thḷaėṇg", vida_auto: false, google: "Speak", ipa: false, def: false},
 	"ធ្វើឲ្យ": {rank: "148", vida: "ṭhṿẹẹ-aȯy", vida_auto: "tvẹẹ-qaȯỵ", google: "Make", ipa: "tvǝǝ ʔaoy", def: false},
