@@ -162,7 +162,7 @@ class CalculateCourseUsageData
 		return counter
 
 export let courses_data = new CalculateCourseUsageData
-console.log courses_data
+# console.log courses_data
 # To improve application speed.
 # log courses_data above with command below
 # console.log courses_data 
