@@ -427,6 +427,8 @@ tag TopNav
 				<.dictionary> "Dictionary"
 			<a route-to="/phonetics">
 				<.dictionary> "Phonetics"
+			<a route-to="/login">
+				<.dictionary> "login"
 tag DictionaryLayout
 	css p:1sp w:100%
 	css .page-wrapper
