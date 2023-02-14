@@ -1,7 +1,7 @@
 # import {learning_data_out} from './data/learning_data_out'
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
-import stoxre from 'store2'
+import store from 'store2'
 import './layouts'
 import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
@@ -138,7 +138,7 @@ class Api
 		for own word, word_state of state.user_learned
 			# if word is not used in object
 			if object.word_usage[word]
-				percent += object.word_usage[word] / object.word_usage_count
+				percent += object.word_usage[word] / object.word_usage_sum
 		percent = Math.round(percent * 100)
 		return percent
 	
@@ -444,7 +444,7 @@ tag DictionaryLayout
 			let dict_length = Object.keys(dictionary).length
 			let learned_percent = state.learning_data.user_progress
 			let learned_usage = state.learning_data.user_progress_learned_usage
-			let all_word_usage = courses_data.word_usage_count
+			let all_word_usage = courses_data.word_usage_sum
 			let all_wordset_length = courses_data.word_set_count
 			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
 			let lessons_percent = Math.floor((learned_length / all_wordset_length) * 1000) / 10
@@ -1015,7 +1015,7 @@ tag ModuleCard
 			<.card-info>
 				<.card-title>
 					<h2> "{course.title}"
-					<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_count)* 1000) / 10}%"
+					<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_sum)* 1000) / 10}%"
 				<ProgressBar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.course_progress[id]>
 				# TODO: Calculate Wordcount of used words for course, Lesson, Phrase
 				<> console.log state.learning_data.course_progress[state.course]
@@ -1448,7 +1448,7 @@ tag LessonNav
 				<.icon-title>
 					<i-{course.icon}[pr:5px]>
 					<h2 [fs:xl]> course.title
-				<.usage_word_count> "{state.learning_data.course_learned_usage[state.course]}/{course.word_usage_count} words"
+				<.usage_word_count> "{state.learning_data.course_learned_usage[state.course]}/{course.word_usage_sum} words"
 				<ProgressBar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.course_progress[state.course]>
 			for own id, lesson of courses_data.courses[state.course].lessons
 				<LessonNavItem .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
@@ -1482,11 +1482,11 @@ tag LessonNavItem
 					$bg:gray8
 					$fg:indigo4
 	def render
-		let progress = "4/{lesson.word_usage_count}"
+		let progress = "4/{lesson.word_usage_sum}"
 		<self[w:100%].lesson-button .chapter_active=no>
 			<.chapter-text[d:hflex jc:space-between ai:end]>
 				<.chapter-name> lesson.title	
-			let progress_string = "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count}"
+			let progress_string = "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_sum}"
 			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress_string} words"
 			<ProgressBar .color progress=state.learning_data.lesson_progress[state.course][id]>
 
