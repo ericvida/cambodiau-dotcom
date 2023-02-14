@@ -1,7 +1,7 @@
 # import {learning_data_out} from './data/learning_data_out'
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
-import store from 'store2'
+import stoxre from 'store2'
 import './layouts'
 import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
@@ -87,6 +87,7 @@ class Api
 		else
 			state.user_learned[word] = yes
 		# console.log 'toggled', word, state.user_learned.hasOwnProperty(word)
+		
 		calcAllProgress!
 		save!
 	
@@ -140,7 +141,6 @@ class Api
 				percent += object.word_usage[word] / object.word_usage_count
 		percent = Math.round(percent * 100)
 		return percent
-	
 	
 	def calcUserLearnedUsage user
 		return calcLearnedUsageOfObject(user)
@@ -429,8 +429,10 @@ tag TopNav
 				<.dictionary> "Phonetics"
 			<a route-to="/login">
 				<.dictionary> "login"
+
 tag DictionaryLayout
 	css p:1sp w:100%
+		
 	css .page-wrapper
 		d:hflex gap:1sp
 		max-width:800px
@@ -1764,12 +1766,3 @@ tag ElemProgressRing
 						<div .progress[rotate:{right_progress}]>
 
 imba.mount <App>, document.getElementById "app"
-
-
-# generate an analogy for the christian trinity
-
-
-
-
-# the analogy is a string of three words, each of which is a synonym for the other two
-

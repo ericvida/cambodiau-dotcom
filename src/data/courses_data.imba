@@ -144,6 +144,7 @@ class CalculateCourseUsageData
 			child.word_set.forEach(do(x) allModulesSet.add(x))
 		let res = [...allModulesSet]
 		return res	
+	
 	def getChildrenWordUsage children
 		let word_usage = {}
 		for child in children
@@ -165,7 +166,6 @@ export let courses_data = new CalculateCourseUsageData
 # console.log courses_data
 # To improve application speed.
 # log courses_data above with command below
-# console.log courses_data 
 # copy object from console and paste into export let below
 # then Comment out courses_data above.
 
