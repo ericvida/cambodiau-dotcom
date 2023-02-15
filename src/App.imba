@@ -579,15 +579,35 @@ tag AdminCMS
 
 tag CMSModuleMeta
 	<self>
-		<div [d:vflex gap:1sp p:1sp]>
-			<input[px:0.6sp] type="text" placeholder="title: string"> 
-			<input[px:0.6sp] type="text" placeholder="route/slug: string"> 
-			<input[px:0.6sp] type="text" placeholder="description: string"> 
-			<input[px:0.6sp] type="text" placeholder="price: number"> 
-			<input[px:0.6sp] type="text" placeholder="word_set: array"> 
-			<input[px:0.6sp] type="text" placeholder="word_set_length: number"> 
-			<input[px:0.6sp] type="text" placeholder="word_usage_count: object"> 
-			<input[px:0.6sp] type="text" placeholder="word_usage_count_sum: number"> 
+		<form[d:vflex gap:1sp p:1sp]>
+			css label mr:1sp
+			<span>
+				<label for="slug"> "slug"
+				<input[px:0.6sp] #slug type="text" placeholder="string"> 
+			<span>
+				<label for="title"> "title"
+				<input[px:0.6sp] #title type="text" placeholder="string"> 
+			<span>
+				<label for="description"> "description"
+				<input[px:0.6sp] #description type="text" placeholder="string"> 
+			<span>
+				<label for="language_tag"> "description"
+				<input[px:0.6sp] #language_tag type="text" placeholder="string"> 
+			<span>
+				<label for="price"> "description"
+				<input[px:0.6sp] #price type="text" placeholder="number"> 
+			<span>
+				<label for="word_set"> "word_set"
+				<input[px:0.6sp] #word_set type="text" placeholder="array"> 
+			<span>
+				<label for="word_set_length"> "word_set_length"
+				<input[px:0.6sp] #word_set_length type="text" placeholder="number"> 
+			<span>
+				<label for="word_usage_count"> "word_usage_count"
+				<input[px:0.6sp] #word_usage_count type="text" placeholder="object"> 
+			<span>
+				<label for="word_usage_count_sum"> "word_usage_count_sum"
+				<input[px:0.6sp] #word_usage_count_sum type="text" placeholder="number"> 
 
 tag CMSModulesList
 	prop module_list = [
@@ -683,15 +703,29 @@ tag CMSLessonCard
 
 tag CMSLessonMeta
 	<self>
-		<div [d:vflex gap:1sp p:1sp]>
-			<input[px:0.6sp] type="text" placeholder=`title: "lesson two"`> 
-			<input[px:0.6sp] type="text" placeholder=`imageURL: "lesson url two"`> 
-			<input[px:0.6sp] type="text" placeholder=`slug: "1"`> 
-			<input[px:0.6sp] type="text" placeholder=`word_set: ["one", "two"]`> 
-			<input[px:0.6sp] type="text" placeholder=`word_set_length: 2`> 
-			<input[px:0.6sp] type="text" placeholder=`word_usage_count: {"one":10, "two":20}`> 
-			<input[px:0.6sp] type="text" placeholder=`word_usage_count_sum: 20`> 
-			<input[px:0.6sp] type="text" placeholder=`number_of_lessons: 10`> 
+		<form[d:vflex gap:1sp p:1sp]>
+			css label mr:1sp
+			<span>
+				<label for="slug"> "slug"
+				<input[px:0.6sp] #slug type="text" placeholder="string"> 
+			<span>
+				<label for="title"> "title"
+				<input[px:0.6sp] #title type="text" placeholder="string"> 
+			<span>
+				<label for="imageURL"> "imageURL"
+				<input[px:0.6sp] #imageURL type="text" placeholder="string"> 
+			<span>
+				<label for="word_set"> "word_set"
+				<input[px:0.6sp] #word_set type="text" placeholder="array"> 
+			<span>
+				<label for="word_set_length"> "word_set_length"
+				<input[px:0.6sp] #word_set_length type="text" placeholder="number"> 
+			<span>
+				<label for="word_usage_count"> "word_usage_count"
+				<input[px:0.6sp] #word_usage_count type="text" placeholder="object"> 
+			<span>
+				<label for="word_usage_count_sum"> "word_usage_count_sum"
+				<input[px:0.6sp] #word_usage_count_sum type="text" placeholder="number"> 
 
 
 tag CMSChapterList
@@ -735,18 +769,39 @@ tag CMSChapterCard
 			# edit button needs to enable editing of input fields.
 			<button[px:.4sp bg:indigo2 rd:sm]> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
-		<div[d:vflex gap:1sp]>
-			css input bg:cool0
-			<input type="text" placeholder="item.slug"> 
-			<input type="text" placeholder="item.number_eng"> 
-			<input type="text" placeholder="item.number_khmer"> 
-			<input type="text" placeholder="item.vida_phonetics"> 
-			<input type="text" placeholder="item.ipa_phonetics"> 
-			<input type="text" placeholder="item.english_meaning"> 
-			<input type="text" placeholder="JSON.stringify item.word_set"> 
-			<input type="text" placeholder="item.word_set_length"> 
-			<input type="text" placeholder="JSON.stringify item.word_usage_count"> 
-			<input type="text" placeholder="item.word_usage_count_sum"> 
+		<form[d:vflex gap:1sp p:1sp]>
+			css label mr:1sp
+			css input bg:cool1 px:1sp
+			<span>
+				<label for="slug"> "slug"
+				<input #slug type="text" placeholder="string"> 
+			<span>
+				<label for="number_eng"> "number_eng"
+				<input #number_eng type="text" placeholder="string"> 
+			<span>
+				<label for="number_khmer"> "number_khmer"
+				<input #number_khmer type="text" placeholder="string"> 
+			<span>
+				<label for="vida_phonetics"> "vida_phonetics"
+				<input #vida_phonetics type="text" placeholder="string"> 
+			<span>
+				<label for="ipa_phonetics"> "ipa_phonetics"
+				<input #ipa_phonetics type="text" placeholder="string"> 
+			<span>
+				<label for="english_meaning"> "english_meaning"
+				<input #english_meaning type="text" placeholder="string"> 
+			<span>
+				<label for="word_set"> "word_set"
+				<input #stringify type="text" placeholder="array"> 
+			<span>
+				<label for="word_set_length"> "word_set_length"
+				<input #word_set_length type="text" placeholder="number"> 
+			<span>
+				<label for="word_usage_count"> "word_usage_count"
+				<input word_usage_count type="text" placeholder="object"> 
+			<span>
+				<label for="word_usage_count_sum"> "word_usage_count_sum"
+				<input #word_usage_count_sum type="text" placeholder="number"> 
 
 
 
