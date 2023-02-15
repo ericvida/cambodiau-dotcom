@@ -560,6 +560,7 @@ tag HomeLayout
 tag AdminCMS
 	def render
 		<self>
+			<h1[p:1sp bg:rose0 bd:2px solid rose3 rd:md m:1sp]> "Design of CMS interface will be improved soon. This a quick implementation."
 			<.breadcrumbs[p:1sp]>
 				<span>
 					<a route-to="/cms/"> "CMS"
@@ -625,6 +626,7 @@ tag CMSModuleCard
 			bxs: 0px 0px 0px 5px indigo3
 	<self[bg:white m:1sp p:1sp]> 
 		<[d:flex gap:1sp]>
+			# TODO: route-to needs to by dynamic
 			<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0"> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<p> item.title
@@ -673,6 +675,7 @@ tag CMSLessonCard
 		bg:white m:1sp p:1sp
 	<self>
 		<[d:flex gap:1sp]>
+			# TODO: route-to needs to by dynamic
 			<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0/0"> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<p> item.title
@@ -734,6 +737,7 @@ tag CMSChapterList
 tag CMSChapterCard
 	<self[bg:white m:1sp p:1sp]> 
 		<[d:flex gap:1sp mb:1sp]>
+			# edit button needs to enable editing of input fields.
 			<button[px:.4sp bg:indigo2 rd:sm]> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<div[d:vflex gap:1sp]>
