@@ -572,10 +572,10 @@ tag AdminCMS
 					<span> " / "
 				<span[c:gray4]> "chapter"
 			<div route="/cms/">
-				<CMSModuleMeta>
 				<CMSModulesList>
 			<CMSLessonList route="/cms/0/">
 			<CMSChapterList route="/cms/0/0/">
+
 tag CMSModuleMeta
 	<self>
 		<div [d:vflex gap:1sp p:1sp]>
@@ -617,12 +617,15 @@ tag CMSModulesList
 			<h2[m:1sp]> "Module List"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add module"
 			for item in module_list
-				<CMSModuleCard item=item route-to="/cms/0">
+				<CMSModuleCard item=item>
 
 tag CMSModuleCard
+	css self
+		@hover
+			bxs: 0px 0px 0px 5px indigo3
 	<self[bg:white m:1sp p:1sp]> 
 		<[d:flex gap:1sp]>
-			<button[px:.4sp bg:cool2 rd:sm]> "edit"
+			<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0"> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<p> item.title
 		<p> item.description
@@ -656,23 +659,21 @@ tag CMSLessonList
 	]
 	def render
 		<self>
-			<div [d:vflex gap:1sp p:1sp]>
-				<input[px:0.6sp] type="text" placeholder="Lesson title: string"> 
-				<input[px:0.6sp] type="text" placeholder="Lesson imageURL: string"> 
-				<input[px:0.6sp] type="text" placeholder="Lesson route/slug: string"> 
-				<input[px:0.6sp] type="text" placeholder="Lesson word_set: array"> 
-				<input[px:0.6sp] type="text" placeholder="Lesson word_set_length: number"> 
-				<input[px:0.6sp] type="text" placeholder="Lesson word_usage_count: object"> 
-				<input[px:0.6sp] type="text" placeholder="Lesson word_usage_count_sum: number"> 
+			<h2[m:1sp]> "Module Metadata"
+			<CMSModuleMeta>
 			<h2[m:1sp]> "Lesson List"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add lesson"
 			for item in lesson_list
-				<CMSLessonCard item=item route-to="/cms/0/0">
-		
+				<CMSLessonCard item=item >
+
 tag CMSLessonCard
-	<self[bg:white m:1sp p:1sp]>
+	css self
+		@hover
+			bxs: 0px 0px 0px 5px indigo3
+		bg:white m:1sp p:1sp
+	<self>
 		<[d:flex gap:1sp]>
-			<button[px:.4sp bg:cool2 rd:sm]> "edit"
+			<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0/0"> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<p> item.title
 		<p> item.imageURL
@@ -681,6 +682,19 @@ tag CMSLessonCard
 		<p> item.word_set_length
 		<p> JSON.stringify item.word_usage_count
 		<p> item.word_usage_count_sum
+
+tag CMSLessonMeta
+	<self>
+		<div [d:vflex gap:1sp p:1sp]>
+			<input[px:0.6sp] type="text" placeholder=`title: "lesson two"`> 
+			<input[px:0.6sp] type="text" placeholder=`imageURL: "lesson url two"`> 
+			<input[px:0.6sp] type="text" placeholder=`slug: "1"`> 
+			<input[px:0.6sp] type="text" placeholder=`word_set: ["one", "two"]`> 
+			<input[px:0.6sp] type="text" placeholder=`word_set_length: 2`> 
+			<input[px:0.6sp] type="text" placeholder=`word_usage_count: {"one":10, "two":20}`> 
+			<input[px:0.6sp] type="text" placeholder=`word_usage_count_sum: 20`> 
+			<input[px:0.6sp] type="text" placeholder=`number_of_lessons: 10`> 
+
 
 tag CMSChapterList
 	prop chapter_list = [
@@ -710,6 +724,8 @@ tag CMSChapterList
 	]
 	def render
 		<self[]>
+			<h2[m:1sp]> "Leson Metadata"
+			<CMSLessonMeta>
 			<h2[m:1sp]> "Chapter List"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add chapter"
 			for item in chapter_list
@@ -718,7 +734,7 @@ tag CMSChapterList
 tag CMSChapterCard
 	<self[bg:white m:1sp p:1sp]> 
 		<[d:flex gap:1sp mb:1sp]>
-			<button[px:.4sp bg:cool2 rd:sm]> "edit"
+			<button[px:.4sp bg:indigo2 rd:sm]> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<div[d:vflex gap:1sp]>
 			css input bg:cool0
