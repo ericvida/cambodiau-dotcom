@@ -621,9 +621,6 @@ tag CMSModulesList
 				<CMSModuleCard item=item>
 
 tag CMSModuleCard
-	css self
-		@hover
-			bxs: 0px 0px 0px 5px indigo3
 	<self[bg:white m:1sp p:1sp]> 
 		<[d:flex gap:1sp]>
 			# TODO: route-to needs to by dynamic
@@ -670,8 +667,6 @@ tag CMSLessonList
 
 tag CMSLessonCard
 	css self
-		@hover
-			bxs: 0px 0px 0px 5px indigo3
 		bg:white m:1sp p:1sp
 	<self>
 		<[d:flex gap:1sp]>
