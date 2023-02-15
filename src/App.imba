@@ -571,9 +571,22 @@ tag AdminCMS
 					<a route-to="/cms/0/0"> "lesson 0"
 					<span> " / "
 				<span[c:gray4]> "chapter"
-			<CMSModulesList route="/cms/">
+			<div route="/cms/">
+				<CMSModuleMeta>
+				<CMSModulesList>
 			<CMSLessonList route="/cms/0/">
 			<CMSChapterList route="/cms/0/0/">
+tag CMSModuleMeta
+	<self>
+		<div [d:vflex gap:1sp p:1sp]>
+			<input[px:0.6sp] type="text" placeholder="title: string"> 
+			<input[px:0.6sp] type="text" placeholder="route/slug: string"> 
+			<input[px:0.6sp] type="text" placeholder="description: string"> 
+			<input[px:0.6sp] type="text" placeholder="price: number"> 
+			<input[px:0.6sp] type="text" placeholder="word_set: array"> 
+			<input[px:0.6sp] type="text" placeholder="word_set_length: number"> 
+			<input[px:0.6sp] type="text" placeholder="word_usage_count: object"> 
+			<input[px:0.6sp] type="text" placeholder="word_usage_count_sum: number"> 
 
 tag CMSModulesList
 	prop module_list = [
@@ -601,6 +614,7 @@ tag CMSModulesList
 	]
 	def render
 		<self> 
+			<button[ml:1sp px:.6sp bg:indigo2]> "add module"
 			for item in module_list
 				<CMSModuleCard item=item route-to="/cms/0">
 
@@ -618,18 +632,6 @@ tag CMSModuleCard
 		<p> item.word_set_length
 		<p> JSON.stringify item.word_usage_count
 		<p> item.word_usage_count_sum
-# 	prop title: 
-# 	prop description: string
-# 	prop imageURL: string
-# 	prop route: string
-# 	prop price: number
-# 	prop word_set: ["one","two"]
-# 	prop word_set_length: 2
-# 	prop word_usage_count: {"one":10, "two":10}
-# 	prop word_usage_count_sum: 20
-# 	prop number_of_lessons: 1
-# 	def render
-# 		<self> "ModuleCard"
 
 tag CMSLessonList
 	prop lesson_list = [
@@ -653,6 +655,15 @@ tag CMSLessonList
 	]
 	def render
 		<self>
+			<div [d:vflex gap:1sp p:1sp]>
+				<input[px:0.6sp] type="text" placeholder="Lesson title: string"> 
+				<input[px:0.6sp] type="text" placeholder="Lesson imageURL: string"> 
+				<input[px:0.6sp] type="text" placeholder="Lesson route/slug: string"> 
+				<input[px:0.6sp] type="text" placeholder="Lesson word_set: array"> 
+				<input[px:0.6sp] type="text" placeholder="Lesson word_set_length: number"> 
+				<input[px:0.6sp] type="text" placeholder="Lesson word_usage_count: object"> 
+				<input[px:0.6sp] type="text" placeholder="Lesson word_usage_count_sum: number"> 
+			<button[ml:1sp px:.6sp bg:indigo2]> "add lesson"
 			for item in lesson_list
 				<CMSLessonCard item=item route-to="/cms/0/0">
 		
@@ -696,25 +707,28 @@ tag CMSChapterList
 		word_usage_count_sum: 3
 	]
 	def render
-		<self>
+		<self[]>
+			<button[ml:1sp px:.6sp bg:indigo2]> "add chapter"
 			for item in chapter_list
 				<CMSChapterCard item=item>
 		
 tag CMSChapterCard
 	<self[bg:white m:1sp p:1sp]> 
-		<[d:flex gap:1sp]>
+		<[d:flex gap:1sp mb:1sp]>
 			<button[px:.4sp bg:cool2 rd:sm]> "edit"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
-		<p> item.slug
-		<p> item.number_eng
-		<p> item.number_khmer
-		<p> item.vida_phonetics
-		<p> item.ipa_phonetics
-		<p> item.english_meaning
-		<p> JSON.stringify item.word_set
-		<p> item.word_set_length
-		<p> JSON.stringify item.word_usage_count
-		<p> item.word_usage_count_sum
+		<div[d:vflex gap:1sp]>
+			css input bg:cool0
+			<input type="text" placeholder="item.slug"> 
+			<input type="text" placeholder="item.number_eng"> 
+			<input type="text" placeholder="item.number_khmer"> 
+			<input type="text" placeholder="item.vida_phonetics"> 
+			<input type="text" placeholder="item.ipa_phonetics"> 
+			<input type="text" placeholder="item.english_meaning"> 
+			<input type="text" placeholder="JSON.stringify item.word_set"> 
+			<input type="text" placeholder="item.word_set_length"> 
+			<input type="text" placeholder="JSON.stringify item.word_usage_count"> 
+			<input type="text" placeholder="item.word_usage_count_sum"> 
 
 
 
