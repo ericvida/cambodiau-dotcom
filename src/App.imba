@@ -427,8 +427,12 @@ tag TopNav
 				<.dictionary> "Dictionary"
 			<a route-to="/phonetics">
 				<.dictionary> "Phonetics"
-			<a route-to="/login">
-				<.dictionary> "login"
+			if state.auth
+				<a @click=(state.auth = !state.auth)>
+					<.dictionary> "logout"
+			else
+				<a route-to="/login">
+					<.dictionary> "login"
 			<a route-to="/cms">
 				<.dictionary> "CMS"
 
@@ -1751,8 +1755,7 @@ tag ModalLogin
 						<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
 						<label for="remember-me"> "Remember Me"
 						<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
-					<.login-button> "Sign In"
-
+					<.login-button @click=(state.auth = !state.auth) route-to="/"> "Sign In"
 # ELEMENT[epic=ELEMENT, seq=38] UserThumb
 tag UserThumb
 	css bg:hue5
