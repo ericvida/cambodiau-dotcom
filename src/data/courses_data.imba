@@ -91,31 +91,31 @@ class CalculateCourseUsageData
 				for phrase in lesson..phrases
 					let phrase_updated = phrase
 					phrase_updated.word_set = getSameWordSet(phrase..khmer)
-					phrase_updated.word_set_length = getSameWordSet(phrase..khmer).length
-					phrase_updated.word_usage = getSameWordUsage(phrase..khmer)
-					phrase_updated.word_usage_sum = phrase_updated.word_usage_sum = Object.values(getSameWordUsage(phrase..khmer)).reduce((do(a,b) a + b), 0)
+					phrase_updated.word_set_count = getSameWordSet(phrase..khmer).length
+					phrase_updated.word_usage_count = getSameWordUsage(phrase..khmer)
+					phrase_updated.word_usage_count_sum = phrase_updated.word_usage_count_sum = Object.values(getSameWordUsage(phrase..khmer)).reduce((do(a,b) a + b), 0)
 					# phrase_updated.khmer = phrase_updated..khmer.split('|') || ''
 					# phrase_updated.english = phrase_updated..english.split('|') || ''
 					lesson_updated.push phrase_updated
 				
 				res_lesson.phrases = lesson_updated
 				res_lesson.word_set = getChildrenWordSet(res_lesson..phrases)
-				res_lesson.word_set_length = res_lesson..word_set.length
-				res_lesson.word_usage = getChildrenWordUsage(res_lesson..phrases)
-				res_lesson.word_usage_sum = getChildrenWordUsageCount(res_lesson..word_usage)
+				res_lesson.word_set_count = res_lesson..word_set.length
+				res_lesson.word_usage_count = getChildrenWordUsage(res_lesson..phrases)
+				res_lesson.word_usage_count_sum = getChildrenWordUsageCount(res_lesson..word_usage_count)
 				course_updated.push res_lesson
 			
 			res_course.lessons = course_updated
 			res_course.word_set = getChildrenWordSet(res_course..lessons)
-			res_course.word_set_length = res_course..word_set.length
-			res_course.word_usage = getChildrenWordUsage(res_course..lessons)
-			res_course.word_usage_sum = getChildrenWordUsageCount(res_course..word_usage)
+			res_course.word_set_count = res_course..word_set.length
+			res_course.word_usage_count = getChildrenWordUsage(res_course..lessons)
+			res_course.word_usage_count_sum = getChildrenWordUsageCount(res_course..word_usage_count)
 			user_updated.push res_course
 		res_user.courses = user_updated
 		res_user.word_set = getChildrenWordSet(res_user..courses)
-		res_user.word_set_length = res_user..word_set.length
-		res_user.word_usage = getChildrenWordUsage(res_user..courses)
-		res_user.word_usage_sum = getChildrenWordUsageCount(res_user..word_usage)
+		res_user.word_set_count = res_user..word_set.length
+		res_user.word_usage_count = getChildrenWordUsage(res_user..courses)
+		res_user.word_usage_count_sum = getChildrenWordUsageCount(res_user..word_usage_count)
 		return res_user
 	
 	def getSameWordSet input
@@ -146,15 +146,15 @@ class CalculateCourseUsageData
 		return res	
 	
 	def getChildrenWordUsage children
-		let word_usage = {}
+		let word_usage_count = {}
 		for child in children
-			let child_word_usage = child.word_usage
-			for own key, val of child_word_usage
-				if word_usage[key]
-					word_usage[key] += val
+			let child_word_usage_count = child.word_usage_count
+			for own key, val of child_word_usage_count
+				if word_usage_count[key]
+					word_usage_count[key] += val
 				else
-					word_usage[key] = val
-		return word_usage
+					word_usage_count[key] = val
+		return word_usage_count
 
 	def getChildrenWordUsageCount word-usage
 		let counter = 0

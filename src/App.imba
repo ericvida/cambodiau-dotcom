@@ -137,8 +137,8 @@ class Api
 		let percent = 0
 		for own word, word_state of state.user_learned
 			# if word is not used in object
-			if object.word_usage[word]
-				percent += object.word_usage[word] / object.word_usage_sum
+			if object.word_usage_count[word]
+				percent += object.word_usage_count[word] / object.word_usage_count_sum
 		percent = Math.round(percent * 100)
 		return percent
 	
@@ -176,8 +176,8 @@ class Api
 		let usage = 0
 		for own word, word_state of state.user_learned
 			# if word is not used in object
-			if object.word_usage[word]
-				usage += object.word_usage[word]
+			if object.word_usage_count[word]
+				usage += object.word_usage_count[word]
 		usage = Math.round(usage)
 		return usage
 	
@@ -391,6 +391,7 @@ tag App
 					<HomeLayout route="/">
 					<DictionaryLayout route="/dictionary">
 					<PhoneticsLayout route="/phonetics">
+					<AdminCMS route="/cms">
 					<.width-container>
 						<CourseLayout route="/course">
 				<div slot="bottom">
@@ -408,6 +409,7 @@ tag App
 						<span> " or "
 						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
 
+# TAG[epic=NAV, seq=1] TopNav
 tag TopNav
 	css self
 		d:hflex gap:1sp
@@ -429,6 +431,8 @@ tag TopNav
 				<.dictionary> "Phonetics"
 			<a route-to="/login">
 				<.dictionary> "login"
+			<a route-to="/cms">
+				<.dictionary> "CMS"
 
 tag DictionaryLayout
 	css p:1sp w:100%
@@ -444,7 +448,7 @@ tag DictionaryLayout
 			let dict_length = Object.keys(dictionary).length
 			let learned_percent = state.learning_data.user_progress
 			let learned_usage = state.learning_data.user_progress_learned_usage
-			let all_word_usage = courses_data.word_usage_sum
+			let all_word_usage_count = courses_data.word_usage_count_sum
 			let all_wordset_length = courses_data.word_set_count
 			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
 			let lessons_percent = Math.floor((learned_length / all_wordset_length) * 1000) / 10
@@ -457,7 +461,7 @@ tag DictionaryLayout
 				<div.wrapper[py:1sp mb:1sp ta:center w:100% d:vflex]>
 					<h2> "You have learned "
 					<p[m:0]> "{lessons_percent}% of all words used in all lessons. ({learned_length} of {all_wordset_length})"
-					<p[m:0]> "{learned_percent}% of all word instances in all lessons. ({learned_usage} of {all_word_usage})"
+					<p[m:0]> "{learned_percent}% of all word instances in all lessons. ({learned_usage} of {all_word_usage_count})"
 					<p[m:0]> "{dict_percent}% of all words in this dictionary. ({learned_length} of {dict_length})"
 			<.page-wrapper>
 				<Dictionary>
@@ -550,7 +554,169 @@ tag HomeLayout
 			<.width-container>
 				<OwnedModules>
 			# <LockedModules>
+# LAYOUT[epic=LAYOUT, seq=1] AdminCMS
+tag AdminCMS
+	def render
+		<self>
+			<.breadcrumbs[p:1sp]>
+				<span>
+					<a route-to="/cms/"> "CMS"
+					<span> " / "
+				<span >
+					<a route-to="/cms/0"> "module 0"
+					<span> " / "
+				<span >
+					<a route-to="/cms/0/0"> "lesson 0"
+					<span> " / "
+				<span[c:gray4]> "chapter"
+			<CMSModulesList route="/cms/">
+			<CMSLessonList route="/cms/0/">
+			<CMSChapterList route="/cms/0/0/">
 
+tag CMSModulesList
+	prop module_list = [
+		title: "module one"
+		description: "description one"
+		imageURL: "url one"
+		slug: "0"
+		price: 20
+		word_set: ["one", "two"]
+		word_set_length: 2
+		word_usage_count: {"one":10, "two":20}
+		word_usage_count_sum: 20
+		number_of_lessons: 2
+		---
+		title: "module two"
+		description: "description two"
+		imageURL: "url two"
+		slug: "1"
+		price: 20
+		word_set: ["one", "two"]
+		word_set_length: 2
+		word_usage_count: {"one":10, "two":20}
+		word_usage_count_sum: 20
+		number_of_lessons: 2
+	]
+	def render
+		<self> 
+			for item in module_list
+				<CMSModuleCard item=item route-to="/cms/0">
+
+tag CMSModuleCard
+	<self[bg:white m:1sp p:1sp]> 
+		<[d:flex gap:1sp]>
+			<button[px:.4sp bg:cool2 rd:sm]> "edit"
+			<button[px:.4sp bg:cool2 rd:sm]> "delete"
+		<p> item.title
+		<p> item.description
+		<p> item.imageURL
+		<p> item.slug
+		<p> item.price
+		<p> JSON.stringify item.word_set
+		<p> item.word_set_length
+		<p> JSON.stringify item.word_usage_count
+		<p> item.word_usage_count_sum
+# 	prop title: 
+# 	prop description: string
+# 	prop imageURL: string
+# 	prop route: string
+# 	prop price: number
+# 	prop word_set: ["one","two"]
+# 	prop word_set_length: 2
+# 	prop word_usage_count: {"one":10, "two":10}
+# 	prop word_usage_count_sum: 20
+# 	prop number_of_lessons: 1
+# 	def render
+# 		<self> "ModuleCard"
+
+tag CMSLessonList
+	prop lesson_list = [
+		title: "lesson one"
+		imageURL: "lesson url one"
+		slug: "0"
+		word_set: ["one", "two"]
+		word_set_length: 2
+		word_usage_count: {"one":10, "two":20}
+		word_usage_count_sum: 20
+		number_of_chapters: 10
+		---
+		title: "lesson two"
+		imageURL: "lesson url two"
+		slug: "1"
+		word_set: ["one", "two"]
+		word_set_length: 2
+		word_usage_count: {"one":10, "two":20}
+		word_usage_count_sum: 20
+		number_of_lessons: 10
+	]
+	def render
+		<self>
+			for item in lesson_list
+				<CMSLessonCard item=item route-to="/cms/0/0">
+		
+tag CMSLessonCard
+	<self[bg:white m:1sp p:1sp]>
+		<[d:flex gap:1sp]>
+			<button[px:.4sp bg:cool2 rd:sm]> "edit"
+			<button[px:.4sp bg:cool2 rd:sm]> "delete"
+		<p> item.title
+		<p> item.imageURL
+		<p> item.slug
+		<p> JSON.stringify item.word_set
+		<p> item.word_set_length
+		<p> JSON.stringify item.word_usage_count
+		<p> item.word_usage_count_sum
+
+tag CMSChapterList
+	prop chapter_list = [
+		slug: "0"
+		number_eng: "1"
+		number_khmer: "១"
+		khmer:  "មួយ ពីរ បី"
+		vida_phonetics: "muy pii bai"
+		ipa_phonetics: "muy pii bai"
+		english_meaning: "one two three"
+		word_set: ["មួយ", "ពីរ", "បី"]
+		word_set_length: 3
+		word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+		word_usage_count_sum: 3
+		---
+		slug: "1"
+		number_eng: "2"
+		number_khmer: "២"
+		khmer:  "មួយ ពីរ បី"
+		vida_phonetics: "muy pii bai"
+		ipa_phonetics: "muy pii bai"
+		english_meaning: "one two three"
+		word_set: ["មួយ", "ពីរ", "បី"]
+		word_set_length: 3
+		word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+		word_usage_count_sum: 3
+	]
+	def render
+		<self>
+			for item in chapter_list
+				<CMSChapterCard item=item>
+		
+tag CMSChapterCard
+	<self[bg:white m:1sp p:1sp]> 
+		<[d:flex gap:1sp]>
+			<button[px:.4sp bg:cool2 rd:sm]> "edit"
+			<button[px:.4sp bg:cool2 rd:sm]> "delete"
+		<p> item.slug
+		<p> item.number_eng
+		<p> item.number_khmer
+		<p> item.vida_phonetics
+		<p> item.ipa_phonetics
+		<p> item.english_meaning
+		<p> JSON.stringify item.word_set
+		<p> item.word_set_length
+		<p> JSON.stringify item.word_usage_count
+		<p> item.word_usage_count_sum
+
+
+
+# LAYOUT[epic=LAYOUT, seq=1] PhoneticsLayout
 tag PhoneticsLayout
 	css self
 		p:1sp
@@ -572,6 +738,7 @@ tag PhoneticsLayout
 			<.phonetics-layout>
 				<PhoneticVowels>
 				<WordCard.card>
+
 tag PhoneticVowels
 	css .chart-wrapper
 		# c:gray9 @darkmode:gray0
@@ -1015,7 +1182,7 @@ tag ModuleCard
 			<.card-info>
 				<.card-title>
 					<h2> "{course.title}"
-					<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_sum)* 1000) / 10}%"
+					<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_count_sum)* 1000) / 10}%"
 				<ProgressBar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.course_progress[id]>
 				# TODO: Calculate Wordcount of used words for course, Lesson, Phrase
 				<> console.log state.learning_data.course_progress[state.course]
@@ -1448,7 +1615,7 @@ tag LessonNav
 				<.icon-title>
 					<i-{course.icon}[pr:5px]>
 					<h2 [fs:xl]> course.title
-				<.usage_word_count> "{state.learning_data.course_learned_usage[state.course]}/{course.word_usage_sum} words"
+				<.usage_word_count> "{state.learning_data.course_learned_usage[state.course]}/{course.word_usage_count_sum} words"
 				<ProgressBar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.course_progress[state.course]>
 			for own id, lesson of courses_data.courses[state.course].lessons
 				<LessonNavItem .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
@@ -1482,11 +1649,11 @@ tag LessonNavItem
 					$bg:gray8
 					$fg:indigo4
 	def render
-		let progress = "4/{lesson.word_usage_sum}"
+		let progress = "4/{lesson.word_usage_count_sum}"
 		<self[w:100%].lesson-button .chapter_active=no>
 			<.chapter-text[d:hflex jc:space-between ai:end]>
 				<.chapter-name> lesson.title	
-			let progress_string = "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_sum}"
+			let progress_string = "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum}"
 			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress_string} words"
 			<ProgressBar .color progress=state.learning_data.lesson_progress[state.course][id]>
 

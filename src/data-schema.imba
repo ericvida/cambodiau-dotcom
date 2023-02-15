@@ -114,9 +114,9 @@ learning_data: object
 	title: string
 	description: string
 	word_set: object
-	word_set_length: number
-	word_usage: object
-	word_usage_sum: number
+	word_set_count: number
+	word_usage_count: object
+	word_usage_count_sum: number
 	modules: array
 		module: object
 			id: number
