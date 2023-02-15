@@ -1,7 +1,6 @@
 # import {learning_data_out} from './data/learning_data_out'
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
-import store from 'store2'
 import './layouts'
 import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
@@ -190,7 +189,6 @@ class Api
 	# API[epic=API, seq=7] LOAD
 	def load
 		state = imba.locals.state if imba.locals.state
-		# state = store.get(STATEKEY) if store.get(STATEKEY)
 		# console.log 'loaded', state
 
 	# API[epic=FrontEnd, seq=8] vida
