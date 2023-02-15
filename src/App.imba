@@ -614,6 +614,7 @@ tag CMSModulesList
 	]
 	def render
 		<self> 
+			<h2[m:1sp]> "Module List"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add module"
 			for item in module_list
 				<CMSModuleCard item=item route-to="/cms/0">
@@ -663,6 +664,7 @@ tag CMSLessonList
 				<input[px:0.6sp] type="text" placeholder="Lesson word_set_length: number"> 
 				<input[px:0.6sp] type="text" placeholder="Lesson word_usage_count: object"> 
 				<input[px:0.6sp] type="text" placeholder="Lesson word_usage_count_sum: number"> 
+			<h2[m:1sp]> "Lesson List"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add lesson"
 			for item in lesson_list
 				<CMSLessonCard item=item route-to="/cms/0/0">
@@ -708,6 +710,7 @@ tag CMSChapterList
 	]
 	def render
 		<self[]>
+			<h2[m:1sp]> "Chapter List"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add chapter"
 			for item in chapter_list
 				<CMSChapterCard item=item>
