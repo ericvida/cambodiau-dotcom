@@ -1,7 +1,6 @@
 # import {learning_data_out} from './data/learning_data_out'
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
-import './layouts'
 import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
 import {clusters} from './data/clusters'
@@ -577,178 +576,131 @@ tag AdminCMS
 			<CMSLessonList route="/cms/0/">
 			<CMSChapterList route="/cms/0/0/">
 
-tag CMSModuleMeta
-	<self>
-		<form[d:vflex gap:1sp p:1sp]>
-			css label mr:1sp
-			<span>
-				<label for="slug"> "slug"
-				<input[px:0.6sp] #slug type="text" placeholder="string"> 
-			<span>
-				<label for="title"> "title"
-				<input[px:0.6sp] #title type="text" placeholder="string"> 
-			<span>
-				<label for="description"> "description"
-				<input[px:0.6sp] #description type="text" placeholder="string"> 
-			<span>
-				<label for="language_tag"> "description"
-				<input[px:0.6sp] #language_tag type="text" placeholder="string"> 
-			<span>
-				<label for="price"> "description"
-				<input[px:0.6sp] #price type="text" placeholder="number"> 
-			<span>
-				<label for="word_set"> "word_set"
-				<input[px:0.6sp] #word_set type="text" placeholder="array"> 
-			<span>
-				<label for="word_set_length"> "word_set_length"
-				<input[px:0.6sp] #word_set_length type="text" placeholder="number"> 
-			<span>
-				<label for="word_usage_count"> "word_usage_count"
-				<input[px:0.6sp] #word_usage_count type="text" placeholder="object"> 
-			<span>
-				<label for="word_usage_count_sum"> "word_usage_count_sum"
-				<input[px:0.6sp] #word_usage_count_sum type="text" placeholder="number"> 
-
 tag CMSModulesList
 	prop module_list = [
 		title: "module one"
 		description: "description one"
 		imageURL: "url one"
-		slug: "0"
 		price: 20
-		word_set: ["one", "two"]
-		word_set_length: 2
-		word_usage_count: {"one":10, "two":20}
-		word_usage_count_sum: 20
+		word_set: ["មួយ", "ពីរ", "បី"]
+		word_set_length: 3
+		word_usage_count: {"មួយ":4, "ពីរ":4, "បី":4}
+		word_usage_count_sum: 12
 		number_of_lessons: 2
 		---
 		title: "module two"
 		description: "description two"
 		imageURL: "url two"
-		slug: "1"
 		price: 20
-		word_set: ["one", "two"]
-		word_set_length: 2
-		word_usage_count: {"one":10, "two":20}
-		word_usage_count_sum: 20
+		word_set: ["មួយ", "ពីរ", "បី"]
+		word_set_length: 3
+		word_usage_count: {"មួយ":4, "ពីរ":4, "បី":4}
+		word_usage_count_sum: 12
 		number_of_lessons: 2
 	]
 	def render
 		<self> 
-			<h2[m:1sp]> "Module List"
+			<h1[m:1sp]> "All Modules"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add module"
 			for item in module_list
 				<CMSModuleCard item=item>
 
 tag CMSModuleCard
+	prop meta_is_editable = false
+	def toggleEditable
+		meta_is_editable = !meta_is_editable
+		imba.commit!
+	css .meta
+		p:1sp
+		my:1sp
+		bd:2px rd:sm solid gray1
+	css .editable
+		bg:gray1
 	<self[bg:white m:1sp p:1sp]> 
 		<[d:flex gap:1sp]>
 			# TODO: route-to needs to by dynamic
-			<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0"> "edit"
+			<button[px:.4sp bg:indigo2 rd:sm] @click.toggleEditable> 
+				if meta_is_editable
+					"save module"
+				else
+					"edit module"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
-		<p> item.title
-		<p> item.description
-		<p> item.imageURL
-		<p> item.slug
-		<p> item.price
-		<p> JSON.stringify item.word_set
-		<p> item.word_set_length
-		<p> JSON.stringify item.word_usage_count
-		<p> item.word_usage_count_sum
-
+		<pre>
+			<code>
+				<div.meta contentEditable=meta_is_editable .editable=meta_is_editable> 
+					JSON.stringify item, null, 4
+		<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0"> "see lessons"
+		
 tag CMSLessonList
 	prop lesson_list = [
 		title: "lesson one"
 		imageURL: "lesson url one"
-		slug: "0"
-		word_set: ["one", "two"]
-		word_set_length: 2
-		word_usage_count: {"one":10, "two":20}
-		word_usage_count_sum: 20
-		number_of_chapters: 10
+		word_set: ["មួយ", "ពីរ", "បី"]
+		word_set_length: 3
+		word_usage_count: {"មួយ":2, "ពីរ":2, "បី":2}
+		word_usage_count_sum: 6
+		number_of_chapters: 2
 		---
 		title: "lesson two"
 		imageURL: "lesson url two"
-		slug: "1"
-		word_set: ["one", "two"]
-		word_set_length: 2
-		word_usage_count: {"one":10, "two":20}
-		word_usage_count_sum: 20
-		number_of_lessons: 10
+		word_set: ["មួយ", "ពីរ", "បី"]
+		word_set_length: 3
+		word_usage_count: {"មួយ":2, "ពីរ":2, "បី":2}
+		word_usage_count_sum: 6
+		number_of_lessons: 2
 	]
 	def render
 		<self>
-			<h2[m:1sp]> "Module Metadata"
-			<CMSModuleMeta>
-			<h2[m:1sp]> "Lesson List"
+			<h2[m:1sp]> "Module (N) Lessons"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add lesson"
 			for item in lesson_list
 				<CMSLessonCard item=item >
 
 tag CMSLessonCard
-	css self
-		bg:white m:1sp p:1sp
-	<self>
+	prop meta_is_editable = false
+	def toggleEditable
+		meta_is_editable = !meta_is_editable
+		imba.commit!
+	css .meta
+		p:1sp
+		my:1sp
+		bd:2px rd:sm solid gray1
+	css .editable
+		bg:gray1
+	<self[bg:white m:1sp p:1sp]> 
 		<[d:flex gap:1sp]>
 			# TODO: route-to needs to by dynamic
-			<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0/0"> "edit"
-			<button[px:.4sp bg:cool2 rd:sm]> "delete"
-		<p> item.title
-		<p> item.imageURL
-		<p> item.slug
-		<p> JSON.stringify item.word_set
-		<p> item.word_set_length
-		<p> JSON.stringify item.word_usage_count
-		<p> item.word_usage_count_sum
-
-tag CMSLessonMeta
-	<self>
-		<form[d:vflex gap:1sp p:1sp]>
-			css label mr:1sp
-			<span>
-				<label for="slug"> "slug"
-				<input[px:0.6sp] #slug type="text" placeholder="string"> 
-			<span>
-				<label for="title"> "title"
-				<input[px:0.6sp] #title type="text" placeholder="string"> 
-			<span>
-				<label for="imageURL"> "imageURL"
-				<input[px:0.6sp] #imageURL type="text" placeholder="string"> 
-			<span>
-				<label for="word_set"> "word_set"
-				<input[px:0.6sp] #word_set type="text" placeholder="array"> 
-			<span>
-				<label for="word_set_length"> "word_set_length"
-				<input[px:0.6sp] #word_set_length type="text" placeholder="number"> 
-			<span>
-				<label for="word_usage_count"> "word_usage_count"
-				<input[px:0.6sp] #word_usage_count type="text" placeholder="object"> 
-			<span>
-				<label for="word_usage_count_sum"> "word_usage_count_sum"
-				<input[px:0.6sp] #word_usage_count_sum type="text" placeholder="number"> 
-
+			<button[px:.4sp bg:indigo2 rd:sm] @click.toggleEditable> 
+				if meta_is_editable
+					"save lesson"
+				else
+					"edit lesson"
+			<button[px:.4sp bg:cool2 rd:sm]> "delete lesson"
+		<pre>
+			<code>
+				<div.meta contentEditable=meta_is_editable .editable=meta_is_editable> 
+					JSON.stringify item, null, 4
+		<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0/0"> "see chapters"
 
 tag CMSChapterList
 	prop chapter_list = [
-		slug: "0"
 		number_eng: "1"
 		number_khmer: "១"
 		khmer:  "មួយ ពីរ បី"
+		english_meaning: "one two three"
 		vida_phonetics: "muy pii bai"
 		ipa_phonetics: "muy pii bai"
-		english_meaning: "one two three"
 		word_set: ["មួយ", "ពីរ", "បី"]
 		word_set_length: 3
 		word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
 		word_usage_count_sum: 3
 		---
-		slug: "1"
 		number_eng: "2"
 		number_khmer: "២"
 		khmer:  "មួយ ពីរ បី"
+		english_meaning: "one two three"
 		vida_phonetics: "muy pii bai"
 		ipa_phonetics: "muy pii bai"
-		english_meaning: "one two three"
 		word_set: ["មួយ", "ពីរ", "បី"]
 		word_set_length: 3
 		word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
@@ -756,52 +708,35 @@ tag CMSChapterList
 	]
 	def render
 		<self[]>
-			<h2[m:1sp]> "Leson Metadata"
-			<CMSLessonMeta>
 			<h2[m:1sp]> "Chapter List"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add chapter"
 			for item in chapter_list
 				<CMSChapterCard item=item>
 		
 tag CMSChapterCard
+	prop meta_is_editable = false
+	def toggleEditable
+		meta_is_editable = !meta_is_editable
+		imba.commit!
+	css .meta
+		p:1sp
+		my:1sp
+		bd:2px rd:sm solid gray1
+	css .editable
+		bg:gray1
 	<self[bg:white m:1sp p:1sp]> 
-		<[d:flex gap:1sp mb:1sp]>
-			# edit button needs to enable editing of input fields.
-			<button[px:.4sp bg:indigo2 rd:sm]> "edit"
-			<button[px:.4sp bg:cool2 rd:sm]> "delete"
-		<form[d:vflex gap:1sp p:1sp]>
-			css label mr:1sp
-			css input bg:cool1 px:1sp
-			<span>
-				<label for="slug"> "slug"
-				<input #slug type="text" placeholder="string"> 
-			<span>
-				<label for="number_eng"> "number_eng"
-				<input #number_eng type="text" placeholder="string"> 
-			<span>
-				<label for="number_khmer"> "number_khmer"
-				<input #number_khmer type="text" placeholder="string"> 
-			<span>
-				<label for="vida_phonetics"> "vida_phonetics"
-				<input #vida_phonetics type="text" placeholder="string"> 
-			<span>
-				<label for="ipa_phonetics"> "ipa_phonetics"
-				<input #ipa_phonetics type="text" placeholder="string"> 
-			<span>
-				<label for="english_meaning"> "english_meaning"
-				<input #english_meaning type="text" placeholder="string"> 
-			<span>
-				<label for="word_set"> "word_set"
-				<input #stringify type="text" placeholder="array"> 
-			<span>
-				<label for="word_set_length"> "word_set_length"
-				<input #word_set_length type="text" placeholder="number"> 
-			<span>
-				<label for="word_usage_count"> "word_usage_count"
-				<input word_usage_count type="text" placeholder="object"> 
-			<span>
-				<label for="word_usage_count_sum"> "word_usage_count_sum"
-				<input #word_usage_count_sum type="text" placeholder="number"> 
+		<[d:flex gap:1sp]>
+			# TODO: route-to needs to by dynamic
+			<button[px:.4sp bg:indigo2 rd:sm] @click.toggleEditable> 
+				if meta_is_editable
+					"save chapter"
+				else
+					"edit chapter"
+			<button[px:.4sp bg:cool2 rd:sm]> "delete chapter"
+		<pre>
+			<code>
+				<div.meta contentEditable=meta_is_editable .editable=meta_is_editable> 
+					JSON.stringify item, null, 4
 
 
 

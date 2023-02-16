@@ -1186,7 +1186,6 @@ export let dictionary = {
 	"សាមញ្ញ": {rank: "1743", vida: false, vida_auto: "saaṃaṇh", google: false, ipa: "saamaɲ", def: false},
 	"ភ្លេច": {rank: "1744", vida: "p̣hḷeec", vida_auto: "plục", google: "Forget", ipa: "plɨc", def: false},
 	"ទទួលយក": {rank: "1745", vida: "ṭoṭuạḷ-ỵooq", vida_auto: "totuẹl-ỵook", google: "Accept", ipa: "tɔtuǝl yɔɔk", def: false},
-	"ម្ដង": {rank: "1747", vida: "ṃdȯṇg", vida_auto: "ṃdȯȯṇg", google: "Once", ipa: "mdɑɑŋ", def: false},
 	"ឥឡូវនេះ": {rank: "1748", vida: "aėlẹụṇih", vida_auto: "lẹv-nih|qiqlẹv-nih|qẹỵlẹv-nih", google: "Now", ipa: "ʔlǝv nih|ʔiʔlǝv nih|ʔǝylǝv nih", def: false},
 	"ជនបទ": {rank: "1749", vida: false, vida_auto: "cuạneaqbȯt|coonbȯt", google: false, ipa: "cʊǝneaʔbɑt|cɔɔnbɑt", def: false},
 	"គ្រែ": {rank: "1751", vida: "kṛėė", vida_auto: "krėė", google: "Bed", ipa: "krɛɛ", def: false},
