@@ -707,8 +707,8 @@ tag CMSChapterList
 		word_usage_count_sum: 3
 	]
 	def render
-		<self[]>
-			<h2[m:1sp]> "Chapter List"
+		<self>
+			<h2[m:1sp]> "Chapter Number"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add chapter"
 			for item in chapter_list
 				<CMSChapterCard item=item>
