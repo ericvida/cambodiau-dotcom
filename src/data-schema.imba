@@ -11,17 +11,17 @@ user_state: object
 	email: string
 	leaderboard_rank: number
 	password: string
-	available_modules: array
+	available_moduuls: array
 	proficiency_total_percent: 
-		number # number calculated from all modules
-	proficiency_modules_progress: 
+		number # number calculated from all moduuls
+	proficiency_moduuls_progress: 
 		array / number # [10,...] - one array of numbers calculated from chapters
-	proficiency_modules_chapters_progress: 
+	proficiency_moduuls_chapters_progress: 
 		array / array / number # [[5,...],[]] - one array of arrays of numbers calculated from lessons
-	proficiency_modules_chapters_lessons_progress: 
-		array / array / array / number [[[1,...,...],[]],[[],[]]] # progress calculated from words completed in module
+	proficiency_moduuls_chapters_lessons_progress: 
+		array / array / array / number [[[1,...,...],[]],[[],[]]] # progress calculated from words completed in moduul
 	dictionary_learned:
-		array > string # ['ក','កក',etc.] added by user when marked a word is marked learned in modules
+		array > string # ['ក','កក',etc.] added by user when marked a word is marked learned in moduuls
 	dictionary_progress: # calculate from words_learned.length and dictionary.length
 	alphabet_learned: array > string
 	vida_learned: array > string
@@ -92,23 +92,23 @@ dictionary: object
 				definition: object
 					word_use: string
 					text: string
-			this_word_use_count_in_purchased_modules: number # calc from user_state
+			this_word_use_count_in_purchased_moduuls: number # calc from user_state
 
 leaderboard: object
 	user: object
 		user_name: string
 		user_image_url: string
-		modules_owned: array / strings
+		moduuls_owned: array / strings
 		words_learned: number
 
-modules_info: array
-	module_info: object
-		module_id: number
-		module_name: string
-		module_price: number
-		module_description: string
-		module_total_words: number
-		module_total_lessons: number
+moduuls_info: array
+	moduul_info: object
+		moduul_id: number
+		moduul_name: string
+		moduul_price: number
+		moduul_description: string
+		moduul_total_words: number
+		moduul_total_lessons: number
 
 learning_data: object
 	title: string
@@ -117,8 +117,8 @@ learning_data: object
 	word_set_count: number
 	word_usage_count: object
 	word_usage_count_sum: number
-	modules: array
-		module: object
+	moduuls: array
+		moduul: object
 			id: number
 			note: string
 			title: string

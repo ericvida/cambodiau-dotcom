@@ -1,17 +1,17 @@
 TEXT CORRECTIONS
 - MEANING INCORRECT: 
-- https://beta2.cambodiau.com/course/0/0/6/37
+- https://beta2.cambodiau.com/moduul/0/0/6/37
   - ចូរ ឲ្យ មាន ផ្ទៃ ទឹក ឡើង » ។ ហើយ មាន ការ ពង្រីក មួយ ។ 
   - Let there be a space above the waters, it says let there be water.
 
 - Wrong word:
-  - http://127.0.0.1:3000/course/0/0/3/18
+  - http://127.0.0.1:3000/moduul/0/0/3/18
   - ពួកគេ maybe should be ពួកវា ??? for stars, sun and moon?
-  - https://beta2.cambodiau.com/course/0/22/2/60
+  - https://beta2.cambodiau.com/moduul/0/22/2/60
     - អំពើបាប should this be sin, or sinful deeds?
-  - https://beta2.cambodiau.com/course/0/22/4/44
+  - https://beta2.cambodiau.com/moduul/0/22/4/44
     - which is correct: ដូនតា (44) ansertor vs បុព្វបុរស (60) absestor?
-  - https://beta2.cambodiau.com/course/0/22/5/10
+  - https://beta2.cambodiau.com/moduul/0/22/5/10
     - (10) ពួកគេ should be ពួកគាត់ ???
     - (13) should ជម្រក សត្វ be one word ???
     - (15) ទេ should be មួយ ???

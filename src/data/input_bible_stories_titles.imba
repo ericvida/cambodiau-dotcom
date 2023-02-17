@@ -1,5 +1,5 @@
 export let titles = {
-	courses: [
+	moduuls: [
 		title: "Bible Stories",
 		icon: 'market'
 		route: "0",
