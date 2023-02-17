@@ -85,7 +85,6 @@ class Api
 		else
 			state.user_learned[word] = yes
 		# console.log 'toggled', word, state.user_learned.hasOwnProperty(word)
-		
 		calcAllProgress!
 		save!
 	
@@ -178,7 +177,7 @@ class Api
 				usage += object.word_usage_count[word]
 		usage = Math.round(usage)
 		return usage
-	
+
 	# API[epic=API, seq=7] SAVE
 	def save
 		imba.locals.state = state
@@ -582,6 +581,7 @@ tag CMSModulesList
 		description: "description one"
 		imageURL: "url one"
 		price: 20
+		language: "kh"
 		word_set: ["មួយ", "ពីរ", "បី"]
 		word_set_length: 3
 		word_usage_count: {"មួយ":4, "ពីរ":4, "បី":4}
@@ -592,6 +592,7 @@ tag CMSModulesList
 		description: "description two"
 		imageURL: "url two"
 		price: 20
+		language: "kh"
 		word_set: ["មួយ", "ពីរ", "បី"]
 		word_set_length: 3
 		word_usage_count: {"មួយ":4, "ពីរ":4, "បី":4}
@@ -599,8 +600,7 @@ tag CMSModulesList
 		number_of_lessons: 2
 	]
 	def render
-		<self> 
-			<h1[m:1sp]> "All Modules"
+		<self>
 			<button[ml:1sp px:.6sp bg:indigo2]> "add module"
 			for item in module_list
 				<CMSModuleCard item=item>
@@ -651,7 +651,6 @@ tag CMSLessonList
 	]
 	def render
 		<self>
-			<h2[m:1sp]> "Module (N) Lessons"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add lesson"
 			for item in lesson_list
 				<CMSLessonCard item=item >
@@ -708,7 +707,6 @@ tag CMSChapterList
 	]
 	def render
 		<self>
-			<h2[m:1sp]> "Chapter Number"
 			<button[ml:1sp px:.6sp bg:indigo2]> "add chapter"
 			for item in chapter_list
 				<CMSChapterCard item=item>
@@ -889,10 +887,11 @@ tag CourseLayout
 			<LessonLayout course=courses_data.courses[state.course]>
 			# 	<.main-wrapper[mx:auto]>
 # LAYOUT[epic=LAYOUT, seq=22] OwnedModules
+
 tag OwnedModules
 	def render
 		<self>
-			<h2[px:1sp fs:xl]> "Owned Modules"
+			<h2[px:1sp fs:xl]>
 			<.layout-card-grid>
 				for own id, course of courses_data.courses
 					<ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
