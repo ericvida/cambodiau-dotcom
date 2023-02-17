@@ -1,4 +1,4 @@
-tag rightbar-module-contents
+tag rightbar-moduul-contents
 	<self>
 		<div.card>
 			<h2> "Contents"

@@ -5,7 +5,7 @@ import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
 import {clusters} from './data/clusters'
 import {dictionary} from './data/dictionary'
-import {courses_data} from './data/courses_data'
+import {moduuls_data} from './data/moduuls_data'
 # import {state.learning_data} from './data'
 import './elements'
 import './components'
@@ -28,7 +28,7 @@ let state = {
 	left: yes
 	right: yes
 	ipa: no
-	course: 0
+	moduul: 0
 	lesson: 0
 	phrase: 0
 	word: 0
@@ -49,7 +49,7 @@ class Api
 				left: yes
 				right: yes
 				ipa: no
-				course: 0
+				moduul: 0
 				lesson: 0
 				phrase: 0
 				word: 0
@@ -61,6 +61,7 @@ class Api
 		if state.dark
 			setDarkmode!
 		save!
+
 	def clear
 		state = {
 			auth: yes
@@ -68,7 +69,7 @@ class Api
 			left: yes
 			right: yes
 			ipa: no
-			course: 0
+			moduul: 0
 			lesson: 0
 			phrase: 0
 			word: 0
@@ -79,6 +80,7 @@ class Api
 		}
 		save!
 		# console.log "cleared local storage"
+
 	def toggleLearned word
 		if state.user_learned.hasOwnProperty(word)
 			delete state.user_learned[word]
@@ -90,39 +92,39 @@ class Api
 	
 	# calculates progress from words already learned by the user
 	def calcAllProgress
-		state.learning_data.user_progress = calcUserProgress(courses_data)
-		state.learning_data.user_progress_learned_usage = calcUserLearnedUsage(courses_data)
-		state.learning_data.course_progress = calcCourseProgress(courses_data)
-		state.learning_data.course_learned_usage = calcCourseLearnedUsage(courses_data)
-		state.learning_data.lesson_progress = calcLessonProgress(courses_data)
-		state.learning_data.lesson_learned_usage = calcLessonLearnedUsage(courses_data)
-		state.learning_data.phrase_progress = calcPhraseProgress(courses_data)
-		state.learning_data.phrase_learned_usage = calcPhraseLearnedUsage(courses_data)
+		state.learning_data.user_progress = calcUserProgress(moduuls_data)
+		state.learning_data.user_progress_learned_usage = calcUserLearnedUsage(moduuls_data)
+		state.learning_data.moduul_progress = calcModuulProgress(moduuls_data)
+		state.learning_data.moduul_learned_usage = calcModuulLearnedUsage(moduuls_data)
+		state.learning_data.lesson_progress = calcLessonProgress(moduuls_data)
+		state.learning_data.lesson_learned_usage = calcLessonLearnedUsage(moduuls_data)
+		state.learning_data.phrase_progress = calcPhraseProgress(moduuls_data)
+		state.learning_data.phrase_learned_usage = calcPhraseLearnedUsage(moduuls_data)
 	
 	def calcUserProgress user_data
 		return calcUsageProgressOfObject(user_data)
 	
-	def calcCourseProgress user
-		let course_progress = []
-		for course in user.courses
-			course_progress.push calcUsageProgressOfObject(course)
+	def calcModuulProgress user
+		let moduul_progress = []
+		for moduul in user.moduuls
+			moduul_progress.push calcUsageProgressOfObject(moduul)
 
-		return course_progress
+		return moduul_progress
 	
 	def calcLessonProgress user
 		let lesson_progress = []
-		for course in user.courses
+		for moduul in user.moduuls
 			let lesson_progress_two = []
-			for lesson in course.lessons
+			for lesson in moduul.lessons
 				lesson_progress_two.push calcUsageProgressOfObject(lesson)
 			lesson_progress.push lesson_progress_two
 		return lesson_progress
 	
 	def calcPhraseProgress user
 		let phrase_progress = []
-		for course in user.courses
+		for moduul in user.moduuls
 			let phrase_progress_two = []
-			for lesson in course.lessons
+			for lesson in moduul.lessons
 				let phrase_progress_three = []
 				for phrase in lesson.phrases
 					phrase_progress_three.push calcUsageProgressOfObject(phrase)
@@ -142,26 +144,26 @@ class Api
 	def calcUserLearnedUsage user
 		return calcLearnedUsageOfObject(user)
 	
-	def calcCourseLearnedUsage user
-		let course_progress = []
-		for course in user.courses
-			course_progress.push calcLearnedUsageOfObject(course)
-		return course_progress
+	def calcModuulLearnedUsage user
+		let moduul_progress = []
+		for moduul in user.moduuls
+			moduul_progress.push calcLearnedUsageOfObject(moduul)
+		return moduul_progress
 	
 	def calcLessonLearnedUsage user
 		let lesson_progress = []
-		for course in user.courses
+		for moduul in user.moduuls
 			let lesson_progress_two = []
-			for lesson in course.lessons
+			for lesson in moduul.lessons
 				lesson_progress_two.push calcLearnedUsageOfObject(lesson)
 			lesson_progress.push lesson_progress_two
 		return lesson_progress
 	
 	def calcPhraseLearnedUsage user
 		let phrase_progress = []
-		for course in user.courses
+		for moduul in user.moduuls
 			let phrase_progress_two = []
-			for lesson in course.lessons
+			for lesson in moduul.lessons
 				let phrase_progress_three = []
 				for phrase in lesson.phrases
 					phrase_progress_three.push calcLearnedUsageOfObject(phrase)
@@ -352,7 +354,7 @@ tag App
 			ml:0px
 	def saveRouteToState
 		let route_array = router.pathname.replace('/','').split('/')
-		state.course = route_array[1]
+		state.moduul = route_array[1]
 		state.lesson = route_array[2]
 		state.phrase = route_array[3]
 		state.word = route_array[4]
@@ -382,14 +384,15 @@ tag App
 					>> main bg:gray1 @darkmode:gray9/50
 				<nav slot="top">
 					<.width-container[p:1sp]>
-						<TopNav>
+						<TopNavigation>
 				<div slot="middle">
-					<HomeLayout route="/">
-					<DictionaryLayout route="/dictionary">
-					<PhoneticsLayout route="/phonetics">
-					<AdminCMS route="/cms">
+					<LandingPage route="/">
+					<UserPage route="/@username">
+					<DictionaryPage route="/dictionary">
+					<PhoneticsPage route="/phonetics">
+					<CMSAdminPage route="/cms">
 					<.width-container>
-						<CourseLayout route="/course">
+						<ModuulPage route="/moduul">
 				<div slot="bottom">
 						css c:gray9 @darkmode:gray1
 							h:1bottombar
@@ -405,8 +408,24 @@ tag App
 						<span> " or "
 						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
 
-# TAG[epic=NAV, seq=1] TopNav
-tag TopNav
+# TAG[epic=PAGE, seq=1] LandingPage
+tag LandingPage
+	css self
+		gap:1sp
+	css h1
+		mt:1sp fs:2xl
+	css .button
+		bg:gray2 @darkmode:gray7
+		c:gray7	@darkmode:gray2
+		p:1sp rd:md
+	<self[mx:auto d:vflex ai:center]>
+		<div[p:1sp bg:rose0 bd:2px solid rose3 rd:md m:1sp]> "Design of Landing Page will be improved soon. This a quick implementation."
+		<h1 [ta:center]> "How to use CambodiaU"
+		<iframe width="560" height="315" src="https://www.youtube.com/embed/20dpm0bNjIU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
+		<button.button route-to="/store"> "Purchase Modules"
+
+# TAG[epic=NAV, seq=1] TopNavigation
+tag TopNavigation
 	css self
 		d:hflex gap:1sp
 	css a, button
@@ -421,20 +440,24 @@ tag TopNav
 	def render
 		<self>
 			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
+			<a route-to="/store">
+				<div> "Store"
+			<a route-to="/@username">
+				<div> "My Learning"
 			<a route-to="/dictionary">
-				<.dictionary> "Dictionary"
+				<div> "Dictionary"
 			<a route-to="/phonetics">
-				<.dictionary> "Phonetics"
+				<div> "Phonetics"
 			if state.auth
 				<a @click=(state.auth = !state.auth)>
-					<.dictionary> "logout"
+					<div> "logout"
 			else
 				<a route-to="/login">
-					<.dictionary> "login"
+					<div> "login"
 			<a route-to="/cms">
-				<.dictionary> "CMS"
+				<div> "CMS"
 
-tag DictionaryLayout
+tag DictionaryPage
 	css p:1sp w:100%
 		
 	css .page-wrapper
@@ -448,8 +471,8 @@ tag DictionaryLayout
 			let dict_length = Object.keys(dictionary).length
 			let learned_percent = state.learning_data.user_progress
 			let learned_usage = state.learning_data.user_progress_learned_usage
-			let all_word_usage_count = courses_data.word_usage_count_sum
-			let all_wordset_length = courses_data.word_set_count
+			let all_word_usage_count = moduuls_data.word_usage_count_sum
+			let all_wordset_length = moduuls_data.word_set_count
 			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
 			let lessons_percent = Math.floor((learned_length / all_wordset_length) * 1000) / 10
 			<.page-wrapper>
@@ -546,16 +569,16 @@ tag Dictionary
 								<span.err> 'vida coming soon'
 						if info..google	then <span> info..google else <span.err> '-'
 # LAYOUT[epic=LAYOUT, seq=21] Home
-tag HomeLayout
+tag UserPage
 	css w:100%
 		py:1sp
 	def render
 		<self>
 			<.width-container>
-				<OwnedModules>
-			# <LockedModules>
-# LAYOUT[epic=LAYOUT, seq=1] AdminCMS
-tag AdminCMS
+				<UserPageOwnedModuuls>
+			# <UserPageLockedModuuls>
+# TAG[epic=PAGE, seq=1] CMSAdminPage
+tag CMSAdminPage
 	def render
 		<self>
 			<h1[p:1sp bg:rose0 bd:2px solid rose3 rd:md m:1sp]> "Design of CMS interface will be improved soon. This a quick implementation."
@@ -564,20 +587,20 @@ tag AdminCMS
 					<a route-to="/cms/"> "CMS"
 					<span> " / "
 				<span >
-					<a route-to="/cms/0"> "module 0"
+					<a route-to="/cms/0"> "moduul 0"
 					<span> " / "
 				<span >
 					<a route-to="/cms/0/0"> "lesson 0"
 					<span> " / "
 				<span[c:gray4]> "chapter"
 			<div route="/cms/">
-				<CMSModulesList>
+				<CMSLearnModuleList>
 			<CMSLessonList route="/cms/0/">
 			<CMSChapterList route="/cms/0/0/">
 
-tag CMSModulesList
-	prop module_list = [
-		title: "module one"
+tag CMSLearnModuleList
+	prop moduul_list = [
+		title: "moduul one"
 		description: "description one"
 		imageURL: "url one"
 		price: 20
@@ -588,7 +611,7 @@ tag CMSModulesList
 		word_usage_count_sum: 12
 		number_of_lessons: 2
 		---
-		title: "module two"
+		title: "moduul two"
 		description: "description two"
 		imageURL: "url two"
 		price: 20
@@ -601,11 +624,11 @@ tag CMSModulesList
 	]
 	def render
 		<self>
-			<button[ml:1sp px:.6sp bg:indigo2]> "add module"
-			for item in module_list
-				<CMSModuleCard item=item>
+			<button[ml:1sp px:.6sp bg:indigo2]> "add moduul"
+			for item in moduul_list
+				<CMSModuulCard item=item>
 
-tag CMSModuleCard
+tag CMSModuulCard
 	prop meta_is_editable = false
 	def toggleEditable
 		meta_is_editable = !meta_is_editable
@@ -621,9 +644,9 @@ tag CMSModuleCard
 			# TODO: route-to needs to by dynamic
 			<button[px:.4sp bg:indigo2 rd:sm] @click.toggleEditable> 
 				if meta_is_editable
-					"save module"
+					"save moduul"
 				else
-					"edit module"
+					"edit moduul"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<pre>
 			<code>
@@ -738,8 +761,8 @@ tag CMSChapterCard
 
 
 
-# LAYOUT[epic=LAYOUT, seq=1] PhoneticsLayout
-tag PhoneticsLayout
+# LAYOUT[epic=PAGE, seq=1] PhoneticsPage
+tag PhoneticsPage
 	css self
 		p:1sp
 		d:vflex
@@ -864,12 +887,12 @@ tag PhoneticVowels
 					<div.dot @click.activeWord(10)>
 						<span> char[10][ipa]
 		
-# LAYOUT[epic=LAYOUT, seq=21] CourseLayout
-tag CourseLayout
+# LAYOUT[epic=PAGE, seq=21] ModuulPage
+tag ModuulPage
 	css w:100% d:hgrid
 		gtc: 1lessonbar 1phrasebar auto
 		p:1sp
-	css .module-course
+	css .moduul-moduul
 		d:hflex w:100% 
 	css .close-leftbar
 		ml: -1lessonbar
@@ -878,27 +901,26 @@ tag CourseLayout
 		h:100vh
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
-		# console.warn course
+		# console.warn moduul
 		<self>
 			# <.lesson-nav-wrapper>
-			<LessonNav route="/course/:lesson" course=courses_data.courses[state.course]>
+			<LessonNav route="/moduul/:lesson" moduul=moduuls_data.moduuls[state.moduul]>
 			# <.phrase-nav-wrapper>
-			<PhraseNav course=courses_data.courses[state.course]>
-			<LessonLayout course=courses_data.courses[state.course]>
+			<ChapterNav moduul=moduuls_data.moduuls[state.moduul]>
+			<LessonLayout moduul=moduuls_data.moduuls[state.moduul]>
 			# 	<.main-wrapper[mx:auto]>
-# LAYOUT[epic=LAYOUT, seq=22] OwnedModules
-
-tag OwnedModules
+# LAYOUT[epic=LAYOUT, seq=22] UserPageOwnedModuuls
+tag UserPageOwnedModuuls
 	def render
 		<self>
 			<h2[px:1sp fs:xl]>
 			<.layout-card-grid>
-				for own id, course of courses_data.courses
-					<ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
-					# <ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
-					# <ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
-					# <ModuleCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
-tag LockedModules
+				for own id, moduul of moduuls_data.moduuls
+					<ModuulCard.stretchy-card route-to="/moduul/{id}/0/0/0/" id=id moduul=moduul>
+					# <ModuulCard.stretchy-card route-to="/moduul/{id}/0/0/0/" id=id moduul=moduul>
+					# <ModuulCard.stretchy-card route-to="/moduul/{id}/0/0/0/" id=id moduul=moduul>
+					# <ModuulCard.stretchy-card route-to="/moduul/{id}/0/0/0/" id=id moduul=moduul>
+tag UserPageLockedModuuls
 	css self
 		d:vflex gap:1sp
 		p:1sp
@@ -913,15 +935,16 @@ tag LockedModules
 	def render
 		<self>
 			<h2> "Purchased Modules"
+			
 			<.card-wrapper route="/">
-				for own id, course of bible_data.courses
-					<ModuleCard route-to="/buy/{id}" id=id course=course>
+				for own id, moduul of bible_data.moduuls
+					<ModuulCard route-to="/buy/{id}" id=id moduul=moduul>
 
 # LAYOUT[epic=LAYOUT, seq=23] LessonLayout
 tag LessonLayout
 	css d:vflex @lg:hflex g:1sp
 		# bg:red
-	css .module-grid
+	css .moduul-grid
 		# flg:1 d:vflex g:1sp
 		d:grid g:1sp
 		gtc: 1fr @md: minmax(1rightbar, 3rightbar) 1rightbar
@@ -936,14 +959,14 @@ tag LessonLayout
 	css .phonetics
 		ff:mono d:flex gap:0.5sp flex-wrap:wrap
 	def render
-		let phrase = course.lessons[state.lesson].phrases[state.phrase]
+		let phrase = moduul.lessons[state.lesson].phrases[state.phrase]
 		<self>
-			<main.module-grid>
+			<main.moduul-grid>
 				<.left>
 					if phrase.image
 						<img src=phrase.image .image> phrase.image
 					# <WordBar>
-					<WordNav.card @click.commit course=course phrase=phrase rt=route>
+					<WordNav.card @click.commit moduul=moduul phrase=phrase rt=route>
 					<.card> 
 						<h2> "Phonetics"
 						<p.phonetics>
@@ -1009,7 +1032,7 @@ tag WordNav
 	def nextWord
 		if word_index < last_word_index
 			word_index++
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 		else 
 			# if last word of phrase, goes to the first word of the next phrase
 			nextPhrase!
@@ -1019,7 +1042,7 @@ tag WordNav
 	def prevWord
 		if word_index > 0
 			word_index--
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 		else
 			# if no previous word in this phrase goes to the last word of the previous phrase
 			prevPhraseLast!
@@ -1028,29 +1051,29 @@ tag WordNav
 		if phrase_index < last_phrase_index
 			phrase_index++
 			word_index = 0
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 	
 	# Goes to the last word of hte previous phrase
 	def prevPhraseLast
 		if phrase_index > 0
 			phrase_index--
 			word_index = phrases[phrase_index].khmer.split('|').length - 1
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 	# Goes to the first word of the previous phrase
 	def prevPhraseZero
 		if phrase_index > 0
 			phrase_index--
 			word_index = 0
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 	
 	def updateActiveWordData
 		route_array = router.pathname.replace('/','').split('/')
-		course_index = route_array[1]
+		moduul_index = route_array[1]
 		lesson_index = route_array[2]
 		phrase_index = route_array[3]
 		word_index = route_array[4]
 		word = phrase.khmer.split('|')[word_index]
-		phrases = course.lessons[lesson_index].phrases
+		phrases = moduul.lessons[lesson_index].phrases
 		last_phrase_index = Object.keys(phrases).length - 1
 		last_word_index = phrase.khmer.split('|').length - 1
 		state.active_word = word
@@ -1069,10 +1092,10 @@ tag WordNav
 			>
 			<div.word-wrapper>
 				for khmer_word, ki in phrase.khmer.split('|')
-					<.word .active=(khmer_word is state.active_word) route-to="/course/{state.course}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
+					<.word .active=(khmer_word is state.active_word) route-to="/moduul/{state.moduul}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
 
-# LAYOUT[epic=LAYOUT, seq=26] ModulePreview
-tag ModulePreview
+# LAYOUT[epic=LAYOUT, seq=26] LearnModulePreview
+tag LearnModulePreview
 	css p:1sp d:vgrid @lg:hgrid g:1sp
 		gtc:none @lg:2fr 1fr
 		min-height: calc(100vh - 1topbar)
@@ -1093,19 +1116,19 @@ tag ModulePreview
 				bg:none
 	def render
 		<self>
-			<main.module-grid>
+			<main.moduul-grid>
 				<div.image> "image"
 				<[d:hgrid w:100% g:1sp gtc: 2fr 1fr]>
 					<div.card> "card"
-					<rightbar-module-contents>
+					<rightbar-moduul-contents>
 				<[d:hgrid w:100% g:1sp gtc:1fr]> 
 					<rightbar-graduated-students>
 			let buy-cards = [
-				name: "Market Module"
+				name: "Market moduul"
 				price: 5
-				benefits: ['One Module','5 chapters','400 words']
+				benefits: ['One moduul','5 chapters','400 words']
 				---
-				name: "All Modules"
+				name: "All moduuls"
 				price: 20
 				benefits: ['5 modoules','40 chapters','2200 words']
 			]
@@ -1139,7 +1162,7 @@ tag UserCard
 	css .user-settings c:gray4 @darkmode:gray6 @hover:hue5 fs:xs
 	def render
 		<self>
-			<img src=user_module.image>
+			<img src=user_moduul.image>
 			<.user-info>
 				<div>
 					<h2.user-name> "DinaLearns"
@@ -1149,18 +1172,18 @@ tag UserCard
 					<a.user-settings route-to="/settings/"> "settings"
 					<a.user-settings @click=state.logout> "logout"
 
-# CARD[epic=CARD, seq=28] ModuleCard
-tag ModuleCard
+# CARD[epic=CARD, seq=28] ModuulCard
+tag ModuulCard
 	# prop chapters = []
 	prop link = "https://images.unsplash.com/photo-1599283787923-51b965a58b05?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Y2FtYm9kaWF8ZW58MHx8MHx8&auto=format&fit=crop&w=300&h=100&q=60"
 	prop locked = yes
-	prop module_active = no
+	prop moduul_active = no
 	css self
-		d:vflex .module_active:vflex ai:center
+		d:vflex .moduul_active:vflex ai:center
 		rd:1rd cursor@hover:pointer
 		@hover
 			bg:gray0 @darkmode:gray8/50
-		&.module_active
+		&.moduul_active
 			bg:gray2 @darkmode:gray8
 		# bxs:0 2px 10px 2px gray3
 	css .image
@@ -1185,7 +1208,7 @@ tag ModuleCard
 		c:gray4 @darkmode:gray5 
 		ff:monospace
 	
-	css .module-actions
+	css .moduul-actions
 		d:hflex jc:space-between
 		a c:white/30 @hover:hue5 fs:xs
 	css .icon-lock
@@ -1194,26 +1217,26 @@ tag ModuleCard
 		p:1sp rd:md h:100%
 		svg size:20px 
 			fill:hue6 @darkmode:hue4
-		.module-price
+		.moduul-price
 			c:hue6 @darkmode:hue4
 			ff:monospace
 	
 	def render
-		<self .locked=course.locked>
-			<div.not-image> unless course.image
-			<img.image src=course.image> if course.image
+		<self .locked=moduul.locked>
+			<div.not-image> unless moduul.image
+			<img.image src=moduul.image> if moduul.image
 			<.card-info>
 				<.card-title>
-					<h2> "{course.title}"
-					<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_count_sum)* 1000) / 10}%"
-				<ProgressBar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.course_progress[id]>
-				# TODO: Calculate Wordcount of used words for course, Lesson, Phrase
-				<> console.log state.learning_data.course_progress[state.course]
-				# if course.locked
+					<h2> "{moduul.title}"
+					<span.progress-percent> "{Math.floor((state.learning_data.moduul_learned_usage[id] / moduul.word_usage_count_sum)* 1000) / 10}%"
+				<ProgressBar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.moduul_progress[id]>
+				# TODO: Calculate Wordcount of used words for moduul, Lesson, Phrase
+				<> console.log state.learning_data.moduul_progress[state.moduul]
+				# if moduul.locked
 				# 	<.icon-lock>
 				# 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" .w-6.h-6>
 				# 			<path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd" />
-				# 		<.module-price[]> "${course.price}"
+				# 		<.moduul-price[]> "${moduul.price}"
 
 # CARD[epic=CARD, seq=29] SellCard
 tag SellCard
@@ -1393,7 +1416,7 @@ tag WordCard
 
 tag AudioPlayerForBar
 	<self>
-		# if state.module > 0
+		# if state.moduul > 0
 		let word = ""
 		if manual
 			word = manual
@@ -1416,7 +1439,7 @@ tag AudioPlayerForBar
 					# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
 tag AudioPlayer
 	<self>
-		# if state.module > 0
+		# if state.moduul > 0
 		let word = ""
 		if manual
 			word = manual
@@ -1596,7 +1619,6 @@ tag SpellingCard
 				kh_c +
 				'.', 'g'
 			
-			
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
 			let testword = state.active_word
 			let groups = testword.match regtest
@@ -1636,12 +1658,12 @@ tag LessonNav
 			
 			<.title-card>
 				<.icon-title>
-					<i-{course.icon}[pr:5px]>
-					<h2 [fs:xl]> course.title
-				<.usage_word_count> "{state.learning_data.course_learned_usage[state.course]}/{course.word_usage_count_sum} words"
-				<ProgressBar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.course_progress[state.course]>
-			for own id, lesson of courses_data.courses[state.course].lessons
-				<LessonNavItem .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
+					<i-{moduul.icon}[pr:5px]>
+					<h2 [fs:xl]> moduul.title
+				<.usage_word_count> "{state.learning_data.moduul_learned_usage[state.moduul]}/{moduul.word_usage_count_sum} words"
+				<ProgressBar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.moduul_progress[state.moduul]>
+			for own id, lesson of moduuls_data.moduuls[state.moduul].lessons
+				<LessonNavItem .active=(id == state.lesson) route-to="/moduul/{state.moduul}/{id}/0/0" id=id lesson=lesson>
 
 # TAG[epic=NAV, seq=35] LessonNavItem
 tag LessonNavItem
@@ -1676,12 +1698,12 @@ tag LessonNavItem
 		<self[w:100%].lesson-button .chapter_active=no>
 			<.chapter-text[d:hflex jc:space-between ai:end]>
 				<.chapter-name> lesson.title	
-			let progress_string = "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum}"
+			let progress_string = "{state.learning_data.lesson_learned_usage[state.moduul][id]}/{lesson.word_usage_count_sum}"
 			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress_string} words"
-			<ProgressBar .color progress=state.learning_data.lesson_progress[state.course][id]>
+			<ProgressBar .color progress=state.learning_data.lesson_progress[state.moduul][id]>
 
-# TAG[epic=NAV, seq=36] PhraseNav
-tag PhraseNav
+# TAG[epic=NAV, seq=36] ChapterNav
+tag ChapterNav
 	css self
 		c:gray9
 		w:1phrasebar
@@ -1701,28 +1723,28 @@ tag PhraseNav
 		if phrase_index < last_phrase_index
 			phrase_index++
 			word_index = 0
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 	
 	# Goes to the last word of hte previous phrase
 	def prevPhraseLast
 		if phrase_index > 0
 			phrase_index--
 			word_index = phrases[phrase_index].khmer.split('|').length - 1
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 	# Goes to the first word of the previous phrase
 	def prevPhraseZero
 		if phrase_index > 0
 			phrase_index--
 			word_index = 0
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/moduul/{moduul_index}/{lesson_index}/{phrase_index}/{word_index}")
 	def render
-		let phrases = courses_data.courses[state.course].lessons[state.lesson].phrases
+		let phrases = moduuls_data.moduuls[state.moduul].lessons[state.lesson].phrases
 		let progress = 0
 		<self>
 			for own id, phrase of phrases
-				<.number-toggle route-to="/course/{state.course}/{state.lesson}/{id}/0">
+				<.number-toggle route-to="/moduul/{state.moduul}/{state.lesson}/{id}/0">
 					let isActive = state.phrase is id
-					let progress = state.learning_data.phrase_progress[state.course][state.lesson][id]
+					let progress = state.learning_data.phrase_progress[state.moduul][state.lesson][id]
 					<ElemProgressRing .active=isActive progress=progress size=30> 
 						if id is 0 
 							"t"
