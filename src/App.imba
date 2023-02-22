@@ -644,9 +644,9 @@ tag CMSModuulCard
 			# TODO: route-to needs to by dynamic
 			<button[px:.4sp bg:indigo2 rd:sm] @click.toggleEditable> 
 				if meta_is_editable
-					"save moduul"
+					"save module"
 				else
-					"edit moduul"
+					"edit module"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<pre>
 			<code>
