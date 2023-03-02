@@ -371,8 +371,8 @@ tag App
 			<global 
 				@hotkey("shift+d")=api.toggleDark!
 				@hotkey("shift+i|v")=api.toggleIpa!
-				@hotkey("shift+a")=api.toggleAuth!
 				@hotkey("shift+c+l")=api.clear!
+				@hotkey("shift+a")=api.toggleAuth! # TODO: delete in production
 				@hotkey('enter|s')=api.toggleLearned(state.active_word)
 			>
 			if router.pathname is "/login"
@@ -1773,7 +1773,7 @@ tag ModalLogin
 	css .options d:hflex g:.5sp ai:center
 	css .forgot-link c:indigo4
 	css .login-button w:100% px:1sp py:0.5sp ta:center rd:1rd cursor:pointer us:none
-		bg:indigo5 @darkmode:indigo7
+		bg:indigo3 @darkmode:indigo7
 		@hover
 			bg:indigo6 @darkmode:indigo6
 		@active
@@ -1785,20 +1785,43 @@ tag ModalLogin
 			<.card>
 				<form.form action="#" method="POST">
 					# <> "login"
-					<div.field-wrapper>
-						<label for="username"> "Public Username"
-						<input.field .email name="username" autocomplete="username" required=""> 
+					<div[d:flex gap:1sp]>
+						<.login-button[bg:rose2] @click.googleAuth> "Sign In with Google"
+						<.login-button[bg:blue2] @click.facebookAuth> "Sign In with Facebook"
+						<.login-button[bg:blue2] @click.facebookAuth> "Sign In with Apple"
+					<hr[mt:1sp mb:.4sp]>
+					<p[ta:center c:gray6]> "Sign in with email"
 					<div.field-wrapper>
 						<label for="email"> "Email Address"
 						<input.field .email name="email" autocomplete="email" required=""> 
 					<div.field-wrapper>
-						<label for="username"> "Password"
-						<input.field .email name="username" autocomplete="username" required="">
+						<label for="password"> "Password"
+						<input.field .email name="password" autocomplete="username" required="">
 					<.options>
 						<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
 						<label for="remember-me"> "Remember Me"
 						<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
 					<.login-button @click=(state.auth = !state.auth) route-to="/"> "Sign In"
+					<hr[mt:1sp mb:.4sp]>
+					<p[ta:center c:gray6]> "Create account with email"
+					<div.field-wrapper>
+						<label for="username"> "Desired Username"
+						<input.field .email name="username" autocomplete="username" required=""> 
+					<div.field-wrapper>
+						<label for="email"> "Email Address"
+						<input.field .email name="email" autocomplete="email" required=""> 
+					<div.field-wrapper>
+						<label for="password"> "Password"
+						<input.field .email name="password" autocomplete="username" required="">
+					<div.field-wrapper>
+						<label for="confirmpassword"> "Confirm Password"
+						<input.field .email name="confirmpassword" autocomplete="username" required="">
+					<.options>
+						<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
+						<label for="remember-me"> "Remember Me"
+						<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
+					<.login-button @click=(state.auth = !state.auth) route-to="/"> "Create Account"
+					
 # ELEMENT[epic=ELEMENT, seq=38] UserThumb
 tag UserThumb
 	css bg:hue5
