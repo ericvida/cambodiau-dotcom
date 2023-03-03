@@ -375,8 +375,8 @@ tag App
 				@hotkey("shift+a")=api.toggleAuth! # TODO: delete in production
 				@hotkey('enter|s')=api.toggleLearned(state.active_word)
 			>
-			if router.pathname is "/login"
-				<ModalLogin[o@off:0% y@off:-200px ease:2dur] ease route="/login">
+			# if router.pathname is "/login"
+			# 	<ModalLogin[o@off:0% y@off:-200px ease:2dur] ease route="/login">
 			<layout-pancakes>
 				css gtr: calc(1topbar+2sp) auto 40px # sidebar content sidebar
 					# >> * p:1sp # padding around immediate children
@@ -391,6 +391,7 @@ tag App
 					<DictionaryPage route="/dictionary">
 					<PhoneticsPage route="/phonetics">
 					<CMSAdminPage route="/cms">
+					<ModalLogin route="/login">
 					<.width-container>
 						<ModuulPage route="/moduul">
 				<div slot="bottom">
@@ -437,6 +438,9 @@ tag TopNavigation
 		api.save!
 		console.log 'toggled nav', state.left
 		imba.commit!
+	def logOut
+		api.logOut!
+		imba.commit!
 	def render
 		<self>
 			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
@@ -449,7 +453,7 @@ tag TopNavigation
 			<a route-to="/phonetics">
 				<div> "Phonetics"
 			if state.auth
-				<a @click=(state.auth = !state.auth)>
+				<a @click.logOut>
 					<div> "logout"
 			else
 				<a route-to="/login">
@@ -1160,6 +1164,9 @@ tag UserCard
 	# css .user-actions
 	# 	d:hflex jc:space-between
 	css .user-settings c:gray4 @darkmode:gray6 @hover:hue5 fs:xs
+	def logOut
+		state.auth = no
+		imba.commit
 	def render
 		<self>
 			<img src=user_moduul.image>
@@ -1754,14 +1761,16 @@ tag ChapterNav
 
 # TAG[epic=Modal, seq=37] Login Modal
 tag ModalLogin
+	css p:2sp
 	css &.hidden d:none
-	css pos:absolute inset:0 zi:20
-		d:box d:vflex gap:4sp
+	
+	# css pos:absolute inset:0 zi:20
+	# 	d:box d:vflex gap:4sp
 	css .bg pos:absolute inset:0 bg:red zi:20
 		d:vflex d:box g:4sp
 		bg:gray1 @darkmode:gray7
 	css .card
-		w:400px p:2.4sp
+		max-width:600px p:2.4sp
 		bg:white @darkmode:gray9
 		bxs:xs hue5,xs hue4,sm hue7,xxl hue5 @darkmode:xs black, md black, xxl black
 	css .form d:vflex g:1.6sp
@@ -1778,49 +1787,63 @@ tag ModalLogin
 			bg:indigo6 @darkmode:indigo6
 		@active
 			bg:indigo5 @darkmode:indigo7
-	<self>
-		<.bg route-to="/">
-		<div[pos:absolute zi:30 d:vbox g:2sp]>
-			<cambodiau-icon[cursor:pointer] route-to="/">
-			<.card>
-				<form.form action="#" method="POST">
-					# <> "login"
-					<div[d:flex gap:1sp]>
-						<.login-button[bg:rose2] @click.googleAuth> "Sign In with Google"
-						<.login-button[bg:blue2] @click.facebookAuth> "Sign In with Facebook"
-						<.login-button[bg:blue2] @click.facebookAuth> "Sign In with Apple"
-					<hr[mt:1sp mb:.4sp]>
-					<p[ta:center c:gray6]> "Sign in with email"
-					<div.field-wrapper>
-						<label for="email"> "Email Address"
-						<input.field .email name="email" autocomplete="email" required=""> 
-					<div.field-wrapper>
-						<label for="password"> "Password"
-						<input.field .email name="password" autocomplete="username" required="">
-					<.options>
-						<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
-						<label for="remember-me"> "Remember Me"
-						<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
-					<.login-button @click=(state.auth = !state.auth) route-to="/"> "Sign In"
-					<hr[mt:1sp mb:.4sp]>
-					<p[ta:center c:gray6]> "Create account with email"
-					<div.field-wrapper>
-						<label for="username"> "Desired Username"
-						<input.field .email name="username" autocomplete="username" required=""> 
-					<div.field-wrapper>
-						<label for="email"> "Email Address"
-						<input.field .email name="email" autocomplete="email" required=""> 
-					<div.field-wrapper>
-						<label for="password"> "Password"
-						<input.field .email name="password" autocomplete="username" required="">
-					<div.field-wrapper>
-						<label for="confirmpassword"> "Confirm Password"
-						<input.field .email name="confirmpassword" autocomplete="username" required="">
-					<.options>
-						<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
-						<label for="remember-me"> "Remember Me"
-						<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
-					<.login-button @click=(state.auth = !state.auth) route-to="/"> "Create Account"
+	def googleAuth
+		api.logIn!
+		imba.commit!
+	def facebookAuth
+		api.logIn!
+		imba.commit!
+	def appleAuth
+		api.logIn!
+		imba.commit!
+	def mockAuthToggle
+		api.logIn!
+		imba.commit!
+		
+	def render
+		<self>
+			# <.bg route-to="/">
+			<div[d:vbox g:2sp]>
+				# <cambodiau-icon[cursor:pointer] route-to="/">
+				<.card>
+					<form.form action="#" method="POST">
+						# <> "login"
+						<div[d:flex gap:1sp]>
+							<.login-button[bg:rose2] @click.googleAuth> "Sign In with Google"
+							<.login-button[bg:blue2] @click.facebookAuth> "Sign In with Facebook"
+							<.login-button[bg:blue2] @click.appleAuth> "Sign In with Apple"
+						<hr[mt:1sp mb:.4sp]>
+						<p[ta:center c:gray6]> "Sign in with email"
+						<div.field-wrapper>
+							<label for="email"> "Email Address"
+							<input.field .email name="email" autocomplete="email" required=""> 
+						<div.field-wrapper>
+							<label for="password"> "Password"
+							<input.field .email name="password" autocomplete="username" required="">
+						<.options>
+							<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
+							<label for="remember-me"> "Remember Me"
+							<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
+						<.login-button @click.mockAuthToggle> "Sign In"
+						<hr[mt:1sp mb:.4sp]>
+						<p[ta:center c:gray6]> "Create account with email"
+						<div.field-wrapper>
+							<label for="username"> "Desired Username"
+							<input.field .email name="username" autocomplete="username" required=""> 
+						<div.field-wrapper>
+							<label for="email"> "Email Address"
+							<input.field .email name="email" autocomplete="email" required=""> 
+						<div.field-wrapper>
+							<label for="password"> "Password"
+							<input.field .email name="password" autocomplete="username" required="">
+						<div.field-wrapper>
+							<label for="confirmpassword"> "Confirm Password"
+							<input.field .email name="confirmpassword" autocomplete="username" required="">
+						<.options>
+							<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
+							<label for="remember-me"> "Remember Me"
+							<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
+						<.login-button @click.mockAuthToggle> "Create Account"
 					
 # ELEMENT[epic=ELEMENT, seq=38] UserThumb
 tag UserThumb
