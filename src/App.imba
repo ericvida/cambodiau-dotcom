@@ -586,25 +586,14 @@ tag CMSAdminPage
 	def render
 		<self>
 			<h1[p:1sp bg:rose0 bd:2px solid rose3 rd:md m:1sp]> "Design of CMS interface will be improved soon. This a quick implementation."
-			<.breadcrumbs[p:1sp]>
-				<span>
-					<a route-to="/cms/"> "CMS"
-					<span> " / "
-				<span >
-					<a route-to="/cms/0"> "moduul 0"
-					<span> " / "
-				<span >
-					<a route-to="/cms/0/0"> "lesson 0"
-					<span> " / "
-				<span[c:gray4]> "chapter"
 			<div route="/cms/">
 				<CMSLearnModuleList>
-			<CMSLessonList route="/cms/0/">
-			<CMSChapterList route="/cms/0/0/">
+			# <CMSLessonList route="/cms/0/">
+			# <CMSChapterList route="/cms/0/0/">
 
 tag CMSLearnModuleList
 	prop moduul_list = [
-		title: "moduul one"
+		title: "module one"
 		description: "description one"
 		imageURL: "url one"
 		price: 20
@@ -614,8 +603,71 @@ tag CMSLearnModuleList
 		word_usage_count: {"មួយ":4, "ពីរ":4, "បី":4}
 		word_usage_count_sum: 12
 		number_of_lessons: 2
+		lessons: [
+			title: "lesson one"
+			imageURL: "lesson url one"
+			word_set: ["មួយ", "ពីរ", "បី"]
+			word_set_length: 3
+			word_usage_count: {"មួយ":2, "ពីរ":2, "បី":2}
+			word_usage_count_sum: 6
+			number_of_chapters: 2
+			chapters: [
+				number_eng: "1"
+				number_khmer: "១"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+				---
+				number_eng: "2"
+				number_khmer: "២"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+			]
+			---
+			title: "lesson two"
+			imageURL: "lesson url two"
+			word_set: ["មួយ", "ពីរ", "បី"]
+			word_set_length: 3
+			word_usage_count: {"មួយ":2, "ពីរ":2, "បី":2}
+			word_usage_count_sum: 6
+			number_of_chapters: 2
+			chapters: [
+				number_eng: "1"
+				number_khmer: "១"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+				---
+				number_eng: "2"
+				number_khmer: "២"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+			]
+		]
 		---
-		title: "moduul two"
+		title: "module two"
 		description: "description two"
 		imageURL: "url two"
 		price: 20
@@ -625,10 +677,73 @@ tag CMSLearnModuleList
 		word_usage_count: {"មួយ":4, "ពីរ":4, "បី":4}
 		word_usage_count_sum: 12
 		number_of_lessons: 2
+		lessons: [
+			title: "lesson one"
+			imageURL: "lesson url one"
+			word_set: ["មួយ", "ពីរ", "បី"]
+			word_set_length: 3
+			word_usage_count: {"មួយ":2, "ពីរ":2, "បី":2}
+			word_usage_count_sum: 6
+			number_of_chapters: 2
+			chapters: [
+				number_eng: "1"
+				number_khmer: "១"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+				---
+				number_eng: "2"
+				number_khmer: "២"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+			]
+			---
+			title: "lesson two"
+			imageURL: "lesson url two"
+			word_set: ["មួយ", "ពីរ", "បី"]
+			word_set_length: 3
+			word_usage_count: {"មួយ":2, "ពីរ":2, "បី":2}
+			word_usage_count_sum: 6
+			number_of_chapters: 2
+			chapters: [
+				number_eng: "1"
+				number_khmer: "១"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+				---
+				number_eng: "2"
+				number_khmer: "២"
+				khmer:  "មួយ ពីរ បី"
+				english_meaning: "one two three"
+				vida_phonetics: "muy pii bai"
+				ipa_phonetics: "muy pii bai"
+				word_set: ["មួយ", "ពីរ", "បី"]
+				word_set_length: 3
+				word_usage_count: {"មួយ":1, "ពីរ":1, "បី":1}
+				word_usage_count_sum: 3
+			]
+		]
 	]
 	def render
-		<self>
-			<button[ml:1sp px:.6sp bg:indigo2]> "add moduul"
+		<self[]>
+			<button[ml:1sp px:.6sp bg:indigo2]> "Add Modules"
 			for item in moduul_list
 				<CMSModuulCard item=item>
 
@@ -644,6 +759,7 @@ tag CMSModuulCard
 	css .editable
 		bg:gray1
 	<self[bg:white m:1sp p:1sp]> 
+		<h1[fs:xl]> item.title
 		<[d:flex gap:1sp]>
 			# TODO: route-to needs to by dynamic
 			<button[px:.4sp bg:indigo2 rd:sm] @click.toggleEditable> 
@@ -655,9 +771,9 @@ tag CMSModuulCard
 		<pre>
 			<code>
 				<div.meta contentEditable=meta_is_editable .editable=meta_is_editable> 
+					css h:300px of:auto
 					JSON.stringify item, null, 4
-		<button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0"> "see lessons"
-		
+		# <button[px:.4sp bg:indigo2 rd:sm] route-to="/cms/0"> "see lessons"
 tag CMSLessonList
 	prop lesson_list = [
 		title: "lesson one"
