@@ -1431,7 +1431,7 @@ tag WordBar
 			minSize: 16
 			maxSize: 26
 		}
-		fitty($fit2, fit_settings)
+		# fitty($fit2, fit_settings)
 	def render
 		<self>
 			let vida = dictionary[state.active_word]..vida
@@ -1509,7 +1509,7 @@ tag WordCard
 			minSize: 16
 			maxSize: 40
 		}
-		fitty($fit, fit_settings)
+		# fitty($fit, fit_settings)
 	def render
 		<self>
 			let vida = dictionary[state.active_word]..vida
