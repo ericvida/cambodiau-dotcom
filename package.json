@@ -1,5 +1,5 @@
 {
-	"name": "11-cambodiau-benj",
+	"name": "11-cambodiau-u",
 	"scripts": {
 		"dev": "imba -w src/index.html",
 		"start": "npm run dev",
@@ -7,9 +7,10 @@
 		"preview": "npx http-server dist"
 	},
 	"devDependencies": {
-		"imba": "^2.0.0-alpha.226"
+		"imba": "^2.0.0-alpha.225"
 	},
 	"dependencies": {
+		"appwrite": "^10.2.0",
 		"fitty": "^2.3.6",
 		"localforage": "^1.10.0"
 	}

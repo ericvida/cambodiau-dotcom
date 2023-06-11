@@ -1,4 +1,5 @@
 # import {learning_data_out} from './data/learning_data_out'
+import { Client } from 'appwrite'
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
 import Fuzzy from './fuzzy' # for fitting text in WordCard
@@ -14,6 +15,12 @@ import './styles.imba'
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 const fuzzy = new Fuzzy
 const STATEKEY = 'app-state-20221119'
+
+const client = new Client()
+
+client
+	.setEndpoint('https://cloud.appwrite.io/v1')
+	.setProject('cambodiau-2023-03')
 
 def logTime fn
 	let startTime = performance.now!
@@ -882,7 +889,7 @@ tag CMSChapterCard
 
 
 
-# LAYOUT[epic=PAGE, seq=1] PhoneticsPage
+# TAG[epic=PAGE, seq=1] PhoneticsPage
 tag PhoneticsPage
 	css self
 		p:1sp
@@ -1008,7 +1015,7 @@ tag PhoneticVowels
 					<div.dot @click.activeWord(10)>
 						<span> char[10][ipa]
 		
-# LAYOUT[epic=PAGE, seq=21] ModuulPage
+# TAG[epic=PAGE, seq=21] ModuulPage
 tag ModuulPage
 	css w:100% d:hgrid
 		gtc: 1lessonbar 1phrasebar auto
