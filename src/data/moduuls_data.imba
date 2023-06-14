@@ -1,3 +1,6 @@
+global.LOG = console.log
+global.WARN = console.warn
+global.ERROR = console.error
 import {en} from './input_bible_stories_eng'
 import {kh} from './input_bible_stories_khmer'
 import {titles} from './input_bible_stories_titles'
@@ -163,7 +166,7 @@ class CalculatemoduulUsageData
 		return counter
 
 export let moduuls_data = new CalculatemoduulUsageData
-# console.log moduuls_data
+# LOG moduuls_data
 # To improve application speed.
 # log moduuls_data above with command below
 # copy object from console and paste into export let below
