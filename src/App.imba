@@ -1,6 +1,5 @@
 # import {learning_data_out} from './data/learning_data_out'
 
-import { Client } from 'appwrite'
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
 import Fuzzy from './fuzzy' # for fitting text in WordCard
@@ -16,12 +15,6 @@ import './styles.imba'
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 const fuzzy = new Fuzzy
 const STATEKEY = 'app-state-20221119'
-
-const client = new Client()
-
-client
-	.setEndpoint('https://cloud.appwrite.io/v1')
-	.setProject('cambodiau-2023-03')
 
 def logTime fn
 	let startTime = performance.now!
@@ -1102,8 +1095,8 @@ tag LessonLayout
 					if phrase.image
 						<img src=phrase.image .image> phrase.image
 					# <WordBar>
-					if state.admin
-						<AdminTools>
+					# TODO BOHUSLAV: admin tools if state.admin
+					<AdminTools @click.openPhraseEditor>
 					<WordNav.card @click.commit moduul=moduul phrase=phrase rt=route>
 					<.card> 
 						<h2> "Phonetics"
