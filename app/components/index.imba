@@ -3,7 +3,7 @@
 # import './left/left-navitem.imba'
 
 # import './right/rightbar-user.imba'
-# import './right/rightbar-moduul-contents.imba'
+# import './right/rightbar-modulus-contents.imba'
 # import './right/rightbar-graduated-students.imba'
 # import './right/rightbar-top-students.imba'
 

@@ -11,7 +11,7 @@ tag left-bar
 	<self>
 		<[w:100% d:box flg:0 h:55px]>
 			<cambodiau-logo route-to="/">
-		# <left-navitem moduul_active=yes locked=no name="Master moduul" price="99" progress="3500/4000" chapters=[
+		# <left-navitem modulus_active=yes locked=no name="Master modulus" price="99" progress="3500/4000" chapters=[
 		# 	title:"one"
 		# 	progress:"4/10"
 		# 	---
@@ -25,9 +25,9 @@ tag left-bar
 		# 	progress:"1/10"
 		# 	]>
 		# 	<i-gift>
-		for user_moduul, mi in user.moduuls
-			<left-navitem  @click=(ui.moduul=mi) locked=yes name=user_moduul.title price=user_moduul.price progress="1000/5000">
-				<i-{user_moduul.icon}>
+		for user_modulus, mi in user.modulus
+			<left-navitem  @click=(ui.modulus=mi) locked=yes name=user_modulus.title price=user_modulus.price progress="1000/5000">
+				<i-{user_modulus.icon}>
 		
 		<[w:100% d:bbox flg:1]>
 			<[d:box h:100px w:100%]>

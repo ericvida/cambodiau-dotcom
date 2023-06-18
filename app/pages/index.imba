@@ -1,1 +1,3 @@
-import './Login.imba'
+import './Login'
+import './Landing'
+import './User'

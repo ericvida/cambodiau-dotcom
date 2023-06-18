@@ -10,7 +10,7 @@ tag letters-chart
 		d:hgrid g:1sp gtc:3fr 1fr
 		p:1sp
 		width:1000px mx:auto
-	css .moduul-grid
+	css .modulus-grid
 		d:grid gtc: 1fr g:1sp w:100%
 		# gtr: auto auto auto auto
 	css .rightbar
@@ -20,7 +20,7 @@ tag letters-chart
 			<.nav-wrapper>
 				<letters-nav>
 			<.wrapper>
-				<main.moduul-grid>
+				<main.modulus-grid>
 					<letters-consonants route="consonants">
 					<letters-vowels route="vowels">
 					# <div.pairing-exceptions.card>

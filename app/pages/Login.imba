@@ -1,5 +1,7 @@
 import firebase from 'firebase/compat/app'
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { collection, doc, setDoc } from "firebase/firestore"
+import { db } from '../state/firebase'
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({
@@ -7,7 +9,6 @@ provider.setCustomParameters({
 });	
 
 const auth = getAuth();
-
 
 # TAG[epic=Modal, seq=37] Login Page
 tag login-page
@@ -37,6 +38,7 @@ tag login-page
 			bg:gray1 @darkmode:indigo6
 		@active
 			bg:gray2 @darkmode:indigo7
+
 	def googleAuth
 		signInWithPopup(auth, provider).then(do(result)
 			console.log(result)
@@ -44,29 +46,33 @@ tag login-page
 			const token = credential.accessToken
 			// The signed-in user info.
 			const user = result.user
+			console.log(user)
+			if user
+				await setDoc(doc(db, 'users', user.uid), {
+					uid: user.uid
+					email: user.email
+					name: user.displayName
+					provider: user.providerData[0].providerId
+					photoUrl: user.photoURL
+				})
 		).catch(do(error)
 			// Handle Errors here.
 			const errorCode = error.code;
 			const errorMessage = error.message;
 			// The email of the user's account used.
-			const email = error.customData.email;
+			const email = error.customData..email;
 			// The AuthCredential type that was used.
 			const credential = GoogleAuthProvider.credentialFromError(error);
 			console.log(credential, error)
 		)
-		api.logIn!
-		imba.commit!
 
 	def facebookAuth
-		api.logIn!
 		imba.commit!
 
 	def appleAuth
-		api.logIn!
 		imba.commit!
 
 	def mockAuthToggle
-		api.logIn!
 		imba.commit!
 		
 	def render
@@ -87,9 +93,9 @@ tag login-page
 							<a[ml:auto fs:xs].forgot-link href=""> "Forgot your password?"
 						<.login-button @click.mockAuthToggle> "Sign In"
 						<hr[mt:1sp mb:.4sp]>
-						<ThirdPartyLogins>
+						<thirdparty-logings>
 
-tag ThirdPartyLogins
+tag thirdparty-logings
 	css .login-button-wrapper
 		d:vflex gap:1sp
 	
