@@ -1,4 +1,5 @@
 # import {learning_data_out} from './data/learning_data_out'
+
 import './assets/stylesheet.css'
 import fitty from 'fitty' # for fitting text in WordCard
 import Fuzzy from './fuzzy' # for fitting text in WordCard
@@ -19,7 +20,7 @@ def logTime fn
 	let startTime = performance.now!
 	let res = fn
 	let endTime = performance.now!
-	# console.log "function took {startTime - endTime} ms"
+	# LOG "function took {startTime - endTime} ms"
 	return res
 
 let state = {
@@ -32,6 +33,7 @@ let state = {
 	lesson: 0
 	phrase: 0
 	word: 0
+	admin: true
 	active_word: 'ជា'
 	learning_data: [{}]
 	user_learned: {}
@@ -53,6 +55,7 @@ class Api
 				lesson: 0
 				phrase: 0
 				word: 0
+				admin: true
 				active_word: 'ជា'
 				learning_data: [{}]
 				user_learned: {}
@@ -73,20 +76,21 @@ class Api
 			lesson: 0
 			phrase: 0
 			word: 0
+			admin: true
 			active_word: 'ជា'
 			learning_data: [{}]
 			user_learned: {}
 			learned_usage: 0
 		}
 		save!
-		# console.log "cleared local storage"
+		# LOG "cleared local storage"
 
 	def toggleLearned word
 		if state.user_learned.hasOwnProperty(word)
 			delete state.user_learned[word]
 		else
 			state.user_learned[word] = yes
-		# console.log 'toggled', word, state.user_learned.hasOwnProperty(word)
+		# LOG 'toggled', word, state.user_learned.hasOwnProperty(word)
 		calcAllProgress!
 		save!
 	
@@ -134,7 +138,7 @@ class Api
 	
 	def calcUsageProgressOfObject object
 		let percent = 0
-		for own word, word_state of state.user_learned
+		for own word, is_learned of state.user_learned
 			# if word is not used in object
 			if object.word_usage_count[word]
 				percent += object.word_usage_count[word] / object.word_usage_count_sum
@@ -171,25 +175,28 @@ class Api
 			phrase_progress.push phrase_progress_two
 		return phrase_progress
 	
-	def calcLearnedUsageOfObject object
-		let usage = 0
-		for own word, word_state of state.user_learned
-			# if word is not used in object
-			if object.word_usage_count[word]
-				usage += object.word_usage_count[word]
-		usage = Math.round(usage)
-		return usage
+	# Calculates how many times a learned word has been used 
+	def calcLearnedUsageOfObject input
+		let words_used = input.word_usage_count
+		# LOG input, state.user_learned
+		let learned_words_usage = 0
+		for own word, is_learned of state.user_learned
+			# If words_used containes word
+			if words_used[word] and is_learned
+				learned_words_usage += words_used[word]
+		learned_words_usage = Math.round(learned_words_usage)
+		return learned_words_usage
 
 	# API[epic=API, seq=7] SAVE
 	def save
 		imba.locals.state = state
 		# store(STATEKEY, state)
-		# console.log 'saved', state
+		# LOG 'saved', state
 	
 	# API[epic=API, seq=7] LOAD
 	def load
 		state = imba.locals.state if imba.locals.state
-		# console.log 'loaded', state
+		# LOG 'loaded', state
 
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
@@ -224,30 +231,31 @@ class Api
 	def logOut
 		if state.auth is yes
 			state.auth = no
-			# console.log 'logged out'
+			# LOG 'logged out'
 		save!
-	def search feather, haystack
-		console.log feather, haystack
+
+	def search needle, haystack
+		# LOG needle, haystack
 		let haystackLength = haystack.length # tlen
-		let featherLength = feather.length # qlen
-		if featherLength > haystackLength
+		let needleLength = needle.length # qlen
+		if needleLength > haystackLength
 			# even if return is implicit in imba
 			# it only returns the last expression.
 			# so without return here it would merely continue
 			# executing the rest of the function
 			return false
 
-		if featherLength is haystackLength
-			return feather is haystack
+		if needleLength is haystackLength
+			return needle is haystack
 		
-		let featherLetter = 0
-		while featherLetter < featherLength
+		let needleLetter = 0
+		while needleLetter < needleLength
 			let haystackLetter = 0
 			let match = false
-			let featherLetterCode = feather.charCodeAt(featherLetter++)
+			let needleLetterCode = needle.charCodeAt(needleLetter++)
 			while haystackLetter < haystackLength
-				if haystack.charCodeAt(haystackLetter++) is featherLetterCode
-					# console.log 'matched?'
+				if haystack.charCodeAt(haystackLetter++) is needleLetterCode
+					# LOG 'matched?'
 					break match = true
 			continue if match
 			return false
@@ -292,7 +300,7 @@ class RemoteAPI
 		if res.status === 201
 			return true
 		else
-			console.log(res)
+			LOG(res)
 	
 	# API[epic=Remote, seq=15] login API call
 	def login email, password
@@ -306,7 +314,7 @@ class RemoteAPI
 		if res.status = 200
 			return res.token
 		else
-			console.log(res)
+			LOG(res)
 
 	# API[epic=Remote, seq=16] logout API call
 	def logout token
@@ -319,7 +327,7 @@ class RemoteAPI
 		if res.status == 200
 			return res.user
 		else
-			console.log(res)
+			LOG(res)
 
 
 	# API[epic=Remote, seq=18] sample use
@@ -336,7 +344,7 @@ class RemoteAPI
 
 		# get user data
 		let user = getUser(token)
-		console.log(user)
+		LOG(user)
 
 		# on logout clear token from local storage
 		logout(token)
@@ -437,7 +445,7 @@ tag TopNavigation
 	def toggleLeftNav
 		state.left = !state.left
 		api.save!
-		console.log 'toggled nav', state.left
+		LOG 'toggled nav', state.left
 		imba.commit!
 	def logOut
 		api.logOut!
@@ -527,7 +535,7 @@ tag Dictionary
 	def toggleDictionaryAudio arg
 		track = audio[arg]
 		$track.src = audio[arg]
-		console.log $track
+		LOG $track
 		if $track.paused
 			$track.play
 		else
@@ -882,7 +890,7 @@ tag CMSChapterCard
 
 
 
-# LAYOUT[epic=PAGE, seq=1] PhoneticsPage
+# TAG[epic=PAGE, seq=1] PhoneticsPage
 tag PhoneticsPage
 	css self
 		p:1sp
@@ -1008,7 +1016,7 @@ tag PhoneticVowels
 					<div.dot @click.activeWord(10)>
 						<span> char[10][ipa]
 		
-# LAYOUT[epic=PAGE, seq=21] ModuulPage
+# TAG[epic=PAGE, seq=21] ModuulPage
 tag ModuulPage
 	css w:100% d:hgrid
 		gtc: 1lessonbar 1phrasebar auto
@@ -1022,7 +1030,7 @@ tag ModuulPage
 		h:100vh
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
-		# console.warn moduul
+		# WARN moduul
 		<self>
 			# <.lesson-nav-wrapper>
 			<LessonNav route="/moduul/:lesson" moduul=moduuls_data.moduuls[state.moduul]>
@@ -1087,6 +1095,8 @@ tag LessonLayout
 					if phrase.image
 						<img src=phrase.image .image> phrase.image
 					# <WordBar>
+					# TODO BOHUSLAV: admin tools if state.admin
+					<AdminTools @click.openPhraseEditor>
 					<WordNav.card @click.commit moduul=moduul phrase=phrase rt=route>
 					<.card> 
 						<h2> "Phonetics"
@@ -1098,7 +1108,7 @@ tag LessonLayout
 										<span> obj..ipa || obj..vida || obj..vida_auto || word
 									else
 										<span> "n/a"
-										<> console.error word, "no phonetics available"
+										<> ERROR word, "no phonetics available"
 							else
 								for word in phrase.khmer.split('|')
 									let obj = dictionary[word]
@@ -1106,7 +1116,7 @@ tag LessonLayout
 										<span> obj..vida || obj..vida_auto || obj..ipa || word
 									unless obj..vida || obj..vida_auto || obj..ipa || word
 										<span> "n/a"
-										<> console.error word, "no phonetics available"
+										<> ERROR word, "no phonetics available"
 					<.card>
 						<h2> "Meaning"
 						<p> phrase.meaning
@@ -1117,7 +1127,23 @@ tag LessonLayout
 							<DefinitionCard.card>
 						<SpellingCard.card>
 					<ShortcutCard.card>
-
+tag AdminTools
+	css self
+		nav
+			d:flex
+			g:1sp
+		button
+			list-style-type:none
+			bg:gray2
+			px:.6sp py:.5sp
+			rd:sm
+			@hover
+				bg:hue3
+	<self>
+		LOG state
+		<nav>
+			<button>
+				"edit phrase"
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
 	css self
@@ -1157,7 +1183,7 @@ tag WordNav
 		else 
 			# if last word of phrase, goes to the first word of the next phrase
 			nextPhrase!
-		# console.log 'phrase', phrase_index, 'word', word_index, 'lastw', last_word_index
+		# LOG 'phrase', phrase_index, 'word', word_index, 'lastw', last_word_index
 
 	# Goes to the previous word in the phrase
 	def prevWord
@@ -1355,7 +1381,7 @@ tag ModuulCard
 					<span.progress-percent> "{Math.floor((state.learning_data.moduul_learned_usage[id] / moduul.word_usage_count_sum)* 1000) / 10}%"
 				<ProgressBar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.moduul_progress[id]>
 				# TODO: Calculate Wordcount of used words for moduul, Lesson, Phrase
-				<> console.log state.learning_data.moduul_progress[state.moduul]
+				<> LOG state.learning_data.moduul_progress[state.moduul]
 				# if moduul.locked
 				# 	<.icon-lock>
 				# 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" .w-6.h-6>
@@ -1432,7 +1458,7 @@ tag WordBar
 			minSize: 16
 			maxSize: 26
 		}
-		# fitty($fit2, fit_settings)
+		fitty($fit2, fit_settings)
 	def render
 		<self>
 			let vida = dictionary[state.active_word]..vida
@@ -1510,7 +1536,7 @@ tag WordCard
 			minSize: 16
 			maxSize: 40
 		}
-		# fitty($fit, fit_settings)
+		fitty($fit, fit_settings)
 	def render
 		<self>
 			let vida = dictionary[state.active_word]..vida
@@ -1591,7 +1617,6 @@ tag DefinitionCard
 		let word_object = dictionary[state.active_word]
 		if word_object.def isnt false
 			<h2> "Definition"
-			# <> console.log word_object
 			<ol>
 				for item in word_object.def
 					let line = item.split('=')
@@ -1746,7 +1771,7 @@ tag SpellingCard
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
 			let testword = state.active_word
 			let groups = testword.match regtest
-			# # console.log groups
+			# # LOG groups
 			for item in groups
 				let cluster = clusters[item]
 				let vowel = item.match /[ា-៑]/
@@ -1779,7 +1804,6 @@ tag LessonNav
 		fs:xxs ff:mono c:gray6
 	def render
 		<self>
-			
 			<.title-card>
 				<.icon-title>
 					<i-{moduul.icon}[pr:5px]>
