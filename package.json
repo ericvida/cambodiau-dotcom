@@ -10,8 +10,8 @@
 		"imba": "^2.0.0-alpha.226"
 	},
 	"dependencies": {
-		"appwrite": "^10.2.0",
-		"fitty": "^2.3.6",
-		"localforage": "^1.10.0"
+		"fitty": "^2.3.7",
+		"localforage": "^1.10.0",
+		"node": "^20.2.0"
 	}
 }
