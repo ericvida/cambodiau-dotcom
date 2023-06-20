@@ -1,4 +1,3 @@
-import firebase from 'firebase/compat/app'
 import { collection, doc, setDoc } from "firebase/firestore"
 import { db } from '../state/firebase'
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
@@ -46,7 +45,9 @@ tag login-page
 			const token = credential.accessToken
 			// The signed-in user info.
 			const user = result.user
-			console.log(user)
+
+			imba.router.go('/learning')
+
 			if user
 				await setDoc(doc(db, 'users', user.uid), {
 					uid: user.uid

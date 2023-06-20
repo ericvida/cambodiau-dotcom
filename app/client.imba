@@ -43,7 +43,7 @@ tag App
 	
 	def build 
 		api.init!
-		api.calcAllProgress!
+		state.calcAllProgress!
 		imba.router.on('change') do saveRouteToState!
 	# FIXME: Not sure why state is not saving and being loaded
 
@@ -53,8 +53,7 @@ tag App
 				@hotkey("shift+d")=api.toggleDark!
 				@hotkey("shift+i|v")=api.toggleIpa!
 				@hotkey("shift+c+l")=api.clear!
-				@hotkey("shift+a")=api.toggleAuth! # TODO: delete in production
-				@hotkey('enter|s')=api.toggleLearned(state.active_word)
+				@hotkey('enter|s')=state.toggleLearned(state.active_word)
 			>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
@@ -68,7 +67,7 @@ tag App
 						<TopNavigation>
 				<div slot="middle">
 					<landing-page route="/">
-					<user-page route="/@username">
+					<user-page route="/learning">
 					<DictionaryPage route="/dictionary">
 					<PhoneticsPage route="/phonetics">
 					<CMSAdminPage route="/cms">
@@ -670,11 +669,11 @@ tag ModulusPage
 			<LessonNav route="/modulus/:lesson" modulus=modulus_data.modulus[state.modulus]>
 			# <.phrase-nav-wrapper>
 			<ChapterNav modulus=modulus_data.modulus[state.modulus]>
-			<LessonLayout modulus=modulus_data.modulus[state.modulus]>
+			<lesson-layout modulus=modulus_data.modulus[state.modulus]>
 			# 	<.main-wrapper[mx:auto]>
 
-# LAYOUT[epic=LAYOUT, seq=23] LessonLayout
-tag LessonLayout
+# LAYOUT[epic=LAYOUT, seq=23] lesson-layout
+tag lesson-layout
 	css d:vflex @lg:hflex g:1sp
 		# bg:red
 	css .modulus-grid
@@ -731,6 +730,7 @@ tag LessonLayout
 							<DefinitionCard.card>
 						<SpellingCard.card>
 					<ShortcutCard.card>
+
 tag AdminTools
 	css self
 		nav
@@ -744,10 +744,10 @@ tag AdminTools
 			@hover
 				bg:hue3
 	<self>
-		LOG state
 		<nav>
 			<button>
 				"edit phrase"
+
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
 	css self
@@ -1021,7 +1021,7 @@ tag WordBar
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "vida coming soon"
-			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)>
+			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=state.toggleLearned(state.active_word)>
 				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
 # CARD[epic=CARD, seq=30] WordCard
 tag WordCard
@@ -1096,7 +1096,7 @@ tag WordCard
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "vida coming soon"
-			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)>
+			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=state.toggleLearned(state.active_word)>
 				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
 			if audio.hasOwnProperty(state.active_word)
 				<AudioPlayer>
