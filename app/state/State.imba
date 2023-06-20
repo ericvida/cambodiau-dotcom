@@ -1,4 +1,8 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, doc, setDoc, addDoc } from "firebase/firestore"
+import { db } from '../state/firebase'
+
+import { modulus_data } from '../data/modulus_data'
 
 import { User } from './types.ts'
 
@@ -40,17 +44,25 @@ class State
 	constructor
 		if imba.locals.state
 			setState imba.locals.state
-		
+
 		# Set Firebase listeners
 		onAuthStateChanged(auth, do(firebaseUser)
 			if firebaseUser
 				# LOG(firebaseUser)
 				// User is signed in, see docs for a list of available properties
 				// https://firebase.google.com/docs/reference/js/auth.user
-				user = firebaseUser.reloadUserInfo;
+				user = {
+					uid: firebaseUser.uid
+					email: firebaseUser.email
+					name: firebaseUser.displayName
+					provider: firebaseUser.providerData[0].providerId
+					photoUrl: firebaseUser.photoURL
+				};
+				// fetch learned words from firebase
 			else
 				// User is signed out
 				user = undefined
+				imba.router.go('/')
 			save!
 		)
 
@@ -71,6 +83,117 @@ class State
 
 	def signOut
 		auth.signOut()
+
+	def saveLearnedProgress
+		const userRef = doc(db, 'users', user.uid)
+
+		const WordsLearnedRef = collection(userRef, 'WordsLearned')
+
+		const updatedUserLearned = await setDoc(doc(WordsLearnedRef, 'Khmer'), user_learned);
+
+	def toggleLearned word
+		if user_learned.hasOwnProperty(word)
+			delete user_learned[word]
+		else
+			user_learned[word] = yes
+		# LOG 'toggled', word, user_learned.hasOwnProperty(word)
+		calcAllProgress!
+		saveLearnedProgress!
+		save!
+
+	# calculates progress from words already learned by the user
+	def calcAllProgress
+		learning_data.user_progress = calcUserProgress(modulus_data)
+		learning_data.user_progress_learned_usage = calcUserLearnedUsage(modulus_data)
+		learning_data.modulus_progress = calcModulusProgress(modulus_data)
+		learning_data.modulus_learned_usage = calcModulusLearnedUsage(modulus_data)
+		learning_data.lesson_progress = calcLessonProgress(modulus_data)
+		learning_data.lesson_learned_usage = calcLessonLearnedUsage(modulus_data)
+		learning_data.phrase_progress = calcPhraseProgress(modulus_data)
+		learning_data.phrase_learned_usage = calcPhraseLearnedUsage(modulus_data)
+
+	def calcUserProgress user_data
+		return calcUsageProgressOfObject(user_data)
+
+	def calcModulusProgress user
+		let modulus_progress = []
+		for modulus in user.modulus
+			modulus_progress.push calcUsageProgressOfObject(modulus)
+
+		return modulus_progress
+
+	def calcLessonProgress user
+		let lesson_progress = []
+		for modulus in user.modulus
+			let lesson_progress_two = []
+			for lesson in modulus.lessons
+				lesson_progress_two.push calcUsageProgressOfObject(lesson)
+			lesson_progress.push lesson_progress_two
+		return lesson_progress
+
+	def calcPhraseProgress user
+		let phrase_progress = []
+		for modulus in user.modulus
+			let phrase_progress_two = []
+			for lesson in modulus.lessons
+				let phrase_progress_three = []
+				for phrase in lesson.phrases
+					phrase_progress_three.push calcUsageProgressOfObject(phrase)
+				phrase_progress_two.push phrase_progress_three
+			phrase_progress.push phrase_progress_two
+		return phrase_progress
+
+	def calcUsageProgressOfObject object
+		let percent = 0
+		for own word, is_learned of user_learned
+			# if word is not used in object
+			if object.word_usage_count[word]
+				percent += object.word_usage_count[word] / object.word_usage_count_sum
+		percent = Math.round(percent * 100)
+		return percent
+
+	def calcUserLearnedUsage user
+		return calcLearnedUsageOfObject(user)
+
+	def calcModulusLearnedUsage user
+		let modulus_progress = []
+		for modulus in user.modulus
+			modulus_progress.push calcLearnedUsageOfObject(modulus)
+		return modulus_progress
+
+	def calcLessonLearnedUsage user
+		let lesson_progress = []
+		for modulus in user.modulus
+			let lesson_progress_two = []
+			for lesson in modulus.lessons
+				lesson_progress_two.push calcLearnedUsageOfObject(lesson)
+			lesson_progress.push lesson_progress_two
+		return lesson_progress
+
+	def calcPhraseLearnedUsage user
+		let phrase_progress = []
+		for modulus in user.modulus
+			let phrase_progress_two = []
+			for lesson in modulus.lessons
+				let phrase_progress_three = []
+				for phrase in lesson.phrases
+					phrase_progress_three.push calcLearnedUsageOfObject(phrase)
+				phrase_progress_two.push phrase_progress_three
+			phrase_progress.push phrase_progress_two
+		return phrase_progress
+
+	# Calculates how many times a learned word has been used 
+	def calcLearnedUsageOfObject input
+		let words_used = input.word_usage_count
+		# LOG input, user_learned
+		let learned_words_usage = 0
+		# LOG(user_learned)
+		for own word, is_learned of user_learned
+			# If words_used containes word
+			if words_used[word] and is_learned
+				learned_words_usage += words_used[word]
+		return Math.round(learned_words_usage)
+
 
 const state = new State
 
