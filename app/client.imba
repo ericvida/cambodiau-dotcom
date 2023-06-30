@@ -112,7 +112,7 @@ tag TopNavigation
 			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
 			<a route-to="/store">
 				<div> "Store"
-			<a route-to="/@username">
+			<a route-to="/learning">
 				<div> "Learning"
 			<a route-to="/dictionary">
 				<div> "Dictionary"

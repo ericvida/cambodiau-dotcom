@@ -6,7 +6,7 @@ import {kh} from './input_bible_stories_khmer'
 import {titles} from './input_bible_stories_titles'
 
 class CalculatemodulusUsageData
-	prop worth_zero = [
+	worth_zero = [
 		"?"
 		"ៗ"
 		"។"
@@ -21,102 +21,70 @@ class CalculatemodulusUsageData
 		"!"
 		'"'
 	]
+
 	def constructor
-		let consolidated_data = consolidateBibleStoryData!
-		let res = enrichmodulusData consolidated_data
-		return res
+		const consolidated_data = consolidateBibleStoryData!
+		LOG window.structuredClone consolidated_data.modulus[0]
+		return enrichmodulusData consolidated_data
 		# convert array tree into object tree
 
+	# This just merges the data.
+	# The result should be similar to what we'll store in Firebase -- compact minimal data
+	# Next step will be to save all this stuff to Firebase and pass to enrichmodulusData modules from Firebase
+	# After we have them in Firebase we will work over CMS tab where you'll be able to add/edit the modules and their lessons
 	def consolidateBibleStoryData
-		# make a regex that selects a space that has no space before or no space after
-		# let singlespace = /(?<!\s)\s(?!\s)/gi
-		# make a regext that selects two spaces that have a word before and after it
-		# let doublespace = /(?<!\s)\s\s(?!\s)/gi
-		let user_updated = []
-		let res_user = titles
-		let modulus_updated = []
 		for modulus, ci in titles.modulus
-			let res_modulus = modulus
-			let lessons_updated = []
 			for lesson, li in modulus.lessons # lesson
-				let res_lesson = lesson
-				res_lesson.phrases = kh[li]
-				let phrases_updated = []
-				let lesson_num_en = li
-				for phrase, phrase_num_en in lesson.phrases
-					let new_phrase = {}
-					const firstSpaceIndex = phrase.indexOf(' ')
-					let phrase_num_kh = phrase.slice(0, firstSpaceIndex)
-					let text = phrase.slice(firstSpaceIndex + 1).replace('\\', ' ')
-					let img = "0-0"
-					if phrase_num_en is 0
-						img = "{li + 1}-{lesson.image}"
-					else
-						img = "{li + 1}-{phrase_num_en}"
-					phrases_updated.push {
-						index: phrase_num_en
+				lesson.phrases = []
+				for phrase, index in kh[li]
+					let img = index is 0 ? "{li + 1}-{lesson.image}" : "{li + 1}-{index}"
+					lesson.phrases.push {
 						image: "https://github.com/ericvida/cambodiau-images/blob/main/obs-en-{img}.jpg?raw=true"
-						index_kh: phrase_num_kh
-						khmer: text
-						meaning: en[lesson_num_en][phrase_num_en]
+						khmer: phrase
+						meaning: en[li][index]
 					}
+		return titles
 
-				res_lesson.phrases = phrases_updated
-				lessons_updated.push res_lesson
-				# console.log 'lessons', lessons_updated
-			
-			res_modulus.lessons = lessons_updated
-			modulus_updated.push res_modulus
-			# console.warn 'modulus', res_modulus, modulus_updated
-		
-		res_user.modulus = modulus_updated
-		user_updated = res_user
-		# console.error 'user', res_user, user_updated
-		
-		return user_updated
-	
 	# Finds all words used in each modulus, lesson, and phrase.
 	# counts how many times the are use in phrase, lesson, and modulus.
 	# and store that information for calculating progress later.
 	def enrichmodulusData user
-		let res_user = user
-		let user_updated = []
 		for modulus in user.modulus
-			let res_modulus = modulus
-			let modulus_updated = []
 			for lesson in modulus..lessons
-				let res_lesson = lesson
-				let lesson_updated = []
 				for phrase in lesson..phrases
-					let phrase_updated = phrase
-					const split_khmer = phrase..khmer.split(' ')
-					phrase_updated.word_set = getSameWordSet(split_khmer)
-					phrase_updated.word_usage_count = getSameWordUsage(split_khmer)
-					phrase_updated.word_usage_count_sum = Object.values(getSameWordUsage(phrase..khmer)).reduce((do(a,b) a + b), 0)
-					# phrase_updated.khmer = phrase_updated..khmer.split(' ') || ''
-					# phrase_updated.english = phrase_updated..english.split(' ') || ''
-					lesson_updated.push phrase_updated
+					# Separate index from text in Khmer text
+					const firstKhmerSpaceIndex = phrase.khmer.indexOf(' ')
+					phrase.index_kh = phrase.khmer.slice(0, firstKhmerSpaceIndex)
+					phrase.khmer = phrase.khmer.slice(firstKhmerSpaceIndex + 1).replace('\\', ' ')
 
-				res_lesson.phrases = lesson_updated
-				res_lesson.word_set = getChildrenWordSet(res_lesson..phrases)
-				[res_lesson.word_usage_count, res_lesson.word_usage_count_sum] = getChildrenWordUsage(res_lesson..phrases)
-				modulus_updated.push res_lesson
+					# Separate index from text in english text
+					const firstEnSpaceIndex = phrase.meaning.indexOf(' ')
+					phrase.index = parseInt(phrase.meaning.slice(0, firstEnSpaceIndex), 10)
+					phrase.meaning = phrase.meaning.slice(firstKhmerSpaceIndex + 1).replace('\\', ' ')
 
-			res_modulus.lessons = modulus_updated
-			res_modulus.word_set = getChildrenWordSet(res_modulus..lessons)
-			[res_modulus.word_usage_count, res_modulus.word_usage_count_sum] = getChildrenWordUsage(res_modulus..lessons)
-			user_updated.push res_modulus
-		res_user.modulus = user_updated
-		res_user.word_set = getChildrenWordSet(res_user..modulus)
-		[res_user.word_usage_count, res_user.word_usage_count_sum] = getChildrenWordUsage(res_user..modulus)
-		return res_user
+					const split_khmer = phrase.khmer.split(' ')
+					phrase.word_set = getSameWordSet(split_khmer)
+					phrase.word_usage_count = getSameWordUsage(split_khmer)
+					phrase.word_usage_count_sum = Object.values(getSameWordUsage(phrase.khmer)).reduce((do(a,b) a + b), 0)
+					# phrase.khmer = phrase..khmer.split(' ') || ''
+					# phrase.english = phrase..english.split(' ') || ''
+
+				lesson.word_set = getChildrenWordSet(lesson..phrases)
+				[lesson.word_usage_count, lesson.word_usage_count_sum] = getChildrenWordUsage(lesson..phrases)
+
+			modulus.word_set = getChildrenWordSet(modulus..lessons)
+			[modulus.word_usage_count, modulus.word_usage_count_sum] = getChildrenWordUsage(modulus..lessons)
+
+		user.word_set = getChildrenWordSet(user..modulus)
+		[user.word_usage_count, user.word_usage_count_sum] = getChildrenWordUsage(user..modulus)
+		return user
 	
-	def getSameWordSet input
-		return [...new Set(input)]
+	def getSameWordSet words
+		return [...new Set(words)]
 	
-	def getSameWordUsage word_array
+	def getSameWordUsage words
 		let word_count = {}
-		for item in word_array
+		for item in words
 			if worth_zero.includes item
 				word_count[item] = 0
 				continue
