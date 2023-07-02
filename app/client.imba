@@ -5,7 +5,7 @@ import Fuzzy from './fuzzy' # for fitting text in WordCard
 import {audio} from './audio'
 import {clusters} from './data/clusters'
 import {dictionary} from './data/dictionary'
-import {modulus_data} from './data/modulus_data'
+import Modulus from './data/Modulus'
 # import {state.learning_data} from './data'
 import './state/index'
 import './elements'
@@ -15,7 +15,6 @@ import './styles.imba'
 import './pages/index'
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 const fuzzy = new Fuzzy
-const STATEKEY = 'app-state-20221119'
 
 def logTime fn
 	let startTime = performance.now!
@@ -33,8 +32,9 @@ tag App
 		bg:white @darkmode:black
 		&.open
 			ml:0px
+
 	def saveRouteToState
-		let route_array = router.pathname.replace('/','').split('/')
+		let route_array = router.pathname.slice(1).split('/')
 		state.modulus = route_array[1]
 		state.lesson = route_array[2]
 		state.phrase = route_array[3]
@@ -43,7 +43,11 @@ tag App
 	
 	def build 
 		api.init!
-		state.calcAllProgress!
+		Modulus.initModulsFromFirebase().then(do()
+			state.calcAllProgress!
+			log modules.modules
+			imba.commit!
+		)
 		imba.router.on('change') do saveRouteToState!
 	# FIXME: Not sure why state is not saving and being loaded
 
@@ -65,6 +69,7 @@ tag App
 				<nav slot="top">
 					<.width-container[p:1sp]>
 						<TopNavigation>
+
 				<div slot="middle">
 					<landing-page route="/">
 					<user-page route="/learning">
@@ -75,6 +80,7 @@ tag App
 					<CreateAccountPage route="/create">
 					<.width-container>
 						<ModulusPage route="/modulus">
+
 				<div slot="bottom">
 						css c:gray9 @darkmode:gray1
 							h:1bottombar
@@ -143,8 +149,8 @@ tag DictionaryPage
 			let dict_length = Object.keys(dictionary).length
 			let learned_percent = state.learning_data.user_progress
 			let learned_usage = state.learning_data.user_progress_learned_usage
-			let all_word_usage_count = modulus_data.word_usage_count_sum
-			let all_wordset_length = modulus_data.word_set.length
+			let all_word_usage_count = Modulus.word_usage_count_sum
+			let all_wordset_length = Modulus.word_set.length
 			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
 			let lessons_percent = Math.floor((learned_length / all_wordset_length) * 1000) / 10
 			<.page-wrapper>
@@ -666,14 +672,16 @@ tag ModulusPage
 		# WARN modulus
 		<self>
 			# <.lesson-nav-wrapper>
-			<LessonNav route="/modulus/:lesson" modulus=modulus_data.modulus[state.modulus]>
+			<LessonNav route="/modulus/:lesson" modulus=Modulus.modules[state.modulus]>
 			# <.phrase-nav-wrapper>
-			<ChapterNav modulus=modulus_data.modulus[state.modulus]>
-			<lesson-layout modulus=modulus_data.modulus[state.modulus]>
+			<ChapterNav modulus=Modulus.modules[state.modulus]>
+			<lesson-layout modulus=Modulus.modules[state.modulus]>
 			# 	<.main-wrapper[mx:auto]>
 
 # LAYOUT[epic=LAYOUT, seq=23] lesson-layout
 tag lesson-layout
+	prop modulus = {}
+
 	css d:vflex @lg:hflex g:1sp
 		# bg:red
 	css .modulus-grid
@@ -690,46 +698,48 @@ tag lesson-layout
 		gap:1sp
 	css .phonetics
 		ff:mono d:flex gap:0.5sp flex-wrap:wrap
+
 	def render
-		let phrase = modulus.lessons[state.lesson].phrases[state.phrase]
 		<self>
-			<main.modulus-grid>
-				<.left>
-					if phrase.image
-						<img src=phrase.image .image> phrase.image
-					# <WordBar>
-					if state.admin
-						<AdminTools>
-					<WordNav.card @click.commit modulus=modulus phrase=phrase rt=route>
-					<.card> 
-						<h2> "Phonetics"
-						<p.phonetics>
-							if state.ipa
-								for word in phrase.khmer.split(' ')
-									let obj = dictionary[word]
-									if obj..ipa || obj..vida || obj..vida_auto || word
-										<span> obj..ipa || obj..vida || obj..vida_auto || word
-									else
-										<span> "n/a"
-										<> ERROR word, "no phonetics available"
-							else
-								for word in phrase.khmer.split(' ')
-									let obj = dictionary[word]
-									if obj..vida || obj..vida_auto || obj..ipa || word
-										<span> obj..vida || obj..vida_auto || obj..ipa || word
-									unless obj..vida || obj..vida_auto || obj..ipa || word
-										<span> "n/a"
-										<> ERROR word, "no phonetics available"
-					<.card>
-						<h2> "Meaning"
-						<p> phrase.meaning
-				<.right>
-					if state.active_word
-						<WordCard.card>
-						if dictionary[state.active_word]..google
-							<DefinitionCard.card>
-						<SpellingCard.card>
-					<ShortcutCard.card>
+			if modulus.lessons
+				let phrase = modulus.lessons[state.lesson]..phrases[state.phrase]
+				<main.modulus-grid>
+					<.left>
+						if phrase.image
+							<img src=phrase.image .image> phrase.image
+						# <WordBar>
+						if state.admin
+							<AdminTools>
+						<WordNav.card @click.commit modulus=modulus phrase=phrase rt=route>
+						<.card> 
+							<h2> "Phonetics"
+							<p.phonetics>
+								if state.ipa
+									for word in phrase..khmer.split(' ')
+										let obj = dictionary[word]
+										if obj..ipa || obj..vida || obj..vida_auto || word
+											<span> obj..ipa || obj..vida || obj..vida_auto || word
+										else
+											<span> "n/a"
+											<> ERROR word, "no phonetics available"
+								else
+									for word in phrase.khmer.split(' ')
+										let obj = dictionary[word]
+										if obj..vida || obj..vida_auto || obj..ipa || word
+											<span> obj..vida || obj..vida_auto || obj..ipa || word
+										unless obj..vida || obj..vida_auto || obj..ipa || word
+											<span> "n/a"
+											<> ERROR word, "no phonetics available"
+						<.card>
+							<h2> "Meaning"
+							<p> phrase.meaning
+					<.right>
+						if state.active_word
+							<WordCard.card>
+							if dictionary[state.active_word]..google
+								<DefinitionCard.card>
+							<SpellingCard.card>
+						<ShortcutCard.card>
 
 tag AdminTools
 	css self
@@ -750,6 +760,8 @@ tag AdminTools
 
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
+	prop modulus = {}
+
 	css self
 		d:hflex g:.4sp flf:wrap
 	css .word-wrapper
@@ -824,10 +836,11 @@ tag WordNav
 		phrase_index = route_array[3]
 		word_index = route_array[4]
 		word = phrase.khmer.split(' ')[word_index]
-		phrases = modulus.lessons[lesson_index].phrases
+		phrases = modulus..lessons[lesson_index].phrases || []
 		last_phrase_index = Object.keys(phrases).length - 1
 		last_word_index = phrase.khmer.split(' ').length - 1
 		state.active_word = word
+
 	def render
 		updateActiveWordData!
 		# @click=(state.active_word = khccmer_word)
@@ -1325,6 +1338,8 @@ tag SpellingCard
 
 # TAG[epic=NAV, seq=34] LessonNav
 tag LessonNav
+	prop modulus = {}
+
 	css self
 		# ml:-1lessonbar
 		h:100vh
@@ -1341,16 +1356,22 @@ tag LessonNav
 		d:hflex
 	css .usage_word_count
 		fs:xxs ff:mono c:gray6
+
 	def render
 		<self>
 			<.title-card>
 				<.icon-title>
 					<i-{modulus.icon}[pr:5px]>
-					<h2 [fs:xl]> modulus.title
-				<.usage_word_count> "{state.learning_data.modulus_learned_usage[state.modulus]}/{modulus.word_usage_count_sum} words"
-				<progress-bar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.modulus_progress[state.modulus]>
-			for own id, lesson of modulus_data.modulus[state.modulus].lessons
-				<LessonNavItem .active=(id == state.lesson) route-to="/modulus/{state.modulus}/{id}/0/0" id=id lesson=lesson>
+					<h2 [fs:xl]> modulus..title
+				if state.learning_data.modulus_learned_usage
+					<.usage_word_count>
+						"{state.learning_data.modulus_learned_usage[state.modulus]}/{modulus..word_usage_count_sum} words"
+					<progress-bar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.modulus_progress[state.modulus]>
+			if Modulus.modules[state.modulus]
+				for own id, lesson of Modulus.modules[state.modulus].lessons
+					<LessonNavItem .active=(id == state.lesson) route-to="/modulus/{state.modulus}/{id}/0/0" id=id lesson=lesson>
+			else
+				<p> 'Loading...'
 
 # TAG[epic=NAV, seq=35] LessonNavItem
 tag LessonNavItem
@@ -1384,10 +1405,10 @@ tag LessonNavItem
 		let progress = "4/{lesson.word_usage_count_sum}"
 		<self[w:100%].lesson-button .chapter_active=no>
 			<.chapter-text[d:hflex jc:space-between ai:end]>
-				<.chapter-name> lesson.title	
-			let progress_string = "{state.learning_data.lesson_learned_usage[state.modulus][id]}/{lesson.word_usage_count_sum}"
-			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress_string} words"
-			<progress-bar .color progress=state.learning_data.lesson_progress[state.modulus][id]>
+				<.chapter-name> lesson.title
+			if state.learning_data.lesson_learned_usage
+				<.chapter-number[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.modulus][id]}/{lesson.word_usage_count_sum} words"
+				<progress-bar .color progress=state.learning_data.lesson_progress[state.modulus][id]>
 
 # TAG[epic=NAV, seq=36] ChapterNav
 tag ChapterNav
@@ -1425,18 +1446,20 @@ tag ChapterNav
 			word_index = 0
 			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
 	def render
-		let phrases = modulus_data.modulus[state.modulus].lessons[state.lesson].phrases
-		let progress = 0
+		let phrases = Modulus.modules[state.modulus]..lessons[state.lesson].phrases
 		<self>
-			for own id, phrase of phrases
-				<.number-toggle route-to="/modulus/{state.modulus}/{state.lesson}/{id}/0">
-					let isActive = state.phrase is id
-					let progress = state.learning_data.phrase_progress[state.modulus][state.lesson][id]
-					<ElemProgressRing .active=isActive progress=progress size=30> 
-						if id is 0 
-							"t"
-						else
-							id
+			if phrases
+				for own id, phrase of phrases
+					<.number-toggle route-to="/modulus/{state.modulus}/{state.lesson}/{id}/0">
+						let isActive = state.phrase is id
+						let progress = state.learning_data.phrase_progress[state.modulus][state.lesson][id]
+						<ElemProgressRing .active=isActive progress=progress size=30> 
+							if id is 0 
+								"t"
+							else
+								id
+			else
+				<p> 'Loading...'
 
 
 # TAG[epic=Modal, seq=37] Login Page

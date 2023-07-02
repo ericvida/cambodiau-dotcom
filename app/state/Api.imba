@@ -4,7 +4,7 @@ class Api
 	def init
 		if state.dark
 			setDarkmode!
-		save!
+			save!
 
 	def clear
 		state.reset!
@@ -15,7 +15,6 @@ class Api
 	def save
 		# Using JSON to clean up all functions from state class and convert it to polay object
 		imba.locals.state = JSON.parse(JSON.stringify(state))
-		# store(STATEKEY, state)
 		# LOG 'saved', state
 
 	# API[epic=FrontEnd, seq=8] vida
@@ -66,7 +65,7 @@ class Api
 			return false
 		return true
 
-let api = new Api
+const api = new Api
 
 extend tag Element
 	get api

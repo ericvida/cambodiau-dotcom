@@ -1,0 +1,4 @@
+ - Move pages/components/elements to their files in their folder.
+ - Use module/lesson ids instead of indexes. Handle loading / missed modules/lessons in a better way.
+ - Make CMS panel for adding/editing modules/lessons.
+ - Make Modal for editing phrases.

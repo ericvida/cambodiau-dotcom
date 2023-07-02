@@ -12,13 +12,13 @@ tag user-page
 tag UserPageOwnedModulus
 	def render
 		<self>
-			<h2[px:1sp fs:xl]>
-			<.layout-card-grid>
-				for own id, modulus of modulus_data.modulus
-					<ModulusCard.stretchy-card route-to="/modulus/{id}/0/0/0/" id=id modulus=modulus>
-					# <ModulusCard.stretchy-card route-to="/modulus/{id}/0/0/0/" id=id modulus=modulus>
-					# <ModulusCard.stretchy-card route-to="/modulus/{id}/0/0/0/" id=id modulus=modulus>
-					# <ModulusCard.stretchy-card route-to="/modulus/{id}/0/0/0/" id=id modulus=modulus>
+			<h2[px:1sp fs:xl]> 'Modules'
+			if modules.modules..length
+				<.layout-card-grid>
+					for own id, modulus of modules.modules
+						<ModulusCard.stretchy-card route-to="/modulus/{id}/0/0/0/" id=id modulus=modulus>
+			else
+				<p> 'Loading...'
 
 tag UserPageLockedModulus
 	css self
@@ -35,7 +35,6 @@ tag UserPageLockedModulus
 	def render
 		<self>
 			<h2> "Purchased Modules"
-			
 			<.card-wrapper route="/">
 				for own id, modulus of bible_data.modulus
 					<ModulusCard route-to="/buy/{id}" id=id modulus=modulus>
@@ -47,6 +46,7 @@ tag ModulusCard
 	prop link = "https://images.unsplash.com/photo-1599283787923-51b965a58b05?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Y2FtYm9kaWF8ZW58MHx8MHx8&auto=format&fit=crop&w=300&h=100&q=60"
 	prop locked = yes
 	prop modulus_active = no
+
 	css self
 		d:vflex .modulus_active:vflex ai:center
 		rd:1rd cursor@hover:pointer
@@ -94,13 +94,14 @@ tag ModulusCard
 		<self .locked=modulus.locked>
 			<div.not-image> unless modulus.image
 			<img.image src=modulus.image> if modulus.image
-			<.card-info>
-				<.card-title>
-					<h2> "{modulus.title}"
-					<span.progress-percent> "{Math.floor((state.learning_data.modulus_learned_usage[id] / modulus.word_usage_count_sum)* 1000) / 10}%"
-				<progress-bar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.modulus_progress[id]>
-				# TODO: Calculate Wordcount of used words for modulus, Lesson, Phrase
-				<> LOG state.learning_data.modulus_progress[state.modulus]
+			if state.learning_data.modulus_learned_usage
+				<.card-info>
+					<.card-title>
+						<h2> "{modulus.title}"
+						<span.progress-percent> "{Math.floor((state.learning_data.modulus_learned_usage[id] / modulus.word_usage_count_sum)* 1000) / 10}%"
+					<progress-bar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.modulus_progress[id]>
+					# TODO: Calculate Wordcount of used words for modulus, Lesson, Phrase
+					<> LOG state.learning_data.modulus_progress[state.modulus]
 				# if modulus.locked
 				# 	<.icon-lock>
 				# 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" .w-6.h-6>

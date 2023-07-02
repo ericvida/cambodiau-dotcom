@@ -1,8 +1,8 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { collection, doc, setDoc, addDoc } from "firebase/firestore"
+import { collection, doc, setDoc, addDoc, getDoc } from "firebase/firestore"
 import { db } from '../state/firebase'
 
-import { modulus_data } from '../data/modulus_data'
+import Modulus from '../data/Modulus'
 
 import { User } from './types.ts'
 
@@ -18,7 +18,7 @@ const initialState = {
 	word: 0
 	admin: true
 	active_word: 'ជា'
-	learning_data: [{}]
+	learning_data: {}
 	user_learned: {}
 	learned_usage: 0
 }
@@ -37,13 +37,14 @@ class State
 	word = 0
 	admin = true
 	active_word = 'ជា'
-	learning_data = [{}]
+	learning_data = {}
 	user_learned = {}
 	learned_usage = 0
 
 	constructor
 		if imba.locals.state
 			setState imba.locals.state
+		
 
 		# Set Firebase listeners
 		onAuthStateChanged(auth, do(firebaseUser)
@@ -59,6 +60,7 @@ class State
 					photoUrl: firebaseUser.photoURL
 				};
 				// fetch learned words from firebase
+				getLearnedProgress!
 			else
 				// User is signed out
 				user = undefined
@@ -71,7 +73,6 @@ class State
 		# Using JSON to clean up all functions from state class and convert it to polay object
 		imba.locals.state = JSON.parse(JSON.stringify(self))
 		imba.commit!
-		# store(STATEKEY, state)
 		# LOG 'saved', state
 
 	def setState desiredState
@@ -83,13 +84,17 @@ class State
 
 	def signOut
 		auth.signOut()
+	
+	def getLearnedProgress
+		const userRef = doc(db, 'users', user.uid)
+		const WordsLearnedRef = collection(userRef, 'WordsLearned')
+		const learnedWordsSnapshot = await getDoc(doc(WordsLearnedRef, 'Khmer'))
+		user_learned = {...user_learned, ...learnedWordsSnapshot.data()}
 
 	def saveLearnedProgress
 		const userRef = doc(db, 'users', user.uid)
-
 		const WordsLearnedRef = collection(userRef, 'WordsLearned')
-
-		const updatedUserLearned = await setDoc(doc(WordsLearnedRef, 'Khmer'), user_learned);
+		await setDoc(doc(WordsLearnedRef, 'Khmer'), user_learned);
 
 	def toggleLearned word
 		if user_learned.hasOwnProperty(word)
@@ -103,28 +108,28 @@ class State
 
 	# calculates progress from words already learned by the user
 	def calcAllProgress
-		learning_data.user_progress = calcUserProgress(modulus_data)
-		learning_data.user_progress_learned_usage = calcUserLearnedUsage(modulus_data)
-		learning_data.modulus_progress = calcModulusProgress(modulus_data)
-		learning_data.modulus_learned_usage = calcModulusLearnedUsage(modulus_data)
-		learning_data.lesson_progress = calcLessonProgress(modulus_data)
-		learning_data.lesson_learned_usage = calcLessonLearnedUsage(modulus_data)
-		learning_data.phrase_progress = calcPhraseProgress(modulus_data)
-		learning_data.phrase_learned_usage = calcPhraseLearnedUsage(modulus_data)
+		learning_data.user_progress = calcUserProgress(Modulus)
+		learning_data.user_progress_learned_usage = calcUserLearnedUsage(Modulus)
+		learning_data.modulus_progress = calcModulusProgress(Modulus)
+		learning_data.modulus_learned_usage = calcModulusLearnedUsage(Modulus)
+		learning_data.lesson_progress = calcLessonProgress(Modulus)
+		learning_data.lesson_learned_usage = calcLessonLearnedUsage(Modulus)
+		learning_data.phrase_progress = calcPhraseProgress(Modulus)
+		learning_data.phrase_learned_usage = calcPhraseLearnedUsage(Modulus)
 
 	def calcUserProgress user_data
 		return calcUsageProgressOfObject(user_data)
 
 	def calcModulusProgress user
 		let modulus_progress = []
-		for modulus in user.modulus
+		for modulus in user.modules
 			modulus_progress.push calcUsageProgressOfObject(modulus)
 
 		return modulus_progress
 
 	def calcLessonProgress user
 		let lesson_progress = []
-		for modulus in user.modulus
+		for modulus in user.modules
 			let lesson_progress_two = []
 			for lesson in modulus.lessons
 				lesson_progress_two.push calcUsageProgressOfObject(lesson)
@@ -133,7 +138,7 @@ class State
 
 	def calcPhraseProgress user
 		let phrase_progress = []
-		for modulus in user.modulus
+		for modulus in user.modules
 			let phrase_progress_two = []
 			for lesson in modulus.lessons
 				let phrase_progress_three = []
@@ -157,13 +162,13 @@ class State
 
 	def calcModulusLearnedUsage user
 		let modulus_progress = []
-		for modulus in user.modulus
+		for modulus in user.modules
 			modulus_progress.push calcLearnedUsageOfObject(modulus)
 		return modulus_progress
 
 	def calcLessonLearnedUsage user
 		let lesson_progress = []
-		for modulus in user.modulus
+		for modulus in user.modules
 			let lesson_progress_two = []
 			for lesson in modulus.lessons
 				lesson_progress_two.push calcLearnedUsageOfObject(lesson)
@@ -172,7 +177,7 @@ class State
 
 	def calcPhraseLearnedUsage user
 		let phrase_progress = []
-		for modulus in user.modulus
+		for modulus in user.modules
 			let phrase_progress_two = []
 			for lesson in modulus.lessons
 				let phrase_progress_three = []
