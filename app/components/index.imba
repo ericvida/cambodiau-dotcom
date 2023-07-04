@@ -10,3 +10,5 @@
 import './letters/letters-chart.imba'
 import './letters/letters-consonants.imba'
 import './letters/letters-vowels.imba'
+import './modals'
+import './top/main-navigation'

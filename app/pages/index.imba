@@ -1,3 +1,6 @@
 import './Login'
 import './Landing'
 import './User'
+import './Dictionary'
+import './Phonetics'
+import './Lesson'
