@@ -15,6 +15,8 @@ const initialState = {
 	modulus: 0
 	lesson: 0
 	phrase: 0
+	show_phrase_editor: no
+	show_word_editor: no
 	word: 0
 	admin: true
 	active_word: 'ជា'
@@ -36,6 +38,8 @@ class State
 	phrase = 0
 	word = 0
 	admin = true
+	show_phrase_editor = no
+	show_word_editor = no
 	active_word = 'ជា'
 	learning_data = {}
 	user_learned = {}
@@ -68,6 +72,12 @@ class State
 			save!
 		)
 
+	def togglePhraseEditor
+		show_phrase_editor = !show_phrase_editor
+		save!
+	def toggleWordEditor
+		show_word_editor = !show_word_editor
+		save!
 	# API[epic=API, seq=7] SAVE
 	def save
 		# Using JSON to clean up all functions from state class and convert it to polay object

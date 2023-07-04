@@ -16,7 +16,12 @@ class Api
 		# Using JSON to clean up all functions from state class and convert it to polay object
 		imba.locals.state = JSON.parse(JSON.stringify(state))
 		# LOG 'saved', state
-
+	def toggleWordEditor
+		state.show_word_editor = !state.show_word_editor
+		save!
+	def togglePhraseEditor
+		state.show_phrase_editor = !state.show_phrase_editor
+		save!
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
 		state.ipa = !state.ipa

@@ -3,7 +3,6 @@
 import './assets/stylesheet.css'
 import Fuzzy from './fuzzy' # for fitting text in word-card
 import {audio} from './audio'
-
 import {dictionary} from './data/dictionary'
 import Modulus from './data/Modulus'
 # import {state.learning_data} from './data'
@@ -59,18 +58,34 @@ tag App
 				@hotkey("shift+c+l")=api.clear!
 				@hotkey('enter|s')=state.toggleLearned(state.active_word)
 			>
+			# MODALS
+			if state.show_phrase_editor
+				<modal-bg>
+				<phrase-editor>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
-			<layout-pancakes>
-				css gtr: calc(1topbar+2sp) auto 40px # sidebar content sidebar
+			<.layout-pancakes>
+				css w:100%
+					d:grid
+					gtr: calc(1topbar) auto 40px # sidebar content sidebar
+					min-height:100vh
+					h:auto
+					pos:absolute inset:0
+					ofy:scroll
 					# >> * p:1sp # padding around immediate children
 					# >> header d:flex ai:center px:1sp
-					>> main bg:gray1 @darkmode:gray9/50
-				<nav slot="top">
-					<.width-container[p:1sp]>
-						<main-navigation>
+					.layout-top
+						p:.5sp
+					.layout-middle
+						h:auto
+						ofy:auto
+						pos:relative
+					>> main-navigation bg:gray1 @darkmode:gray9/50
+				<.layout-top>
+					# <.width-container[p:1sp]>
+					<main-navigation>
 
-				<div slot="middle">
+				<.layout-middle>
 					<landing-page route="/">
 					<user-page route="/learning">
 					<dictionary-page route="/dictionary">
@@ -81,7 +96,7 @@ tag App
 					<.width-container>
 						<ModulusPage route="/modulus">
 
-				<div slot="bottom">
+				<.layout-bottom>
 						css c:gray9 @darkmode:gray1
 							h:1bottombar
 							d:hflex
@@ -387,6 +402,7 @@ tag ModulusPage
 	css w:100% d:hgrid
 		gtc: 1lessonbar 1phrasebar auto
 		p:1sp
+		pos:relative
 	css .modulus-modulus
 		d:hflex w:100% 
 	css .close-leftbar
@@ -398,10 +414,11 @@ tag ModulusPage
 		# FIXME: Console.warn fires twice. Not sure why
 		# WARN modulus
 		<self>
+			
 			# <.lesson-nav-wrapper>
 			<LessonNav route="/modulus/:lesson" modulus=Modulus.modules[state.modulus]>
 			# <.phrase-nav-wrapper>
-			<ChapterNav modulus=Modulus.modules[state.modulus]>
+			<phrase-nav modulus=Modulus.modules[state.modulus]>
 			<lesson-page modulus=Modulus.modules[state.modulus]>
 			# 	<.main-wrapper[mx:auto]>
 
@@ -789,8 +806,8 @@ tag LessonNavItem
 				<.chapter-number[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.modulus][id]}/{lesson.word_usage_count_sum} words"
 				<progress-bar .color progress=state.learning_data.lesson_progress[state.modulus][id]>
 
-# TAG[epic=NAV, seq=36] ChapterNav
-tag ChapterNav
+# TAG[epic=NAV, seq=36] phrase-nav
+tag phrase-nav
 	css self
 		c:gray9
 		w:1phrasebar
@@ -1008,6 +1025,7 @@ tag ElemProgressRing
 		size:$size
 		bg:none
 		pos:relative
+		zi:10
 		.inner
 			bg:$center-color
 			pos:absolute

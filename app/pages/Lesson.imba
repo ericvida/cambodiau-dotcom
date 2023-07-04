@@ -32,7 +32,6 @@ tag lesson-page
 					<.left>
 						if phrase.image
 							<img src=phrase.image .image> phrase.image
-						# <WordBar>
 						if state.admin
 							<AdminTools>
 						<WordNav.card @click.commit modulus=modulus phrase=phrase rt=route>
@@ -79,6 +78,9 @@ tag AdminTools
 			@hover
 				bg:hue3
 	def togglePhraseEditor
+		state.togglePhraseEditor!
+		console.log state.show_phrase_editor
+		imba.commit!
 	<self>
 		<nav>
 			<button @click.togglePhraseEditor>
