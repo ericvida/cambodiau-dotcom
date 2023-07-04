@@ -32,9 +32,7 @@ tag lesson-page
 					<.left>
 						if phrase.image
 							<img src=phrase.image .image> phrase.image
-						if state.admin
-							<AdminTools>
-						<WordNav.card @click.commit modulus=modulus phrase=phrase rt=route>
+						<word-grid.card @click.commit modulus=modulus phrase=phrase rt=route>
 						<.card> 
 							<h2> "Phonetics"
 							<p.phonetics>
@@ -64,33 +62,10 @@ tag lesson-page
 								<DefinitionCard.card>
 							<SpellingCard.card>
 						<ShortcutCard.card>
-						
-tag AdminTools
-	css self
-		nav
-			d:flex
-			g:1sp
-		button
-			list-style-type:none
-			bg:gray2
-			px:.6sp py:.5sp
-			rd:sm
-			@hover
-				bg:hue3
-	def togglePhraseEditor
-		state.togglePhraseEditor!
-		console.log state.show_phrase_editor
-		imba.commit!
-	<self>
-		<nav>
-			<button @click.togglePhraseEditor>
-				"edit phrase"
-				
-				
 
 
-# TAG[epic=NAV, seq=24] WordNav
-tag WordNav
+# TAG[epic=NAV, seq=24] word-grid
+tag word-grid
 	prop modulus = {}
 
 	css self

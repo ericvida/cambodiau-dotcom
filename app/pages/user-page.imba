@@ -39,7 +39,6 @@ tag UserPageLockedModulus
 				for own id, modulus of bible_data.modulus
 					<ModulusCard route-to="/buy/{id}" id=id modulus=modulus>
 
-
 # CARD[epic=CARD, seq=28] ModulusCard
 tag ModulusCard
 	# prop chapters = []

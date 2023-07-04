@@ -1,11 +1,15 @@
 # TAG[epic=NAV, seq=1] main-navigation
 tag main-navigation
 	css self
-		d:hflex gap:1sp fs:10px
+		d:flex gap:1sp fs:10px
+		h:1topbar
+		p:.6sp
+		# max-width:800px
+		# mx:auto
 	css a, button
 		bg:gray2 @darkmode:gray7
 		c:gray7	@darkmode:gray2
-		p:.4sp rd:md ai:center
+		rd:md
 	def toggleLeftNav
 		state.left = !state.left
 		api.save!
@@ -17,24 +21,28 @@ tag main-navigation
 
 	def render
 		<self>
-			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
-			<a route-to="/store">
+			<cambodiau-logo route-to="/">
+				css 
+					mr:auto 
+					cursor:pointer
+					py:.3sp
+			<button route-to="/store">
 				<div> "Store"
-			<a route-to="/learning">
+			<button route-to="/learning">
 				<div> "Learning"
-			<a route-to="/dictionary">
+			<button route-to="/dictionary">
 				<div> "Dictionary"
-			<a route-to="/phonetics">
+			<button route-to="/phonetics">
 				<div> "Phonetics"
-			<a route-to="/phrase-editor">
+			<button route-to="/phrase-editor">
 				<div> "phrase"
+			<button route-to="/cms">
+				<div> "CMS"
 			if state.user
-				<a @click.signOut>
+				<button @click.signOut>
 					<div> "Sign out"
-				<a route-to="/cms">
-					<div> "CMS"
 			else
-				<a route-to="/login">
+				<button route-to="/login">
 					<div> "Login"
-				<a route-to="/create">
+				<button route-to="/create">
 					<div> "Create Account"

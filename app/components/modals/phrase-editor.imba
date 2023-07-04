@@ -1,3 +1,4 @@
+# TODO: Make modal close when clicking outside of the modal
 import '../../state/index'
 import {dictionary} from '../../data/dictionary'
 
@@ -39,8 +40,11 @@ tag phrase-editor
 			bg:gray1
 		.not-in-dictionary
 			bg:rose3
+	def closeModal
+		state.closeModals!
 	<self>
-		<.card[d:flex]>
+		<.modal-bg @click.closeModal>
+		<.card[d:flex zi:30]>
 			<h1> "phrase-editor"
 			<section>
 				<h3> "meaning"

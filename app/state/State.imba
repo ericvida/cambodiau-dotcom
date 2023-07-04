@@ -38,13 +38,14 @@ class State
 	phrase = 0
 	word = 0
 	admin = true
-	show_phrase_editor = no
-	show_word_editor = no
 	active_word = 'ជា'
 	learning_data = {}
 	user_learned = {}
 	learned_usage = 0
-
+	# new below
+	modal_open = no
+	show_phrase_editor = no
+	show_word_editor = no
 	constructor
 		if imba.locals.state
 			setState imba.locals.state
@@ -71,12 +72,19 @@ class State
 				imba.router.go('/')
 			save!
 		)
-
+	def closeModals
+		show_phrase_editor = no
+		show_word_editor = no
+		modal_open = no
+		save!
 	def togglePhraseEditor
 		show_phrase_editor = !show_phrase_editor
+		modal_open = !modal_open
 		save!
+	
 	def toggleWordEditor
 		show_word_editor = !show_word_editor
+		modal_open = !modal_open
 		save!
 	# API[epic=API, seq=7] SAVE
 	def save
