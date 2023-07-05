@@ -15,14 +15,16 @@ const initialState = {
 	modulus: 0
 	lesson: 0
 	phrase: 0
-	show_phrase_editor: no
-	show_word_editor: no
 	word: 0
 	admin: true
 	active_word: 'ជា'
 	learning_data: {}
 	user_learned: {}
 	learned_usage: 0
+	show_modulus_editor: no
+	show_lesson_editor: no
+	show_phrase_editor: no
+	show_word_editor: no
 }
 
 const auth = getAuth!
@@ -44,6 +46,8 @@ class State
 	learned_usage = 0
 	# new below
 	modal_open = no
+	show_modulus_editor = no
+	show_lesson_editor = no
 	show_phrase_editor = no
 	show_word_editor = no
 	constructor
@@ -73,18 +77,32 @@ class State
 			save!
 		)
 	def closeModals
+		show_modulus_editor = no
+		show_lesson_editor = no
 		show_phrase_editor = no
 		show_word_editor = no
 		modal_open = no
 		save!
+	def toggleModulusEditor
+		show_modulus_editor = !show_modulus_editor
+		modal_open = !modal_open
+		LOG 'modulus editor modal called', show_modulus_editor, modal_open
+		save!
+	def toggleLessonEditor
+		show_lesson_editor = !show_lesson_editor
+		modal_open = !modal_open
+		LOG 'lesson editor modal called', show_lesson_editor, modal_open
+		save!
 	def togglePhraseEditor
 		show_phrase_editor = !show_phrase_editor
 		modal_open = !modal_open
+		LOG 'phrase editor modal called', show_phrase_editor, modal_open
 		save!
 	
 	def toggleWordEditor
 		show_word_editor = !show_word_editor
 		modal_open = !modal_open
+		LOG 'word editor modal called', show_word_editor, modal_open
 		save!
 	# API[epic=API, seq=7] SAVE
 	def save

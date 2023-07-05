@@ -8,7 +8,8 @@ import Modulus from './data/Modulus'
 # import {state.learning_data} from './data'
 import './state/index'
 import './elements'
-import './components'	
+import './components'
+import './modals'
 import './icons'
 import './styles.imba'
 import './pages/index'
@@ -59,8 +60,14 @@ tag App
 				@hotkey('enter|s')=state.toggleLearned(state.active_word)
 			>
 			# MODALS
+			if state.show_modulus_editor
+				<modulus-editor>
+			if state.show_lesson_editor
+				<lesson-editor>
 			if state.show_phrase_editor
 				<phrase-editor>
+			if state.show_word_editor
+				<word-editor>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
 			<.layout-pancakes>

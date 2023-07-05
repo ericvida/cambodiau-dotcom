@@ -1,6 +1,6 @@
 # TODO: Make modal close when clicking outside of the modal
-import '../../state/index'
-import {dictionary} from '../../data/dictionary'
+import '../state/index'
+import {dictionary} from '../data/dictionary'
 
 let mock-phrase-data = {
 	english: "In the beginning God created the heavens and the earth."
@@ -30,6 +30,7 @@ tag phrase-editor
 		%pill-wrapper
 			flex-wrap:wrap
 			d:flex gap:.4sp
+			ff:monospace
 		%pill
 			bd:2px solid gray1
 			px:.5sp

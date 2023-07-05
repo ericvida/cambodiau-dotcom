@@ -1,6 +1,6 @@
 tag admin-tools
 	css self
-		with:100% bg:hue9
+		w:100% bg:hue9
 		h:1topbar
 		p:1sp
 		d:flex
@@ -13,6 +13,14 @@ tag admin-tools
 			@hover
 				bg:hue3
 		d:flex
+	def toggleModulusEditor
+		state.toggleModulusEditor!
+		LOG 'clicked toggle modulus'
+		imba.commit!
+	def toggleLessonEditor
+		LOG 'clicked toggle lesson'
+		state.toggleLessonEditor!
+		imba.commit!
 	def togglePhraseEditor
 		state.togglePhraseEditor!
 		imba.commit!
@@ -21,9 +29,9 @@ tag admin-tools
 		imba.commit!
 	<self>
 		<div[c:hue3]> "edit active:"
-		<button @click.togglePhraseEditor>
+		<button @click.toggleModulusEditor>
 			"module"
-		<button @click.togglePhraseEditor>
+		<button @click.toggleLessonEditor>
 			"lesson"
 		<button @click.togglePhraseEditor>
 			"phrase"
