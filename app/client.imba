@@ -174,7 +174,6 @@ tag audio-player-for-bar
 						# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
 
 
-
 # TAG[epic=NAV, seq=34] LessonNav
 tag LessonNav
 	prop modulus = {}
