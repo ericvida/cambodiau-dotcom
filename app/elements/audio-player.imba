@@ -1,7 +1,7 @@
 import {audio} from '../audio'
 tag audio-player
 	<self>
-		# if state.modulus > 0
+		# if state.course > 0
 		let word = ""
 		if manual
 			word = manual

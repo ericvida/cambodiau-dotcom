@@ -13,12 +13,10 @@ tag admin-tools
 			@hover
 				bg:hue3
 		d:flex
-	def toggleModulusEditor
-		state.toggleModulusEditor!
-		LOG 'clicked toggle modulus'
+	def toggleCourseEditor
+		state.toggleCourseEditor!
 		imba.commit!
 	def toggleLessonEditor
-		LOG 'clicked toggle lesson'
 		state.toggleLessonEditor!
 		imba.commit!
 	def togglePhraseEditor
@@ -28,22 +26,24 @@ tag admin-tools
 		state.toggleWordEditor!
 		imba.commit!
 	def downloadJson
-		# Downloads entire Module Data from Database in JSON format.
+		# Downloads entire Course Data from Database in JSON format.
 		window.alert('downloading json')
 	def uploadJson
-		# Upload Module Data that was modified locally from JSON format.
+		# Upload Course Data that was modified locally from JSON format.
 		window.alert('uploading json')
 	<self>
-		<div[c:hue3]> "edit active:"
-		<button @click.toggleModulusEditor>
-			"module"
-		<button @click.toggleLessonEditor>
-			"lesson"
-		<button @click.togglePhraseEditor>
-			"phrase"
-		<button @click.toggleWordEditor>
-			"word"
-		<button @click.downloadJson>
-			"download json"
-		<button @click.uploadJson>
-			"upload json"
+		<.width-container[d:hflex gap:.5sp jc:center]>
+			<div[c:hue3]> "edit active:"
+			<button @click.toggleCourseEditor>
+				"course"
+			<button @click.toggleLessonEditor>
+				"lesson"
+			<button @click.togglePhraseEditor>
+				"phrase"
+			<button @click.toggleWordEditor>
+				"word"
+			<div[c:hue3 fs:2em ff:sans]> "∙"
+			<button @click.downloadJson>
+				"download json"
+			<button @click.uploadJson>
+				"upload json"

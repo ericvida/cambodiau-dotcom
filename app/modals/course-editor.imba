@@ -1,4 +1,4 @@
-let mock-module-data = {
+let mock-course-data = {
 	title: "Bible Stories"
 	slug: "bible-stories"
 	price: "20"
@@ -13,20 +13,21 @@ let mock-module-data = {
 		title: "The Tower of Babel"
 	]
 }
-tag modulus-editor
+tag course-editor
 	# transition
-	css self
+	css pos:absolute inset:0
+		d:grid zi:12
+		min-height: 100vh
+		ja:center
+		m:0
 		o@off:0 ea:1s
 		.card
 			x@in:100px x@out:100px ea:1s
-	css pos:absolute inset:0
-		d:grid zi:12
-		h:100vh 
-		ja:center
-		m:0
-		.card  
-			w:500px
-			min-height:500px
+			d:flex zi:30 ofy:scroll
+			min-width: 500px
+			width: 60vw
+			height: 80vh
+			ofy:scroll
 			
 			
 	css h3
@@ -42,24 +43,24 @@ tag modulus-editor
 	
 	<self ease>
 		<.modal-bg @click.closeModal>
-		<.card[d:flex zi:30]>
-			<h1> "module editor"
+		<.card>
+			<h1> "Course Editor"
 			<section>
-				<h3> "Module Title"
-				<input bind=mock-module-data.title type="text">
+				<h3> "Course Title"
+				<input bind=mock-course-data.title type="text">
 			<section>
-				<h3> "Module slug"
-				<input bind=mock-module-data.slug type="text">
+				<h3> "Course slug"
+				<input bind=mock-course-data.slug type="text">
 			<section>
-				<h3> "Module Info"
-				<input bind=mock-module-data.info type="text">
+				<h3> "Course Info"
+				<input bind=mock-course-data.info type="text">
 			<section>
 				<h3> "Price in USD"
-				<input bind=mock-module-data.price type="text">
+				<input bind=mock-course-data.price type="text">
 			<section>
 				<h3> "Lessons"
 				<[d:vflex gap:1sp]>
-						for item in mock-module-data.lessons
+						for item in mock-course-data.lessons
 							<.lesson-row[d:hflex gap:1sp ja:center]>
 								<p[w:100%]> item.title
 								<button[bg:gray1 @hover:hue2 rd:md h:50px w:100px]> "edit"

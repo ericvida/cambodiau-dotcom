@@ -9,19 +9,19 @@ let mock-phrase-data = {
 
 tag phrase-editor
 	# transition
-	css self
+	css pos:absolute inset:0
+		d:grid zi:12
+		min-height: 100vh
+		ja:center
+		m:0
 		o@off:0 ea:1s
 		.card
 			x@in:100px x@out:100px ea:1s
-	css pos:absolute inset:0
-		d:grid zi:12
-		h:100vh 
-		ja:center
-		m:0
-		.card  
-			w:500px
-			h:800px
-			
+			d:flex zi:30 ofy:scroll
+			min-width: 500px
+			width: 60vw
+			height: 80vh
+			ofy:scroll
 		h3
 			fs:.8em c:gray4 m:0
 		section
@@ -32,26 +32,51 @@ tag phrase-editor
 			shadow: 0 0 5px 0px gray2 inset
 			rd:md
 			p:1sp m:0
-		%pill-wrapper
+		.word-pill-wrapper
 			flex-wrap:wrap
 			d:flex gap:.4sp
 			ff:monospace
-		%pill
+		.word-pill
 			bd:2px solid gray1
 			px:.5sp
 			rd:md
-		.in-dictionary
-			bg:amber3
-		.in-dictionary-no-def
-			bg:gray1
-		.not-in-dictionary
-			bg:rose3
+			cursor:pointer
+		.found
+			bg:gray1 @hover:gray2
+			bc:gray2 @hover:gray3
+			bs:solid
+			bw:2px
+		.not-defined
+			bg:orange1 @hover:orange2
+			bc:orange2 @hover:orange3
+			bs:solid
+			bw:2px
+		.not-found
+			bg:rose1 @hover:rose2
+			bc:rose2 @hover:rose3
+			bs:solid
+			bw:2px
 	def closeModal
 		state.closeModals!
+	def editWord
+		closeModal!
+		state.toggleWordEditor!
+		imba.commit!
+	def toggleCourseEditor
+		closeModal!
+		state.toggleCourseEditor!
+		imba.commit!
+	def toggleLessonEditor
+		closeModal!
+		state.toggleLessonEditor!
+		imba.commit!
 	<self ease>
 		<.modal-bg @click.closeModal>
 		<.card[d:flex zi:30]>
-			<h1> "module > lesson > phrase"
+			<h1>
+				<span @click.toggleCourseEditor> "Course > "
+				<span @click.toggleLessonEditor> "Lesson > "
+				<span> "Phrase Editor"
 			<section>
 				<h3> "meaning"
 				<input bind=mock-phrase-data.english type="text">
@@ -59,29 +84,33 @@ tag phrase-editor
 				<h3> "khmer"
 				<input bind=mock-phrase-data.khmer type="text">
 			<section>
-				<h3> "words (parsed)"
-				<div%pill-wrapper>
+				<[d:hflex gap:1sp mb:1sp]>
+					<h3> "words (parsed)"
+					<span.word-pill .found> "defined"
+					<span.word-pill .not-defined> "not defined"
+					<span.word-pill .not-found> "not found"
+				<div.word-pill-wrapper>
 					for word in mock-phrase-data.khmer.split(' ')
 						# let obj = dictionary[word]
 						# console.log word
-						<span%pill 
-							.in-dictionary=(dictionary.hasOwnProperty(word) and (dictionary[word].def is true))
-							.in-dictionary-no-def=(dictionary.hasOwnProperty(word) and (dictionary[word].def is false))
-							.not-in-dictionary=(!dictionary.hasOwnProperty(word))
-						> word
+						<span.word-pill
+							@click.editWord
+							.found=(dictionary.hasOwnProperty(word) and (dictionary[word].def is true))
+							.not-defined=(dictionary.hasOwnProperty(word) and (dictionary[word].def is false))
+							.not-found=(!dictionary.hasOwnProperty(word))> word
 			<section[justify-self:flex-end]>
 				<h3> "vida phonetics (generated)"
-				<div%pill-wrapper>
+				<div.word-pill-wrapper>
 					for word in mock-phrase-data.khmer.split(' ')
 						# let obj = dictionary[word]
 						# console.log word
 						if dictionary.hasOwnProperty(word)
-							<span%pill 
-								.in-dictionary=(dictionary[word].def isnt false)
-								.in-dictionary-no-def=(dictionary[word].def is false)
-								> dictionary[word]..vida
+							<span.word-pill 
+								.found=(dictionary[word].def isnt false)
+								.not-defined=(dictionary[word].def is false)
+								@click.editWord> dictionary[word]..vida
 						else
-							<span%pill.not-in-dictionary> word
+							<span.word-pill.not-found @click.editWord> word
 			<section[flex-grow:1]>
 			<section[w:100% d:flex jc:end]>
 				<.button[w:200px p:.5sp ta:center as:end]> "save"

@@ -2,7 +2,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { collection, doc, setDoc, addDoc, getDoc } from "firebase/firestore"
 import { db } from '../state/firebase'
 
-import Modulus from '../data/Modulus'
+import Course from '../data/Course'
 
 import { User } from './types.ts'
 
@@ -12,7 +12,7 @@ const initialState = {
 	left: yes
 	right: yes
 	ipa: no
-	modulus: 0
+	course: 0
 	lesson: 0
 	phrase: 0
 	word: 0
@@ -21,7 +21,7 @@ const initialState = {
 	learning_data: {}
 	user_learned: {}
 	learned_usage: 0
-	show_modulus_editor: no
+	show_course_editor: no
 	show_lesson_editor: no
 	show_phrase_editor: no
 	show_word_editor: no
@@ -35,7 +35,7 @@ class State
 	left = yes
 	right = yes
 	ipa = no
-	modulus = 0
+	course = 0
 	lesson = 0
 	phrase = 0
 	word = 0
@@ -46,7 +46,7 @@ class State
 	learned_usage = 0
 	# new below
 	modal_open = no
-	show_modulus_editor = no
+	show_course_editor = no
 	show_lesson_editor = no
 	show_phrase_editor = no
 	show_word_editor = no
@@ -77,16 +77,16 @@ class State
 			save!
 		)
 	def closeModals
-		show_modulus_editor = no
+		show_course_editor = no
 		show_lesson_editor = no
 		show_phrase_editor = no
 		show_word_editor = no
 		modal_open = no
 		save!
-	def toggleModulusEditor
-		show_modulus_editor = !show_modulus_editor
+	def toggleCourseEditor
+		show_course_editor = !show_course_editor
 		modal_open = !modal_open
-		LOG 'modulus editor modal called', show_modulus_editor, modal_open
+		LOG 'course editor modal called', show_course_editor, modal_open
 		save!
 	def toggleLessonEditor
 		show_lesson_editor = !show_lesson_editor
@@ -144,39 +144,39 @@ class State
 
 	# calculates progress from words already learned by the user
 	def calcAllProgress
-		learning_data.user_progress = calcUserProgress(Modulus)
-		learning_data.user_progress_learned_usage = calcUserLearnedUsage(Modulus)
-		learning_data.modulus_progress = calcModulusProgress(Modulus)
-		learning_data.modulus_learned_usage = calcModulusLearnedUsage(Modulus)
-		learning_data.lesson_progress = calcLessonProgress(Modulus)
-		learning_data.lesson_learned_usage = calcLessonLearnedUsage(Modulus)
-		learning_data.phrase_progress = calcPhraseProgress(Modulus)
-		learning_data.phrase_learned_usage = calcPhraseLearnedUsage(Modulus)
+		learning_data.user_progress = calcUserProgress(Course)
+		learning_data.user_progress_learned_usage = calcUserLearnedUsage(Course)
+		learning_data.course_progress = calcCourseProgress(Course)
+		learning_data.course_learned_usage = calcCourseLearnedUsage(Course)
+		learning_data.lesson_progress = calcLessonProgress(Course)
+		learning_data.lesson_learned_usage = calcLessonLearnedUsage(Course)
+		learning_data.phrase_progress = calcPhraseProgress(Course)
+		learning_data.phrase_learned_usage = calcPhraseLearnedUsage(Course)
 
 	def calcUserProgress user_data
 		return calcUsageProgressOfObject(user_data)
 
-	def calcModulusProgress user
-		let modulus_progress = []
-		for modulus in user.modules
-			modulus_progress.push calcUsageProgressOfObject(modulus)
+	def calcCourseProgress user
+		let course_progress = []
+		for course in user.courses
+			course_progress.push calcUsageProgressOfObject(course)
 
-		return modulus_progress
+		return course_progress
 
 	def calcLessonProgress user
 		let lesson_progress = []
-		for modulus in user.modules
+		for course in user.courses
 			let lesson_progress_two = []
-			for lesson in modulus.lessons
+			for lesson in course.lessons
 				lesson_progress_two.push calcUsageProgressOfObject(lesson)
 			lesson_progress.push lesson_progress_two
 		return lesson_progress
 
 	def calcPhraseProgress user
 		let phrase_progress = []
-		for modulus in user.modules
+		for course in user.courses
 			let phrase_progress_two = []
-			for lesson in modulus.lessons
+			for lesson in course.lessons
 				let phrase_progress_three = []
 				for phrase in lesson.phrases
 					phrase_progress_three.push calcUsageProgressOfObject(phrase)
@@ -196,26 +196,26 @@ class State
 	def calcUserLearnedUsage user
 		return calcLearnedUsageOfObject(user)
 
-	def calcModulusLearnedUsage user
-		let modulus_progress = []
-		for modulus in user.modules
-			modulus_progress.push calcLearnedUsageOfObject(modulus)
-		return modulus_progress
+	def calcCourseLearnedUsage user
+		let course_progress = []
+		for course in user.courses
+			course_progress.push calcLearnedUsageOfObject(course)
+		return course_progress
 
 	def calcLessonLearnedUsage user
 		let lesson_progress = []
-		for modulus in user.modules
+		for course in user.courses
 			let lesson_progress_two = []
-			for lesson in modulus.lessons
+			for lesson in course.lessons
 				lesson_progress_two.push calcLearnedUsageOfObject(lesson)
 			lesson_progress.push lesson_progress_two
 		return lesson_progress
 
 	def calcPhraseLearnedUsage user
 		let phrase_progress = []
-		for modulus in user.modules
+		for course in user.courses
 			let phrase_progress_two = []
-			for lesson in modulus.lessons
+			for lesson in course.lessons
 				let phrase_progress_three = []
 				for phrase in lesson.phrases
 					phrase_progress_three.push calcLearnedUsageOfObject(phrase)

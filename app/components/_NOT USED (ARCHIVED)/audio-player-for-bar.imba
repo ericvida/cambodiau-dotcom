@@ -2,7 +2,7 @@ tag audio-player-for-bar
 	def render
 		console.log(audio[word])
 		<self>
-			# if state.modulus > 0
+			# if state.course > 0
 			let word = ""
 			if manual
 				word = manual

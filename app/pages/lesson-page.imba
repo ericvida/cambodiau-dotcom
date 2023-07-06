@@ -5,11 +5,11 @@ import {clusters} from '../data/clusters'
 
 # LAYOUT[epic=LAYOUT, seq=23] lesson-page
 tag lesson-page
-	prop modulus = {}
+	prop course = {}
 
 	css d:vflex @lg:hflex g:1sp
 		# bg:red
-	css .modulus-grid
+	css .course-grid
 		# flg:1 d:vflex g:1sp
 		d:grid g:1sp
 		gtc: 1fr @md: minmax(1rightbar, 3rightbar) 1rightbar
@@ -26,13 +26,13 @@ tag lesson-page
 
 	def render
 		<self>
-			if modulus.lessons
-				let phrase = modulus.lessons[state.lesson]..phrases[state.phrase]
-				<main.modulus-grid>
+			if course.lessons
+				let phrase = course.lessons[state.lesson]..phrases[state.phrase]
+				<main.course-grid>
 					<.left>
 						if phrase.image
 							<img src=phrase.image .image> phrase.image
-						<word-grid.card @click.commit modulus=modulus phrase=phrase rt=route>
+						<word-grid.card @click.commit course=course phrase=phrase rt=route>
 						<.card> 
 							<h2> "Phonetics"
 							<p.phonetics>
@@ -66,7 +66,7 @@ tag lesson-page
 
 # TAG[epic=NAV, seq=24] word-grid
 tag word-grid
-	prop modulus = {}
+	prop course = {}
 
 	css self
 		d:hflex g:.4sp flf:wrap
@@ -101,7 +101,7 @@ tag word-grid
 	def nextWord
 		if word_index < last_word_index
 			word_index++
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 		else 
 			# if last word of phrase, goes to the first word of the next phrase
 			nextPhrase!
@@ -111,7 +111,7 @@ tag word-grid
 	def prevWord
 		if word_index > 0
 			word_index--
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 		else
 			# if no previous word in this phrase goes to the last word of the previous phrase
 			prevPhraseLast!
@@ -120,29 +120,29 @@ tag word-grid
 		if phrase_index < last_phrase_index
 			phrase_index++
 			word_index = 0
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 	
 	# Goes to the last word of hte previous phrase
 	def prevPhraseLast
 		if phrase_index > 0
 			phrase_index--
 			word_index = phrases[phrase_index].khmer.split(' ').length - 1
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 	# Goes to the first word of the previous phrase
 	def prevPhraseZero
 		if phrase_index > 0
 			phrase_index--
 			word_index = 0
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 	
 	def updateActiveWordData
 		route_array = router.pathname.replace('/','').split('/')
-		modulus_index = route_array[1]
+		course_index = route_array[1]
 		lesson_index = route_array[2]
 		phrase_index = route_array[3]
 		word_index = route_array[4]
 		word = phrase.khmer.split(' ')[word_index]
-		phrases = modulus..lessons[lesson_index].phrases || []
+		phrases = course..lessons[lesson_index].phrases || []
 		last_phrase_index = Object.keys(phrases).length - 1
 		last_word_index = phrase.khmer.split(' ').length - 1
 		state.active_word = word
@@ -162,7 +162,7 @@ tag word-grid
 			>
 			<div.word-wrapper>
 				for khmer_word, ki in phrase.khmer.split(' ')
-					<.word .active=(khmer_word is state.active_word) route-to="/modulus/{state.modulus}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
+					<.word .active=(khmer_word is state.active_word) route-to="/course/{state.course}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
 	<self>

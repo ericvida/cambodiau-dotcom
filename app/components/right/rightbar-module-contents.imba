@@ -1,4 +1,4 @@
-tag rightbar-modulus-contents
+tag rightbar-course-contents
 	<self>
 		<div.card>
 			<h2> "Contents"

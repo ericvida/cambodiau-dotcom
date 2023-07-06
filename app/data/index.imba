@@ -1,3 +1,3 @@
-import './modulus_data'
+import './course_data'
 
 # import './user.imba'

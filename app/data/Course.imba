@@ -9,10 +9,10 @@ import { db } from '../state/firebase'
 # import {kh} from './input_bible_stories_khmer'
 # import {modulies} from './input_bible_stories_titles'
 
-export const MODULES_COLLECTION = 'modules'
+export const MODULES_COLLECTION = 'courses'
 export const LESSONS_SUBCOLLECTION = 'lessons'
 
-class ModulusData
+class CourseData
 	worth_zero = [
 		"?"
 		"ៗ"
@@ -28,23 +28,23 @@ class ModulusData
 		"!"
 		'"'
 	]
-	modules = []
+	courses = []
 
 	def constructor
-		console.log('Initialized Modulus')
+		console.log('Initialized Course')
 		# const consolidated_data = consolidateBibleStoryData!
-		# If you change the modulus data locally and want to push the changes to firebase just uncomment the line below
-		# saveGeneratedModule window.structuredClone consolidated_data.modulus
-		# enrichmodulusData consolidated_data
+		# If you change the course data locally and want to push the changes to firebase just uncomment the line below
+		# saveGeneratedCourse window.structuredClone consolidated_data.course
+		# enrichcourseData consolidated_data
 		# convert array tree into object tree
 
 	# This just merges the data.
 	# The result should be similar to what we'll store in Firebase -- compact minimal data
-	# Next step will be to save all this stuff to Firebase and pass to enrichmodulusData modules from Firebase
-	# After we have them in Firebase we will work over CMS tab where you'll be able to add/edit the modules and their lessons
+	# Next step will be to save all this stuff to Firebase and pass to enrichcourseData courses from Firebase
+	# After we have them in Firebase we will work over CMS tab where you'll be able to add/edit the courses and their lessons
 	# def consolidateBibleStoryData
-	# 	for modulus, ci in modulies
-	# 		for lesson, li in modulus.lessons # lesson
+	# 	for course, ci in modulies
+	# 		for lesson, li in course.lessons # lesson
 	# 			lesson.phrases = []
 	# 			for phrase, index in kh[li]
 	# 				let img = index is 0 ? "{li + 1}-{lesson.image}" : "{li + 1}-{index}"
@@ -57,12 +57,12 @@ class ModulusData
 
 
 
-	# Finds all words used in each modulus, lesson, and phrase.
-	# counts how many times the are use in phrase, lesson, and modulus.
+	# Finds all words used in each course, lesson, and phrase.
+	# counts how many times the are use in phrase, lesson, and course.
 	# and store that information for calculating progress later.
-	def enrichmodulusData modulus_data
-		for modulus in modulus_data
-			for lesson in modulus..lessons
+	def enrichcourseData course_data
+		for course in course_data
+			for lesson in course..lessons
 				for phrase in lesson..phrases
 					# Separate index from text in Khmer text
 					const firstKhmerSpaceIndex = phrase.khmer.indexOf(' ')
@@ -84,13 +84,13 @@ class ModulusData
 				lesson.word_set = getChildrenWordSet(lesson..phrases)
 				[lesson.word_usage_count, lesson.word_usage_count_sum] = getChildrenWordUsage(lesson..phrases)
 
-			modulus.word_set = getChildrenWordSet(modulus..lessons)
-			[modulus.word_usage_count, modulus.word_usage_count_sum] = getChildrenWordUsage(modulus..lessons)
+			course.word_set = getChildrenWordSet(course..lessons)
+			[course.word_usage_count, course.word_usage_count_sum] = getChildrenWordUsage(course..lessons)
 
-		this.word_set = getChildrenWordSet(modulus_data)
-		[this.word_usage_count, this.word_usage_count_sum] = getChildrenWordUsage(modulus_data)
+		this.word_set = getChildrenWordSet(course_data)
+		[this.word_usage_count, this.word_usage_count_sum] = getChildrenWordUsage(course_data)
 
-		this.modules = modulus_data
+		this.courses = course_data
 	
 	def getSameWordSet words
 		return [...new Set(words)]
@@ -130,21 +130,21 @@ class ModulusData
 			counter += val
 		return counter
 
-	def saveGeneratedModule modules
-		for modulus in modules
-			const moduleRef = doc(db, MODULES_COLLECTION, modulus.id)
+	def saveGeneratedCourse courses
+		for course in courses
+			const courseRef = doc(db, MODULES_COLLECTION, course.id)
 
-			await setDoc(moduleRef, {
-				icon: modulus.icon
-				id: modulus.id
-				image: modulus.image
-				info: modulus.info
-				price: modulus.price
-				title: modulus.title
+			await setDoc(courseRef, {
+				icon: course.icon
+				id: course.id
+				image: course.image
+				info: course.info
+				price: course.price
+				title: course.title
 			})
 
-			await Promise.all(modulus.lessons.map(do(lesson)
-				const lessonCollectionRef = collection(moduleRef, LESSONS_SUBCOLLECTION)
+			await Promise.all(course.lessons.map(do(lesson)
+				const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
 				const lessonRef = doc(lessonCollectionRef, lesson.id)
 				return setDoc(lessonRef, lesson)
 			))
@@ -154,25 +154,25 @@ class ModulusData
 
 		const data = querySnapshot.docs.map(do(doc) doc.data())
 
-		await Promise.all(data.map(do(modulus)
-			const lessonsRef = collection(db, MODULES_COLLECTION, modulus.id, LESSONS_SUBCOLLECTION)
+		await Promise.all(data.map(do(course)
+			const lessonsRef = collection(db, MODULES_COLLECTION, course.id, LESSONS_SUBCOLLECTION)
 			const lessonsSnapshot = await getDocs(lessonsRef)
-			modulus.lessons = lessonsSnapshot.docs.map(do(doc) doc.data())
+			course.lessons = lessonsSnapshot.docs.map(do(doc) doc.data())
 		))
 
-		raw_modules = window.structuredClone data
+		raw_courses = window.structuredClone data
 
-		enrichmodulusData data
-		LOG('Initialized modulus data')
+		enrichcourseData data
+		LOG('Initialized course data')
 		
 
-export const Modulus = new ModulusData
+export const Course = new CourseData
 
 extend tag Element
-	get modules
+	get courses
 		# return {}
-		return Modulus
+		return Course
 
-export default Modulus
-# export let Modulus = {}
-# LOG Modulus
+export default Course
+# export let Course = {}
+# LOG Course

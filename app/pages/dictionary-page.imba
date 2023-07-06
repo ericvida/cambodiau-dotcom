@@ -1,6 +1,6 @@
 import '../state/index'
 import Fuzzy from '../fuzzy' # for fitting text in word-card
-import Modulus from '../data/Modulus'
+import Course from '../data/Course'
 import {audio} from '../audio'
 import {dictionary} from '../data/dictionary'
 const fuzzy = new Fuzzy
@@ -19,8 +19,8 @@ tag dictionary-page
 			let dict_length = Object.keys(dictionary).length
 			let learned_percent = state.learning_data.user_progress
 			let learned_usage = state.learning_data.user_progress_learned_usage
-			let all_word_usage_count = Modulus.word_usage_count_sum
-			let all_wordset_length = Modulus.word_set..length # TODO: Eric changed to ..length from .length, fix issue instead
+			let all_word_usage_count = Course.word_usage_count_sum
+			let all_wordset_length = Course.word_set..length # TODO: Eric changed to ..length from .length, fix issue instead
 			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
 			let lessons_percent = Math.floor((learned_length / all_wordset_length) * 1000) / 10
 			<.page-wrapper>

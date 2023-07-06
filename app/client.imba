@@ -4,7 +4,7 @@ import './assets/stylesheet.css'
 import Fuzzy from './fuzzy' # for fitting text in word-card
 import {audio} from './audio'
 import {dictionary} from './data/dictionary'
-import Modulus from './data/Modulus'
+import Course from './data/Course'
 # import {state.learning_data} from './data'
 import './state/index'
 import './elements'
@@ -35,7 +35,7 @@ tag App
 
 	def saveRouteToState
 		let route_array = router.pathname.slice(1).split('/')
-		state.modulus = route_array[1]
+		state.course = route_array[1]
 		state.lesson = route_array[2]
 		state.phrase = route_array[3]
 		state.word = route_array[4]
@@ -43,10 +43,10 @@ tag App
 	
 	def build 
 		api.init!
-		Modulus.initModulsFromFirebase().then(do()
+		Course.initModulsFromFirebase().then(do()
 			state.calcAllProgress!
-			log modules.modules
-			imba.commit!
+			log courses.courses
+		imba.commit!
 		)
 		imba.router.on('change') do saveRouteToState!
 	# FIXME: Not sure why state is not saving and being loaded
@@ -60,8 +60,8 @@ tag App
 				@hotkey('enter|s')=state.toggleLearned(state.active_word)
 			>
 			# MODALS
-			if state.show_modulus_editor
-				<modulus-editor>
+			if state.show_course_editor
+				<course-editor>
 			if state.show_lesson_editor
 				<lesson-editor>
 			if state.show_phrase_editor
@@ -98,8 +98,8 @@ tag App
 					<cms-page route="/cms">
 					<login-page route="/login">
 					<CreateAccountPage route="/create">
-					<.width-container route="/modulus">
-						<ModulusPage>
+					<.width-container route="/course">
+						<CoursePage>
 
 				<.layout-bottom>
 						css c:gray9 @darkmode:gray1
@@ -117,13 +117,13 @@ tag App
 						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
 
 		
-# TAG[epic=PAGE, seq=21] ModulusPage
-tag ModulusPage
+# TAG[epic=PAGE, seq=21] CoursePage
+tag CoursePage
 	css w:100% d:hgrid
 		gtc: 1lessonbar 1phrasebar auto
 		p:1sp
 		pos:relative
-	css .modulus-modulus
+	css .course-course
 		d:hflex w:100% 
 	css .close-leftbar
 		ml: -1lessonbar
@@ -132,13 +132,13 @@ tag ModulusPage
 		h:100vh
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
-		# WARN modulus
+		# WARN course
 		<self>
 			# <.lesson-nav-wrapper>
-			<LessonNav route="/modulus/:lesson" modulus=Modulus.modules[state.modulus]>
+			<LessonNav route="/course/:lesson" course=Course.courses[state.course]>
 			# <.phrase-nav-wrapper>
-			<phrase-nav modulus=Modulus.modules[state.modulus]>
-			<lesson-page modulus=Modulus.modules[state.modulus]>
+			<phrase-nav course=Course.courses[state.course]>
+			<lesson-page course=Course.courses[state.course]>
 			# 	<.main-wrapper[mx:auto]>
 
 
@@ -151,7 +151,7 @@ tag audio-player-for-bar
 	def render
 		console.log(audio[word])
 		<self>
-			# if state.modulus > 0
+			# if state.course > 0
 			let word = ""
 			if manual
 				word = manual
@@ -176,7 +176,7 @@ tag audio-player-for-bar
 
 # TAG[epic=NAV, seq=34] LessonNav
 tag LessonNav
-	prop modulus = {}
+	prop course = {}
 
 	css self
 		# ml:-1lessonbar
@@ -198,15 +198,15 @@ tag LessonNav
 		<self>
 			<.title-card>
 				<.icon-title>
-					<i-{modulus.icon}[pr:5px]>
-					<h2 [fs:xl]> modulus..title
-				if state.learning_data.modulus_learned_usage
+					<i-{course.icon}[pr:5px]>
+					<h2 [fs:xl]> course..title
+				if state.learning_data.course_learned_usage
 					<.usage_word_count>
-						"{state.learning_data.modulus_learned_usage[state.modulus]}/{modulus..word_usage_count_sum} words"
-					<progress-bar[$bg:gray2 @darkmode:gray7] progress=state.learning_data.modulus_progress[state.modulus]>
-			if Modulus.modules[state.modulus]
-				for own id, lesson of Modulus.modules[state.modulus].lessons
-					<LessonNavItem .active=(id == state.lesson) route-to="/modulus/{state.modulus}/{id}/0/0" id=id lesson=lesson>
+						"{state.learning_data.course_learned_usage[state.course]}/{course..word_usage_count_sum} words"
+					<progress-bar[$bg:gray2 @darkmode:gray7] progress=state.learning_data.course_progress[state.course]>
+			if Course.courses[state.course]
+				for own id, lesson of Course.courses[state.course].lessons
+					<LessonNavItem .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
 			else
 				<p> 'Loading...'
 
@@ -240,12 +240,12 @@ tag LessonNavItem
 					$fg:indigo4
 	def render
 		let progress = "4/{lesson.word_usage_count_sum}"
-		<self[w:100%].lesson-button .modulus_active=modulus_active> # FIX: modulus active state, not working.
+		<self[w:100%].lesson-button .course_active=course_active> # FIX: course active state, not working.
 			<.chapter-text[d:hflex jc:space-between ai:end]>
 				<.chapter-name> lesson.title
 			if state.learning_data.lesson_learned_usage
-				<.chapter-number[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.modulus][id]}/{lesson.word_usage_count_sum} words"
-				<progress-bar .color progress=state.learning_data.lesson_progress[state.modulus][id]>
+				<.chapter-number[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum} words"
+				<progress-bar .color progress=state.learning_data.lesson_progress[state.course][id]>
 
 # TAG[epic=NAV, seq=36] phrase-nav
 tag phrase-nav
@@ -268,28 +268,28 @@ tag phrase-nav
 		if phrase_index < last_phrase_index
 			phrase_index++
 			word_index = 0
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 	
 	# Goes to the last word of hte previous phrase
 	def prevPhraseLast
 		if phrase_index > 0
 			phrase_index--
 			word_index = phrases[phrase_index].khmer.split(' ').length - 1
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 	# Goes to the first word of the previous phrase
 	def prevPhraseZero
 		if phrase_index > 0
 			phrase_index--
 			word_index = 0
-			router.go("/modulus/{modulus_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 	def render
-		let phrases = Modulus.modules[state.modulus]..lessons[state.lesson].phrases
+		let phrases = Course.courses[state.course]..lessons[state.lesson].phrases
 		<self>
 			if phrases
 				for own id, phrase of phrases
-					<.number-toggle route-to="/modulus/{state.modulus}/{state.lesson}/{id}/0">
+					<.number-toggle route-to="/course/{state.course}/{state.lesson}/{id}/0">
 						let isActive = state.phrase is id
-						let progress = state.learning_data.phrase_progress[state.modulus][state.lesson][id]
+						let progress = state.learning_data.phrase_progress[state.course][state.lesson][id]
 						<ElemProgressRing .active=isActive progress=progress size=30> 
 							if id is 0 
 								"t"

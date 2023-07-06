@@ -20,19 +20,19 @@ tag store-page
 				bg:none
 	def render
 		<self>
-			<main.modulus-grid>
+			<main.course-grid>
 				<div.image> "image"
 				<[d:hgrid w:100% g:1sp gtc: 2fr 1fr]>
 					<div.card> "card"
-					<rightbar-modulus-contents>
+					<rightbar-course-contents>
 				<[d:hgrid w:100% g:1sp gtc:1fr]> 
 					<rightbar-graduated-students>
 			let buy-cards = [
-				name: "Market modulus"
+				name: "Market course"
 				price: 5
-				benefits: ['One modulus','5 chapters','400 words']
+				benefits: ['One course','5 chapters','400 words']
 				---
-				name: "All modulus"
+				name: "All course"
 				price: 20
 				benefits: ['5 modoules','40 chapters','2200 words']
 			]

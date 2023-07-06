@@ -27,7 +27,7 @@ tag user-bio-card
 
 	def render
 		<self>
-			<img src=user_modulus.image>
+			<img src=user_course.image>
 			<.user-info>
 				<div>
 					<h2.user-name> "DinaLearns"

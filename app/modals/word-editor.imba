@@ -1,7 +1,7 @@
 let mock-active-word = "ឡើង"
 let mock-word-data = {
 	khmer_spellings: ["ឡើង"] # sometimes khmer words can have multiple acceptable spellings
-	rank: "52" # this could generated from how many times a word is used in all the modules compared to other words. most of the current rankings came from someone else's analysis using web khmer data, not my module data.
+	rank: "52" # this could generated from how many times a word is used in all the courses compared to other words. most of the current rankings came from someone else's analysis using web khmer data, not my course data.
 	vida_pronunciations: ["laẹṇg"] # sometimes words can have multiple pronunciations
 	vida_pronunciations_generated: "laẹṇg" # generated from online ipa, may not be accurate. I want to replace overtime with my own in the vida array above.
 	ipa_pronunciations: ["laǝŋ"]
@@ -17,18 +17,19 @@ let mock-word-data = {
 }
 tag word-editor
 	# transition
-	css self
+	css pos:absolute inset:0
+		d:grid zi:12
+		min-height: 100vh
+		ja:center
+		m:0
 		o@off:0 ea:1s
 		.card
 			x@in:100px x@out:100px ea:1s
-	css pos:absolute inset:0
-		d:grid zi:12
-		h:100vh 
-		ja:center
-		m:0
-		.card  
-			w:500px
-			h:800px
+			d:flex zi:30 ofy:scroll
+			min-width: 500px
+			width: 60vw
+			height: 80vh
+			ofy:scroll
 			
 	css h3
 			fs:.8em c:gray4 m:0
@@ -52,10 +53,10 @@ tag word-editor
 		bg:none @hover:hue0
 		c:gray3 @hover:hue3
 		fw:bold
-	css %pill-wrapper
+	css .word-pill-wrapper
 			flex-wrap:wrap
 			d:flex gap:.4sp
-	css %pill
+	css .word-pill
 			bd:2px solid gray1
 			px:.5sp
 			rd:md
@@ -81,11 +82,26 @@ tag word-editor
 		ff:monospace
 	def closeModal
 		state.closeModals!
-	
+	def toggleCourseEditor
+		closeModal!
+		state.toggleCourseEditor!
+		imba.commit!
+	def toggleLessonEditor
+		closeModal!
+		state.toggleLessonEditor!
+		imba.commit!
+	def togglePhraseEditor
+		closeModal!
+		state.togglePhraseEditor!
+		imba.commit!
 	<self ease>
 		<.modal-bg @click.closeModal>
 		<.card[d:flex zi:30]>
-			<h1> "Module > Lesson > Phrase > Word editor"
+			<h1> 
+				<span @click.toggleCourseEditor> "Course > "
+				<span @click.toggleLessonEditor> "Lesson > "
+				<span @click.togglePhraseEditor> "Phrase > "
+				<span> "Word Editor"
 			<section>
 				<h3> "khmer spellings"
 				<.word-group>
@@ -102,7 +118,7 @@ tag word-editor
 				<h3> "ipa pronunciations (generated from vida)"
 				<.word-group .ipa-pronunciations>
 					for word in mock-word-data.ipa_pronunciations
-						<%pill> word
+						<.word-pill> word
 			<section>
 				<.definition-list>
 					<.definition-grid>
@@ -127,34 +143,3 @@ tag word-editor
 			<section>
 				css w:100% d:flex jc:end
 				<button[bg:gray1 @hover:hue2 py:.6sp px:1sp rd:md]> "save"
-			# <section>
-			# 	<h3> "khmer"
-			# 	<input bind=mock-phrase-data.khmer type="text">
-			# <section>
-			# 	<h3> "words (parsed)"
-			# 	<div%pill-wrapper>
-			# 		for word in mock-phrase-data.khmer.split(' ')
-			# 			# let obj = dictionary[word]
-			# 			# console.log word
-			# 			<span%pill 
-			# 				.in-dictionary=(dictionary.hasOwnProperty(word) and (dictionary[word].def is true))
-			# 				.in-dictionary-no-def=(dictionary.hasOwnProperty(word) and (dictionary[word].def is false))
-			# 				.not-in-dictionary=(!dictionary.hasOwnProperty(word))
-			# 			> word
-			# <section[justify-self:flex-end]>
-			# 	<h3> "vida phonetics (generated)"
-			# 	<div%pill-wrapper>
-			# 		for word in mock-phrase-data.khmer.split(' ')
-			# 			# let obj = dictionary[word]
-			# 			# console.log word
-			# 			if dictionary.hasOwnProperty(word)
-			# 				<span%pill 
-			# 					.in-dictionary=(dictionary[word].def isnt false)
-			# 					.in-dictionary-no-def=(dictionary[word].def is false)
-			# 					> dictionary[word]..vida
-			# 			else
-			# 				<span%pill.not-in-dictionary> word
-			# <section[flex-grow:1]>
-			# <section[w:100% d:flex jc:end]>
-			# 	<.button[w:200px p:.5sp ta:center as:end]> "save"
-			# 		css bg:gray1 @hover:hue2

@@ -15,18 +15,20 @@ let mock-lesson-data = {
 }
 tag lesson-editor
 	# transition
-	css self
+	css pos:absolute inset:0
+		d:grid zi:12
+		min-height: 100vh
+		ja:center
+		m:0
 		o@off:0 ea:1s
 		.card
 			x@in:100px x@out:100px ea:1s
-	css pos:absolute inset:0
-		d:grid zi:12
-		h:100vh 
-		ja:center
-		m:0
-		.card  
-			w:500px
-			h:800px
+			d:flex zi:30 ofy:scroll
+			min-width: 500px
+			width: 60vw
+			height: 80vh
+			ofy:scroll
+			
 			
 	css h3
 			fs:.8em c:gray4 m:0
@@ -38,10 +40,16 @@ tag lesson-editor
 			w:100%
 	def closeModal
 		state.closeModals!
+	def toggleCourseEditor
+		closeModal!
+		state.toggleCourseEditor!
+		imba.commit!
 	<self ease>
 		<.modal-bg @click.closeModal>
 		<.card[d:flex zi:30]>
-			<h1> "module name > lesson name"
+			<span>
+				<button @click.toggleCourseEditor [mr:3px]> "Course > "
+				<button> "Lesson Editor"
 			<section>
 				<h3> "Lesson Title"
 				<input bind=mock-lesson-data.title type="text">

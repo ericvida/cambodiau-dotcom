@@ -11,17 +11,17 @@ user_state: object
 	email: string
 	leaderboard_rank: number
 	password: string
-	available_modulus: array
+	available_course: array
 	proficiency_total_percent: 
-		number # number calculated from all modulus
-	proficiency_modulus_progress: 
+		number # number calculated from all course
+	proficiency_course_progress: 
 		array / number # [10,...] - one array of numbers calculated from chapters
-	proficiency_modulus_chapters_progress: 
+	proficiency_course_chapters_progress: 
 		array / array / number # [[5,...],[]] - one array of arrays of numbers calculated from lessons
-	proficiency_modulus_chapters_lessons_progress: 
-		array / array / array / number [[[1,...,...],[]],[[],[]]] # progress calculated from words completed in modulus
+	proficiency_course_chapters_lessons_progress: 
+		array / array / array / number [[[1,...,...],[]],[[],[]]] # progress calculated from words completed in course
 	dictionary_learned:
-		array > string # ['ក','កក',etc.] added by user when marked a word is marked learned in modulus
+		array > string # ['ក','កក',etc.] added by user when marked a word is marked learned in course
 	dictionary_progress: # calculate from words_learned.length and dictionary.length
 	alphabet_learned: array > string
 	vida_learned: array > string
@@ -92,23 +92,23 @@ dictionary: object
 				definition: object
 					word_use: string
 					text: string
-			this_word_use_count_in_purchased_modulus: number # calc from user_state
+			this_word_use_count_in_purchased_course: number # calc from user_state
 
 leaderboard: object
 	user: object
 		user_name: string
 		user_image_url: string
-		modulus_owned: array / strings
+		course_owned: array / strings
 		words_learned: number
 
-modulus_info: array
-	modulus_info: object
-		modulus_id: number
-		modulus_name: string
-		modulus_price: number
-		modulus_description: string
-		modulus_total_words: number
-		modulus_total_lessons: number
+course_info: array
+	course_info: object
+		course_id: number
+		course_name: string
+		course_price: number
+		course_description: string
+		course_total_words: number
+		course_total_lessons: number
 
 learning_data: object
 	title: string
@@ -116,8 +116,8 @@ learning_data: object
 	word_set: object
 	word_usage_count: object
 	word_usage_count_sum: number
-	modulus: array
-		modulus: object
+	course: array
+		course: object
 			id: number
 			note: string
 			title: string

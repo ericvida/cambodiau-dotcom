@@ -4,13 +4,13 @@ tag cms-page
 		<self>
 			<h1[p:1sp bg:rose0 bd:2px solid rose3 rd:md m:1sp]> "Design of CMS interface will be improved soon. This a quick implementation."
 			<div route="/cms/">
-				<CMSLearnModuleList>
+				<CMSLearnCourseList>
 			# <CMSLessonList route="/cms/0/">
 			# <CMSChapterList route="/cms/0/0/">
 
-tag CMSLearnModuleList
-	prop modulus_list = [
-		title: "module one"
+tag CMSLearnCourseList
+	prop course_list = [
+		title: "course one"
 		description: "description one"
 		imageURL: "url one"
 		price: 20
@@ -77,7 +77,7 @@ tag CMSLearnModuleList
 			]
 		]
 		---
-		title: "module two"
+		title: "course two"
 		description: "description two"
 		imageURL: "url two"
 		price: 20
@@ -146,11 +146,11 @@ tag CMSLearnModuleList
 	]
 	def render
 		<self[]>
-			<button[ml:1sp px:.6sp bg:indigo2]> "Add Modules"
-			for item in modulus_list
-				<CMSModulusCard item=item>
+			<button[ml:1sp px:.6sp bg:indigo2]> "Add Courses"
+			for item in course_list
+				<CMSCourseCard item=item>
 
-tag CMSModulusCard
+tag CMSCourseCard
 	prop meta_is_editable = false
 	def toggleEditable
 		meta_is_editable = !meta_is_editable
@@ -167,9 +167,9 @@ tag CMSModulusCard
 			# TODO: route-to needs to by dynamic
 			<button[px:.4sp bg:indigo2 rd:sm] @click.toggleEditable> 
 				if meta_is_editable
-					"save module"
+					"save course"
 				else
-					"edit module"
+					"edit course"
 			<button[px:.4sp bg:cool2 rd:sm]> "delete"
 		<pre>
 			<code>
