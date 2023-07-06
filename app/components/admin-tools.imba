@@ -27,6 +27,12 @@ tag admin-tools
 	def toggleWordEditor
 		state.toggleWordEditor!
 		imba.commit!
+	def downloadJson
+		# Downloads entire Module Data from Database in JSON format.
+		window.alert('downloading json')
+	def uploadJson
+		# Upload Module Data that was modified locally from JSON format.
+		window.alert('uploading json')
 	<self>
 		<div[c:hue3]> "edit active:"
 		<button @click.toggleModulusEditor>
@@ -37,7 +43,7 @@ tag admin-tools
 			"phrase"
 		<button @click.toggleWordEditor>
 			"word"
-		<button @click.toggleWordEditor>
+		<button @click.downloadJson>
 			"download json"
-		<button @click.toggleWordEditor>
+		<button @click.uploadJson>
 			"upload json"

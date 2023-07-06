@@ -91,6 +91,7 @@ tag App
 				<.layout-middle>
 					<admin-tools>
 					<landing-page route="/">
+					<store-page route="/store">
 					<user-page route="/learning">
 					<dictionary-page route="/dictionary">
 					<phonetics-page route="/phonetics">
@@ -143,263 +144,10 @@ tag ModulusPage
 
 
 
-# LAYOUT[epic=LAYOUT, seq=26] LearnModulePreview
-tag LearnModulePreview
-	css p:1sp d:vgrid @lg:hgrid g:1sp
-		gtc:none @lg:2fr 1fr
-		min-height: calc(100vh - 1topbar)
-		max-width:1000px mx:auto
-	css .buy-cards
-		d:hflex @lg:vflex g:1sp
-	css main flg:1 d:vflex g:1sp w:100%
-	css .image 
-		bg:hue5 p:1sp rd:1rd
-		aspect-ratio: 16 / 9
-	css .actions
-		d:grid g:1sp jc:end gtc: 1fr 1fr
-		button px:1.5sp py:1sp rd:1rd
-			bg:hue3 c:hue9
-			fw:bold
-			fs:20px d:flex gap:1sp
-			&.outline
-				bg:none
-	def render
-		<self>
-			<main.modulus-grid>
-				<div.image> "image"
-				<[d:hgrid w:100% g:1sp gtc: 2fr 1fr]>
-					<div.card> "card"
-					<rightbar-modulus-contents>
-				<[d:hgrid w:100% g:1sp gtc:1fr]> 
-					<rightbar-graduated-students>
-			let buy-cards = [
-				name: "Market modulus"
-				price: 5
-				benefits: ['One modulus','5 chapters','400 words']
-				---
-				name: "All modulus"
-				price: 20
-				benefits: ['5 modoules','40 chapters','2200 words']
-			]
-			<.buy-cards>
-				for card in buy-cards
-					<SellCard name=card.name price=card.price benefits=card.benefits>
 
 
-# CARD[epic=CARD, seq=27] UserCard
-tag UserCard
-	css self d:hflex g:1sp ai:center p:0sp my:1sp
-	css .user-image
-		size:4sp
-		rd:full 
-		bd:3px solid gray1/20 bxs:sm,xl,xl
-	css .user-info
-		w:100% g:.5sp d:vflex ff: 'Merriweather Sans', sans-serif;
-	css .user-stats
-		d:hflex ai:flex-end 
-		*@first mr:auto
-	css .user-name
-		mr:auto fw:bold fs:20px 
-	css .user-wordcount
-		c:gray4 @darkmode:gray6 fs:xxs 
-	css .user-progress
-		bg:gray2 @darkmode:gray8  h:10px w:100% rd:full pos:relative zi:0 of:hidden
-		.progress-fg
-			bg:hue5 h:10px w:100% rd:full pos:absolute t:0 r:90% zi:10 rdr:full
-	# css .user-actions
-	# 	d:hflex jc:space-between
-	css .user-settings c:gray4 @darkmode:gray6 @hover:hue5 fs:xs
-	def signOut
-		# state.auth = no
-		imba.commit
 
-	def render
-		<self>
-			<img src=user_modulus.image>
-			<.user-info>
-				<div>
-					<h2.user-name> "DinaLearns"
-				<a.user-wordcount> "400/4000"
-				<progress-bar .color=#context.active progress=progress>
-				<.user-stats>
-					<a.user-settings route-to="/settings/"> "settings"
-					<a.user-settings @click=state.signOut> "Sign Out"
-
-# CARD[epic=CARD, seq=29] SellCard
-tag SellCard
-	css bg:white p:1sp d:vflex gap:2sp w:100%
-	css .pill rd:full fls:1 w:fit-content px:1sp py:.2sp
-		bg:hue1 @darkmode:hue8/50
-		c:hue6 @darkmode:hue4
-	css .price 
-		fw:bold
-		# h:64px
-		d:hflex ai:center jc:start gap:0.5sp
-		my:2sp
-	css .num
-		fs:5xl lh:inherit ff:$copy
-	css .text 
-		fs:1xl lh:inherit ff:$heading
-		c:warm4
-	css .button
-		rd:1rd ta:center p:1sp
-		bg:gray3 @darkmode:gray7
-		c:gray9 @darkmode:gray0
-		@hover
-			bg:hue5 @darkmode:hue5
-		cursor:pointer
-	# css .benefits
-	<self.card> 
-		<span.pill> name
-		<.price>
-			<span.num> "${price}"
-			<span.text> " lifetime"
-		<ul.benefits> for item in benefits
-			<li> item
-		<.button> "Get Started"
-
-# CARD[epic=CARD, seq=30] WordBar
-tag WordBar
-	css self
-		d:hflex jc:space-between
-		bg:gray0 @darkmode:gray9 
-		p:1sp rd:md
-		ai:center
-	css .khmer
-		c:hue5
-	css .switch-wrapper
-		h:30px w:110px rd:full
-		bg:gray3 @darkmode:black/60
-		cursor:pointer
-		tween:all 1dur back-in-out
-		&.learned
-			bg:hue4 @darkmode:hue8
-		# mt:auto
-	css .switch
-		ml:0px
-		tween:all 1dur back-in-out
-		h:30px rd:full 
-		bd:3px fs:xs c:black d:box
-		w:fit-content px:1sp
-		bc:gray3 @darkmode:gray8
-		bg:gray0 @darkmode:gray7
-		c:gray4
-		w:90px
-		&.learned
-			bc:hue4 @darkmode:hue8
-			bg:hue2 @darkmode:hue5
-			c:hue8 @darkmode:hue1
-			ml:20px
-	def mount
-		fit_settings = {
-			minSize: 16
-			maxSize: 26
-		}
-	def render
-		<self>
-			let vida = dictionary[state.active_word]..vida
-			let vida_auto = dictionary[state.active_word]..vida_auto
-			let ipa = dictionary[state.active_word]..ipa
-			<a$fit2.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={state.active_word}&service=dictionary" target="_blank"> 
-				state.active_word
-			if audio.hasOwnProperty(state.active_word)
-				<AudioPlayerForBar>
-			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=api.toggleIpa!>
-				if state.ipa
-					<span[fs:xs c:gray5]> "ipa"
-					if ipa
-						<div.phonetic> ipa
-					else
-						<div.phonetic[fs:xs]> "ipa coming soon"
-				else
-					<span[fs:xs c:gray5]> "vida"
-					if vida
-						<div.phonetic> vida
-					elif vida_auto
-						<div.phonetic> vida_auto
-					else
-						<div.phonetic> "vida coming soon"
-			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=state.toggleLearned(state.active_word)>
-				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
-# CARD[epic=CARD, seq=30] word-card
-tag word-card
-	css self 
-		d:vflex ai:center gap:1sp
-		min-width:1rightbar
-		w:100%
-	css .khmer
-		lh:60px
-		mt:20px
-		ff:$khmer
-		c:hue6
-	css .phonetic
-		ff:monospace fs:xl
-		c:hue5 @darkmode:hue4
-	css .switch-wrapper
-		h:30px w:110px rd:full
-		bg:gray3 @darkmode:black/60
-		cursor:pointer
-		tween:all 1dur back-in-out
-		&.learned
-			bg:hue4 @darkmode:hue8
-		# mt:auto
-	css .switch
-		ml:0px
-		tween:all 1dur back-in-out
-		h:30px rd:full 
-		bd:3px fs:xs c:black d:box
-		w:fit-content px:1sp
-		bc:gray3 @darkmode:gray8
-		bg:gray0 @darkmode:gray7
-		c:gray4
-		w:90px
-		&.learned
-			bc:hue4 @darkmode:hue8
-			bg:hue2 @darkmode:hue5
-			c:hue8 @darkmode:hue1
-			ml:20px
-	css .resizeable
-		margin:0
-		padding:0
-		height:40px
-		width:100px
-		bg:hue4
-		overflow:hidden
-	css .phonetic-wrapper
-		cursor:pointer
-	def mount
-		fit_settings = {
-			minSize: 16
-			maxSize: 40
-		}
-	def render
-		<self>
-			let vida = dictionary[state.active_word]..vida
-			let vida_auto = dictionary[state.active_word]..vida_auto
-			let ipa = dictionary[state.active_word]..ipa
-			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={state.active_word}&service=dictionary" target="_blank"> 
-				state.active_word
-			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=api.toggleIpa!>
-				if state.ipa
-					<span[fs:xs c:gray5]> "ipa"
-					if ipa
-						<div.phonetic> ipa
-					else
-						<div.phonetic[fs:xs]> "ipa coming soon"
-				else
-					<span[fs:xs c:gray5]> "vida"
-					if vida
-						<div.phonetic> vida
-					elif vida_auto
-						<div.phonetic> vida_auto
-					else
-						<div.phonetic> "vida coming soon"
-			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=state.toggleLearned(state.active_word)>
-				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
-			if audio.hasOwnProperty(state.active_word)
-				<AudioPlayer>
-
-tag AudioPlayerForBar
+tag audio-player-for-bar
 	def render
 		console.log(audio[word])
 		<self>
@@ -424,30 +172,7 @@ tag AudioPlayerForBar
 						# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 						# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 						# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
-tag AudioPlayer
-	<self>
-		# if state.modulus > 0
-		let word = ""
-		if manual
-			word = manual
-		else
-			word = state.active_word
-		<audio$track @ended.commit src=audio[word] type="audio/mpeg" preload="metadata">
-		
-		<.button-wrapper[d:hflex ai:center]>
-			if $track.paused # when paused
-				<div .play-audio[w:2em cursor:pointer] @hotkey('space|a') @click=$track.play> 
-					<svg[size:24px] stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">
-						<path[stroke:indigo6 fill:indigo6]  d="M6.906 4.537A.6.6 0 006 5.053v13.894a.6.6 0 00.906.516l11.723-6.947a.6.6 0 000-1.032L6.906 4.537z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-			
-			else # when playing
-				<div .play-audio[w:2em cursor:pointer] @hotkey('space') @click=$track.pause> 
-					<svg[size:24px] stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000" viewBox="0 0 24 24">
-						<path[stroke:indigo6 fill:indigo2] d="M6 18.4V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6H6.6a.6.6 0 0 1-.6-.6zm8 0V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6h-2.8a.6.6 0 0 1-.6-.6z"/>
-					# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-					# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-					# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
-	
+
 
 
 # TAG[epic=NAV, seq=34] LessonNav
@@ -458,10 +183,9 @@ tag LessonNav
 		# ml:-1lessonbar
 		h:100vh
 		overflow-y:scroll
-		w:1lessonbar
+		# w:1lessonbar
 		ofy: scroll
 		d:vflex
-		g:1sp
 	css .title-card 
 		bg:white @darkmode:gray9
 		rd:md
@@ -480,7 +204,7 @@ tag LessonNav
 				if state.learning_data.modulus_learned_usage
 					<.usage_word_count>
 						"{state.learning_data.modulus_learned_usage[state.modulus]}/{modulus..word_usage_count_sum} words"
-					<progress-bar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.modulus_progress[state.modulus]>
+					<progress-bar[$bg:gray2 @darkmode:gray7] progress=state.learning_data.modulus_progress[state.modulus]>
 			if Modulus.modules[state.modulus]
 				for own id, lesson of Modulus.modules[state.modulus].lessons
 					<LessonNavItem .active=(id == state.lesson) route-to="/modulus/{state.modulus}/{id}/0/0" id=id lesson=lesson>
@@ -496,10 +220,10 @@ tag LessonNavItem
 		c:gray5
 		bg:white/50 @darkmode:gray8/20
 		@hover
-			bg:white @darkmode:gray8/50
+			bg:gray1 @darkmode:gray8/50
 	css progress-bar 
-			$bg:gray3
-			$fg:gray7
+			$bg:gray1
+			$fg:hue3
 		@hover
 			bg:gray1
 			progress-bar
@@ -517,7 +241,7 @@ tag LessonNavItem
 					$fg:indigo4
 	def render
 		let progress = "4/{lesson.word_usage_count_sum}"
-		<self[w:100%].lesson-button .chapter_active=no>
+		<self[w:100%].lesson-button .modulus_active=modulus_active> # FIX: modulus active state, not working.
 			<.chapter-text[d:hflex jc:space-between ai:end]>
 				<.chapter-name> lesson.title
 			if state.learning_data.lesson_learned_usage

@@ -104,8 +104,11 @@ tag word-editor
 					for word in mock-word-data.ipa_pronunciations
 						<%pill> word
 			<section>
-				<h3> "definitions"
 				<.definition-list>
+					<.definition-grid>
+						<h3> "definition"
+						<h3> "use"
+						<h3> "source"
 					for item in mock-word-data.word_definitions
 						<.definition-grid>
 							<input.hdefinition bind=item.definition type="text">
@@ -114,7 +117,12 @@ tag word-editor
 					<button.add-button> "＋"
 			<section>
 				<h3> "audio"
-				<button[bg:gray1 @hover:hue2 py:.6sp px:1sp rd:md]> "choose file"
+				<[d:hflex gap:1sp]>
+					# if no audio file on server
+					<button[bg:gray1 @hover:hue2 py:.6sp px:1sp rd:md]> "upload file" 
+					# if has audio file
+					<button[bg:hue1 @hover:hue2 py:.6sp px:1sp rd:md]> "play"
+					<button[bg:gray1 @hover:rose2 py:.6sp px:1sp rd:md]> "delete file"
 			<div[flg:1]>
 			<section>
 				css w:100% d:flex jc:end

@@ -6,10 +6,11 @@ tag main-navigation
 		p:.6sp
 		# max-width:800px
 		# mx:auto
-	css a, button
+	css button
 		bg:gray2 @darkmode:gray7
 		c:gray7	@darkmode:gray2
-		rd:md
+		rd:md px:.5sp
+		
 	def toggleLeftNav
 		state.left = !state.left
 		api.save!
