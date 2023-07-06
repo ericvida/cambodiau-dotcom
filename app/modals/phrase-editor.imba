@@ -8,6 +8,11 @@ let mock-phrase-data = {
 }
 
 tag phrase-editor
+	# transition
+	css self
+		o@off:0 ea:1s
+		.card
+			x@in:100px x@out:100px ea:1s
 	css pos:absolute inset:0
 		d:grid zi:12
 		h:100vh 
@@ -43,10 +48,10 @@ tag phrase-editor
 			bg:rose3
 	def closeModal
 		state.closeModals!
-	<self>
+	<self ease>
 		<.modal-bg @click.closeModal>
 		<.card[d:flex zi:30]>
-			<h1> "phrase-editor"
+			<h1> "module > lesson > phrase"
 			<section>
 				<h3> "meaning"
 				<input bind=mock-phrase-data.english type="text">

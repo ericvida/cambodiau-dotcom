@@ -37,3 +37,7 @@ tag admin-tools
 			"phrase"
 		<button @click.toggleWordEditor>
 			"word"
+		<button @click.toggleWordEditor>
+			"download json"
+		<button @click.toggleWordEditor>
+			"upload json"

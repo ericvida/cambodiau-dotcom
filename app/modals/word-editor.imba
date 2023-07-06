@@ -16,6 +16,11 @@ let mock-word-data = {
 		]
 }
 tag word-editor
+	# transition
+	css self
+		o@off:0 ea:1s
+		.card
+			x@in:100px x@out:100px ea:1s
 	css pos:absolute inset:0
 		d:grid zi:12
 		h:100vh 
@@ -77,10 +82,10 @@ tag word-editor
 	def closeModal
 		state.closeModals!
 	
-	<self>
+	<self ease>
 		<.modal-bg @click.closeModal>
 		<.card[d:flex zi:30]>
-			<h1> "word editor"
+			<h1> "Module > Lesson > Phrase > Word editor"
 			<section>
 				<h3> "khmer spellings"
 				<.word-group>
