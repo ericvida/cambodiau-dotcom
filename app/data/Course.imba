@@ -9,7 +9,7 @@ import { db } from '../state/firebase'
 # import {kh} from './input_bible_stories_khmer'
 # import {modulies} from './input_bible_stories_titles'
 
-export const MODULES_COLLECTION = 'courses'
+export const COURSES_COLLECTION = 'modules' # TODO: rename to courses
 export const LESSONS_SUBCOLLECTION = 'lessons'
 
 class CourseData
@@ -132,7 +132,7 @@ class CourseData
 
 	def saveGeneratedCourse courses
 		for course in courses
-			const courseRef = doc(db, MODULES_COLLECTION, course.id)
+			const courseRef = doc(db, COURSES_COLLECTION, course.id) # TODO: 
 
 			await setDoc(courseRef, {
 				icon: course.icon
@@ -150,12 +150,12 @@ class CourseData
 			))
 
 	def initModulsFromFirebase
-		const querySnapshot = await getDocs(collection(db, MODULES_COLLECTION));
+		const querySnapshot = await getDocs(collection(db, COURSES_COLLECTION)); # TODO: 
 
 		const data = querySnapshot.docs.map(do(doc) doc.data())
 
 		await Promise.all(data.map(do(course)
-			const lessonsRef = collection(db, MODULES_COLLECTION, course.id, LESSONS_SUBCOLLECTION)
+			const lessonsRef = collection(db, COURSES_COLLECTION, course.id, LESSONS_SUBCOLLECTION) # TODO: 
 			const lessonsSnapshot = await getDocs(lessonsRef)
 			course.lessons = lessonsSnapshot.docs.map(do(doc) doc.data())
 		))
