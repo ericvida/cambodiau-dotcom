@@ -4,6 +4,7 @@
   - Use module/lesson ids instead of indexes. Handle loading / missed modules/lessons in a better way.
 
   - Refactor dictionary data to work better with CMS admin panel.
+  - Make lesson-page bgi: url() dynamic.
 ERIC
 - Move pages/components/elements to their files in their folder.
 - Make CMS panel for adding/editing modules/lessons.

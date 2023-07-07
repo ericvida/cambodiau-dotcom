@@ -86,20 +86,17 @@ tag App
 						pos:relative
 				<.layout-top>
 					<.width-container>
-						<main-navigation>
+						<main-nav>
 
 				<.layout-middle>
-					<admin-tools>
 					<landing-page route="/">
 					<store-page route="/store">
 					<user-page route="/learning">
 					<dictionary-page route="/dictionary">
 					<phonetics-page route="/phonetics">
-					<cms-page route="/cms">
 					<login-page route="/login">
 					<CreateAccountPage route="/create">
-					<.width-container route="/course">
-						<CoursePage>
+					<course-page route="/course">
 
 				<.layout-bottom>
 						css c:gray9 @darkmode:gray1
@@ -111,35 +108,13 @@ tag App
 							fs:xs
 							gap:.20sp
 						css a c:hue7 @darkmode:hue4
-						<span> "Currently in Development. Give feedback via "
-						<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
-						<span> " or "
-						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
-
-		
-# TAG[epic=PAGE, seq=21] CoursePage
-tag CoursePage
-	css w:100% d:hgrid
-		gtc: 1lessonbar 1phrasebar auto
-		p:1sp
-		pos:relative
-	css .course-course
-		d:hflex w:100% 
-	css .close-leftbar
-		ml: -1lessonbar
-	css .left-bar
-		flb:1lessonbar
-		h:100vh
-	def render
-		# FIXME: Console.warn fires twice. Not sure why
-		# WARN course
-		<self>
-			# <.lesson-nav-wrapper>
-			<LessonNav route="/course/:lesson" course=Course.courses[state.course]>
-			# <.phrase-nav-wrapper>
-			<phrase-nav course=Course.courses[state.course]>
-			<lesson-page course=Course.courses[state.course]>
-			# 	<.main-wrapper[mx:auto]>
+						if admin = yes
+							<admin-tools>
+						else
+							<span> "Currently in Development. Give feedback via "
+							<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
+							<span> " or "
+							<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
 
 
 
@@ -147,75 +122,46 @@ tag CoursePage
 
 
 
-tag audio-player-for-bar
-	def render
-		console.log(audio[word])
-		<self>
-			# if state.course > 0
-			let word = ""
-			if manual
-				word = manual
-			else
-				word = state.active_word
-			<audio$track2 @ended.commit src=audio[word] type="audio/mpeg" preload="metadata">
-			
-			<.button-wrapper[d:hflex ai:center]>
-				if $track2.paused # when paused
-					<div .play-audio[w:2em cursor:pointer] @hotkey('space|a') @click=$track2.play> 
-						<svg[size:24px] stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">
-							<path[stroke:indigo6 fill:indigo6]  d="M6.906 4.537A.6.6 0 006 5.053v13.894a.6.6 0 00.906.516l11.723-6.947a.6.6 0 000-1.032L6.906 4.537z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-				
-				else # when playing
-					<div .play-audio[w:2em cursor:pointer] @hotkey('space') @click=$track2.pause> 
-						<svg[size:24px] stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000" viewBox="0 0 24 24">
-							<path[stroke:indigo6 fill:indigo2] d="M6 18.4V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6H6.6a.6.6 0 0 1-.6-.6zm8 0V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6h-2.8a.6.6 0 0 1-.6-.6z"/>
-						# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-						# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-						# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
 
 
-# TAG[epic=NAV, seq=34] LessonNav
-tag LessonNav
+
+# TAG[epic=NAV, seq=34] lesson-list
+tag lesson-list
 	prop course = {}
-
-	css self
-		# ml:-1lessonbar
-		h:100vh
-		overflow-y:scroll
-		# w:1lessonbar
-		ofy: scroll
-		d:vflex
-	css .title-card 
-		bg:white @darkmode:gray9
-		rd:md
-		p:1sp
-	css .icon-title
-		d:hflex
-	css .usage_word_count
-		fs:xxs ff:mono c:gray6
-
 	def render
 		<self>
-			<.title-card>
+			css h:100vh
+				d:vflex
+			<%lesson-title-widget>
+				css bg:gray0/50 @darkmode:gray9
+					rd:md
+					p:1sp
+					bd:2px solid gray1
 				<.icon-title>
-					<i-{course.icon}[pr:5px]>
-					<h2 [fs:xl]> course..title
+					css d:hflex ai:end
+						mb:0.5sp
+					<i-{course.icon}>
+						css h:25px mr:.3sp
+					<h2 [fs:xl mr:auto]> course..title
+						css h:26px lh:26px
+					if state.learning_data.course_learned_usage
+						<.usage_word_count> "{state.learning_data.course_learned_usage[state.course]}/{course..word_usage_count_sum}"
+							css h:26px lh:26px ai:end d:flex
+							css fs:xxs ff:mono c:gray6
+					
 				if state.learning_data.course_learned_usage
-					<.usage_word_count>
-						"{state.learning_data.course_learned_usage[state.course]}/{course..word_usage_count_sum} words"
 					<progress-bar[$bg:gray2 @darkmode:gray7] progress=state.learning_data.course_progress[state.course]>
 			if Course.courses[state.course]
 				for own id, lesson of Course.courses[state.course].lessons
-					<LessonNavItem .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
+					<lesson-list-item .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
 			else
 				<p> 'Loading...'
 
-# TAG[epic=NAV, seq=35] LessonNavItem
-tag LessonNavItem
+# TAG[epic=NAV, seq=35] lesson-list-item
+tag lesson-list-item
 	css self
 		cursor:pointer
 		rd:1rd
-		px:1sp py:1sp
 		c:gray5
 		bg:white/50 @darkmode:gray8/20
 		@hover
@@ -241,10 +187,10 @@ tag LessonNavItem
 	def render
 		let progress = "4/{lesson.word_usage_count_sum}"
 		<self[w:100%].lesson-button .course_active=course_active> # FIX: course active state, not working.
-			<.chapter-text[d:hflex jc:space-between ai:end]>
-				<.chapter-name> lesson.title
+			
+			<.lesson-name> lesson.title
 			if state.learning_data.lesson_learned_usage
-				<.chapter-number[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum} words"
+				<.progress-numbers[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum} words"
 				<progress-bar .color progress=state.learning_data.lesson_progress[state.course][id]>
 
 # TAG[epic=NAV, seq=36] phrase-nav
@@ -392,7 +338,7 @@ tag IconRightChevron
 
 # ELEMENT[epic=ELEMENT, seq=42] Icon Template
 tag icon
-	css self d:inline mb:4px
+	css self d:inline
 	css svg size:20px d:inline-block stroke:hue4
 
 # ELEMENT[epic=ELEMENT, seq=43] Gift Icon

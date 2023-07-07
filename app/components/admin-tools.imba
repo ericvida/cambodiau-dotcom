@@ -1,7 +1,5 @@
 tag admin-tools
 	css self
-		w:100% bg:hue9
-		h:1topbar
 		p:1sp
 		d:flex
 		g:1sp
@@ -32,18 +30,17 @@ tag admin-tools
 		# Upload Course Data that was modified locally from JSON format.
 		window.alert('uploading json')
 	<self>
-		<.width-container[d:hflex gap:.5sp jc:center]>
-			<div[c:hue3]> "edit active:"
-			<button @click.toggleCourseEditor>
-				"course"
-			<button @click.toggleLessonEditor>
-				"lesson"
-			<button @click.togglePhraseEditor>
-				"phrase"
-			<button @click.toggleWordEditor>
-				"word"
-			<div[c:hue3 fs:2em ff:sans]> "∙"
-			<button @click.downloadJson>
-				"download json"
-			<button @click.uploadJson>
-				"upload json"
+		<div[c:hue9]> "Admin Tools:"
+		<button @click.toggleCourseEditor>
+			"course"
+		<button @click.toggleLessonEditor>
+			"lesson"
+		<button @click.togglePhraseEditor>
+			"phrase"
+		<button @click.toggleWordEditor>
+			"word"
+		<div[c:hue9 fs:2em ff:sans]> "∙"
+		<button @click.downloadJson>
+			"download json"
+		<button @click.uploadJson>
+			"upload json"

@@ -3,35 +3,34 @@ import {audio} from '../audio'
 import {dictionary} from '../data/dictionary'
 import {clusters} from '../data/clusters'
 
-# LAYOUT[epic=LAYOUT, seq=23] lesson-page
-tag lesson-page
+# LAYOUT[epic=LAYOUT, seq=23] lesson-viewer
+tag lesson-viewer
 	prop course = {}
-
-	css d:vflex @lg:hflex g:1sp
-		# bg:red
 	css .course-grid
-		# flg:1 d:vflex g:1sp
 		d:grid g:1sp
 		gtc: 1fr @md: minmax(1rightbar, 3rightbar) 1rightbar
-		# grid-template-areas: "a a b", "a a b"
-	css .image 
-		rd:1rd
-		aspect-ratio: 2 / 1
-		w:100%
-	css .left, .right
-		d:vflex
-		gap:1sp
+		bg:gray0
 	css .phonetics
 		ff:mono d:flex gap:0.5sp flex-wrap:wrap
-
 	def render
 		<self>
 			if course.lessons
 				let phrase = course.lessons[state.lesson]..phrases[state.phrase]
+				# TODO: Make background image dynamic
 				<main.course-grid>
-					<.left>
-						if phrase.image
-							<img src=phrase.image .image> phrase.image
+					css pos:relative
+					<.bg-image[pos:absolute w:100% zi:0]>
+						<img src=phrase.image>
+							css pos:absolute 
+								inset:0 w:100% 
+								aspect-ratio: 16 / 9
+						<div.after>
+							css pos:absolute 
+								inset:0 
+								aspect-ratio: 16 / 9
+								bg: linear-gradient(to bottom, gray9/30 50%, gray0 100%)
+					<div.phrase-ui>
+						css w:100% zi:10 mt:230px ml:100px
 						<word-grid.card @click.commit course=course phrase=phrase rt=route>
 						<.card> 
 							<h2> "Phonetics"
@@ -55,7 +54,6 @@ tag lesson-page
 						<.card>
 							<h2> "Meaning"
 							<p> phrase.meaning
-					<.right>
 						if state.active_word
 							<word-card.card>
 							if dictionary[state.active_word]..google
@@ -74,7 +72,7 @@ tag word-grid
 		d:hflex flf:wrap g:.5sp
 	css .word
 			ff:$khmer
-			fs:2xl
+			fs:1xl
 			lh:2em
 			pt:.4em
 			cursor:pointer
@@ -160,6 +158,7 @@ tag word-grid
 				@hotkey('d|left')=prevWord 
 				@hotkey('f|right')=nextWord
 			>
+			<h2> "Khmer"
 			<div.word-wrapper>
 				for khmer_word, ki in phrase.khmer.split(' ')
 					<.word .active=(khmer_word is state.active_word) route-to="/course/{state.course}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word

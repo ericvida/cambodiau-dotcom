@@ -1,5 +1,5 @@
-# TAG[epic=NAV, seq=1] main-navigation
-tag main-navigation
+# TAG[epic=NAV, seq=1] main-nav
+tag main-nav
 	css self
 		d:flex gap:1sp fs:10px
 		h:1topbar
@@ -35,10 +35,7 @@ tag main-navigation
 				<div> "Dictionary"
 			<button route-to="/phonetics">
 				<div> "Phonetics"
-			<button route-to="/phrase-editor">
-				<div> "phrase"
-			<button route-to="/cms">
-				<div> "CMS"
+			
 			if state.user
 				<button @click.signOut>
 					<div> "Sign out"
