@@ -6,6 +6,7 @@ import {clusters} from '../data/clusters'
 # LAYOUT[epic=LAYOUT, seq=23] phrase-playground
 tag phrase-playground
 	prop course = {}
+
 	def render
 		<self>
 			if course.lessons

@@ -24,7 +24,7 @@ tag lesson-nav
 					
 				if state.learning_data.course_learned_usage
 					<progress-bar[$bg:gray2 @darkmode:gray7] progress=state.learning_data.course_progress[state.course]>
-			if course
+			if course.lessons
 				for own id, lesson of course.lessons
 					<lesson-nav-item .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
 			else
@@ -41,6 +41,7 @@ tag lesson-nav-item
 		@hover
 			bg:gray0 @darkmode:gray8/50
 			bxs:0px 0px 0px 2px gray1
+
 	css progress-bar 
 			$bg:gray1
 			$fg:hue3
@@ -59,14 +60,16 @@ tag lesson-nav-item
 				progress-bar
 					$bg:gray8
 					$fg:indigo4
+
 	def render
-		let progress = "4/{lesson.word_usage_count_sum}"
+		const progress = (state.learning_data.lesson_progress[state.course][id] / lesson.word_usage_count_sum).toFixed(2)
 		<self.lesson-button .course_active=course_active> # FIX: course active state, not working.
 			if state.learning_data.lesson_learned_usage
 				<[d:hflex gap:0.6sp]>
-					<progress-ring size=40 progress=state.learning_data.lesson_progress[state.course][id]> 
-						<span> "{Number(id)+1}"
+					<progress-ring size=40 progress=progress> 
+						<span> "{progress}%"
 					<div[d:vflex]>
 						<div.lesson-name> lesson.title
-						<div.progress-numbers[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_progress[state.course][id]}% ({state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum})"
+						<div.progress-numbers[opacity:80% fs:xs ff:monospace]>
+							"{state.learning_data.lesson_progress[state.course][id]}/{lesson.word_usage_count_sum}"
 					# <progress-bar .color progress=state.learning_data.lesson_progress[state.course][id]>

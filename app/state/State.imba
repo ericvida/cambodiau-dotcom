@@ -50,6 +50,7 @@ class State
 	show_lesson_editor = no
 	show_phrase_editor = no
 	show_word_editor = no
+
 	constructor
 		if imba.locals.state
 			setState imba.locals.state
@@ -76,6 +77,7 @@ class State
 				imba.router.go('/')
 			save!
 		)
+
 	def closeModals
 		show_course_editor = no
 		show_lesson_editor = no
@@ -144,8 +146,8 @@ class State
 
 	# calculates progress from words already learned by the user
 	def calcAllProgress
-		learning_data.user_progress = calcUserProgress(Course)
-		learning_data.user_progress_learned_usage = calcUserLearnedUsage(Course)
+		learning_data.user_progress = calcUsageProgressOfObject(Course)
+		learning_data.user_progress_learned_usage = calcLearnedUsageOfObject(Course)
 		learning_data.course_progress = calcCourseProgress(Course)
 		learning_data.course_learned_usage = calcCourseLearnedUsage(Course)
 		learning_data.lesson_progress = calcLessonProgress(Course)
@@ -153,36 +155,32 @@ class State
 		learning_data.phrase_progress = calcPhraseProgress(Course)
 		learning_data.phrase_learned_usage = calcPhraseLearnedUsage(Course)
 
-	def calcUserProgress user_data
-		return calcUsageProgressOfObject(user_data)
-
 	def calcCourseProgress user
 		let course_progress = []
-		for course in user.courses
+		for own courseid, course of user.courses
 			course_progress.push calcUsageProgressOfObject(course)
-
 		return course_progress
 
 	def calcLessonProgress user
-		let lesson_progress = []
-		for course in user.courses
-			let lesson_progress_two = []
-			for lesson in course.lessons
-				lesson_progress_two.push calcUsageProgressOfObject(lesson)
-			lesson_progress.push lesson_progress_two
-		return lesson_progress
+		let course_progress = {}
+		for own courseid, course of user.courses
+			let lesson_progress = {}
+			for own lessonid, lesson of course.lessons
+				lesson_progress[lessonid] = calcUsageProgressOfObject(lesson)
+			course_progress[courseid] = lesson_progress
+		return course_progress
 
 	def calcPhraseProgress user
-		let phrase_progress = []
-		for course in user.courses
-			let phrase_progress_two = []
-			for lesson in course.lessons
-				let phrase_progress_three = []
+		let course_progress = {}
+		for own courseid, course of user.courses
+			let lesson_progress = {}
+			for own lessonid, lesson of course.lessons
+				let phrase_progress = []
 				for phrase in lesson.phrases
-					phrase_progress_three.push calcUsageProgressOfObject(phrase)
-				phrase_progress_two.push phrase_progress_three
-			phrase_progress.push phrase_progress_two
-		return phrase_progress
+					phrase_progress.push calcUsageProgressOfObject(phrase)
+				lesson_progress[lessonid] = phrase_progress
+			course_progress[courseid] = lesson_progress
+		return course_progress
 
 	def calcUsageProgressOfObject object
 		let percent = 0
@@ -193,35 +191,32 @@ class State
 		percent = Math.round(percent * 100)
 		return percent
 
-	def calcUserLearnedUsage user
-		return calcLearnedUsageOfObject(user)
-
 	def calcCourseLearnedUsage user
 		let course_progress = []
-		for course in user.courses
+		for own courseid, course of user.courses
 			course_progress.push calcLearnedUsageOfObject(course)
 		return course_progress
 
 	def calcLessonLearnedUsage user
-		let lesson_progress = []
-		for course in user.courses
-			let lesson_progress_two = []
-			for lesson in course.lessons
-				lesson_progress_two.push calcLearnedUsageOfObject(lesson)
-			lesson_progress.push lesson_progress_two
-		return lesson_progress
+		let course_progress = []
+		for own courseid, course of user.courses
+			let lesson_progress = []
+			for own id, lesson of course.lessons
+				lesson_progress.push calcLearnedUsageOfObject(lesson)
+			course_progress[courseid] = lesson_progress
+		return course_progress
 
 	def calcPhraseLearnedUsage user
-		let phrase_progress = []
-		for course in user.courses
-			let phrase_progress_two = []
-			for lesson in course.lessons
-				let phrase_progress_three = []
+		let course_progress = []
+		for own courseid, course of user.courses
+			let lesson_progress = []
+			for own lessonid, lesson of course.lessons
+				let phrase_progress = []
 				for phrase in lesson.phrases
-					phrase_progress_three.push calcLearnedUsageOfObject(phrase)
-				phrase_progress_two.push phrase_progress_three
-			phrase_progress.push phrase_progress_two
-		return phrase_progress
+					phrase_progress.push calcLearnedUsageOfObject(phrase)
+				lesson_progress[lessonid] = phrase_progress
+			course_progress[courseid] = lesson_progress
+		return course_progress
 
 	# Calculates how many times a learned word has been used 
 	def calcLearnedUsageOfObject input

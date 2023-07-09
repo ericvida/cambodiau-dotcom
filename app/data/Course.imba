@@ -4,12 +4,13 @@ global.ERROR = console.error
 
 import { collection, doc, setDoc, getDocs } from "firebase/firestore"
 import { db } from '../state/firebase'
+import raw_fb_courses from './raw_fb_courses.json'
 
 # import {en} from './input_bible_stories_eng'
 # import {kh} from './input_bible_stories_khmer'
-# import {modulies} from './input_bible_stories_titles'
+# import {courses} from './input_bible_stories_titles'
 
-export const COURSES_COLLECTION = 'modules' # TODO: rename to courses
+export const COURSES_COLLECTION = 'courses'
 export const LESSONS_SUBCOLLECTION = 'lessons'
 
 class CourseData
@@ -28,13 +29,13 @@ class CourseData
 		"!"
 		'"'
 	]
-	courses = []
+	courses = {}
 
 	def constructor
 		console.log('Initialized Course')
 		# const consolidated_data = consolidateBibleStoryData!
 		# If you change the course data locally and want to push the changes to firebase just uncomment the line below
-		# saveGeneratedCourse window.structuredClone consolidated_data.course
+		# saveGeneratedCourse window.structuredClone consolidated_data
 		# enrichcourseData consolidated_data
 		# convert array tree into object tree
 
@@ -43,7 +44,7 @@ class CourseData
 	# Next step will be to save all this stuff to Firebase and pass to enrichcourseData courses from Firebase
 	# After we have them in Firebase we will work over CMS tab where you'll be able to add/edit the courses and their lessons
 	# def consolidateBibleStoryData
-	# 	for course, ci in modulies
+	# 	for course, ci in courses
 	# 		for lesson, li in course.lessons # lesson
 	# 			lesson.phrases = []
 	# 			for phrase, index in kh[li]
@@ -53,8 +54,27 @@ class CourseData
 	# 					khmer: phrase
 	# 					meaning: en[li][index]
 	# 				}
-	# 	return modulies
+	# 	return courses
 
+
+	# def saveGeneratedCourse modules
+	# 	for course in modules
+	# 		const courseRef = doc(db, COURSES_COLLECTION, course.slug)
+
+	# 		await setDoc(courseRef, {
+	# 			icon: course.icon
+	# 			slug: course.slug
+	# 			image: course.image
+	# 			info: course.info
+	# 			price: course.price
+	# 			title: course.title
+	# 		})
+
+	# 		await Promise.all(course.lessons.map(do(lesson)
+	# 			const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
+	# 			const lessonRef = doc(lessonCollectionRef)
+	# 			return setDoc(lessonRef, lesson)
+	# 		))
 
 
 	# Finds all words used in each course, lesson, and phrase.
@@ -77,7 +97,7 @@ class CourseData
 					const split_khmer = phrase.khmer.split(' ')
 					phrase.word_set = getSameWordSet(split_khmer)
 					phrase.word_usage_count = getSameWordUsage(split_khmer)
-					phrase.word_usage_count_sum = Object.values(getSameWordUsage(phrase.khmer)).reduce((do(a,b) a + b), 0)
+					phrase.word_usage_count_sum = Object.values(getSameWordUsage(split_khmer)).reduce((do(a,b) a + b), 0)
 					# phrase.khmer = phrase..khmer.split(' ') || ''
 					# phrase.english = phrase..english.split(' ') || ''
 
@@ -90,11 +110,31 @@ class CourseData
 		this.word_set = getChildrenWordSet(course_data)
 		[this.word_usage_count, this.word_usage_count_sum] = getChildrenWordUsage(course_data)
 
-		this.courses = course_data
-	
+		# this.courses = course_data
+		# Create a map of courses and their lessons
+		for course in course_data
+			# No spread because lessons need special attention
+			courses[course.slug] = {
+				info: course.info
+				title: course.title
+				icon: course.icon
+				price: course.price
+				image: course.image
+				slug: course.slug
+				id: course.id
+				word_set: course.word_set
+				word_usage_count: course.word_usage_count
+				word_usage_count_sum: course.word_usage_count_sum
+				lessons: {}
+			}
+			for lesson in course.lessons
+				courses[course.slug].lessons[lesson.slug] = lesson
+
+
+
 	def getSameWordSet words
 		return [...new Set(words)]
-	
+
 	def getSameWordUsage words
 		let word_count = {}
 		for item in words
@@ -106,7 +146,6 @@ class CourseData
 				word_count[item] += 1
 			else
 				word_count[item] = 1
-
 		return word_count
 
 	def getChildrenWordSet children
@@ -130,41 +169,32 @@ class CourseData
 			counter += val
 		return counter
 
-	def saveGeneratedCourse courses
-		for course in courses
-			const courseRef = doc(db, COURSES_COLLECTION, course.id) # TODO: 
+	def docDatWithId doc
+		const data = doc.data()
+		data.id = doc._key.path.segments.at(-1)
+		return data
 
-			await setDoc(courseRef, {
-				icon: course.icon
-				id: course.id
-				image: course.image
-				info: course.info
-				price: course.price
-				title: course.title
-			})
+	def initCoursesFromFirebase
+		if 'development === true'
+			// use predownloaded data for development to speed up the process
+			await setTimeout(0, console.log('fake async delay to make the mock function async'))
+			raw_courses = raw_fb_courses
+			enrichcourseData window.structuredClone raw_fb_courses
+		else
+			const querySnapshot = await getDocs(collection(db, COURSES_COLLECTION))
 
-			await Promise.all(course.lessons.map(do(lesson)
-				const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
-				const lessonRef = doc(lessonCollectionRef, lesson.id)
-				return setDoc(lessonRef, lesson)
+			const data = querySnapshot.docs.map(do(doc) docDatWithId(doc))
+
+			await Promise.all(data.map(do(course)
+				const lessonsRef = collection(db, COURSES_COLLECTION, course.slug, LESSONS_SUBCOLLECTION)
+				const lessonsSnapshot = await getDocs(lessonsRef)
+				course.lessons = lessonsSnapshot.docs.map(do(doc) docDatWithId(doc))
 			))
 
-	def initModulsFromFirebase
-		const querySnapshot = await getDocs(collection(db, COURSES_COLLECTION)); # TODO: 
-
-		const data = querySnapshot.docs.map(do(doc) doc.data())
-
-		await Promise.all(data.map(do(course)
-			const lessonsRef = collection(db, COURSES_COLLECTION, course.id, LESSONS_SUBCOLLECTION) # TODO: 
-			const lessonsSnapshot = await getDocs(lessonsRef)
-			course.lessons = lessonsSnapshot.docs.map(do(doc) doc.data())
-		))
-
-		raw_courses = window.structuredClone data
-
-		enrichcourseData data
-		LOG('Initialized course data')
+			raw_courses = window.structuredClone data
+			enrichcourseData data
 		
+		LOG('Initialized course data')
 
 export const Course = new CourseData
 

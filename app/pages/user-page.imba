@@ -10,13 +10,18 @@ tag user-page
 
 # LAYOUT[epic=LAYOUT, seq=22] UserPageOwnedCourse
 tag UserPageOwnedCourse
+	def defaultCourseUrl id, course
+		const firstLesson = Object.values(course.lessons)[0]
+		console.log "/course/{id}/{firstLesson.slug}/0/0/"
+		return "/course/{id}/{firstLesson.slug}/0/0/"
+
 	def render
 		<self>
 			<h2[px:1sp fs:xl]> 'Courses'
-			if courses.courses..length
+			if Object.keys(courses.courses).length
 				<.layout-card-grid>
 					for own id, course of courses.courses
-						<CourseCard.stretchy-card route-to="/course/{id}/0/0/0/" id=id course=course>
+						<CourseCard.stretchy-card route-to=defaultCourseUrl(id, course) id=id course=course>
 			else
 				<p> 'Loading...'
 
@@ -99,7 +104,7 @@ tag CourseCard
 						<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_count_sum)* 1000) / 10}%"
 					<progress-bar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.course_progress[id]>
 					# TODO: Calculate Wordcount of used words for course, Lesson, Phrase
-					<> LOG state.learning_data.course_progress[state.course]
+					# <> LOG state.learning_data.course_progress[state.course]
 				# if course.locked
 				# 	<.icon-lock>
 				# 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" .w-6.h-6>

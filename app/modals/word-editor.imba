@@ -13,7 +13,7 @@ let mock-word-data = {
 		use_of_word: ""
 		definition: "to get on"
 		source: "google translate"
-		]
+	]
 }
 tag word-editor
 	# transition
