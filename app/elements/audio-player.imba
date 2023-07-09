@@ -9,7 +9,7 @@ tag audio-player
 			word = state.active_word
 		<audio$track @ended.commit src=audio[word] type="audio/mpeg" preload="metadata">
 		
-		<.button-wrapper[d:hflex ai:center]>
+		<.button-wrapper[d:hflex ai:center size:24px]>
 			if $track.paused # when paused
 				<div .play-audio[w:2em cursor:pointer] @hotkey('space|a') @click=$track.play> 
 					<svg[size:24px] stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">

@@ -68,54 +68,39 @@ tag App
 				<phrase-editor>
 			if state.show_word_editor
 				<word-editor>
-			# if router.pathname is "/login"
-			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
-			<.layout-pancakes>
-				css w:100%
-					d:grid
-					gtr: calc(1topbar) auto 40px # sidebar content sidebar
-					min-height:100vh
-					h:auto
-					pos:absolute inset:0
-					ofy:scroll
-					# >> * p:1sp # padding around immediate children
-					# >> header d:flex ai:center px:1sp
-					.layout-middle
-						h:auto
-						ofy:auto
-						pos:relative
-				<.layout-top>
-					<.width-container>
-						<main-nav>
-
-				<.layout-middle>
+			<%pancake-layout>
+				css d:grid
+					grid-template-rows: auto 1fr auto
+					h:100vh
+					w:100%
+				<header>
+					<main-nav>
+				<main>
 					<landing-page route="/">
 					<store-page route="/store">
 					<user-page route="/learning">
 					<dictionary-page route="/dictionary">
 					<phonetics-page route="/phonetics">
 					<login-page route="/login">
-					<CreateAccountPage route="/create">
+					<signup-page route="/signup">
 					<course-page route="/course">
-
-				<.layout-bottom>
-						css c:gray9 @darkmode:gray1
-							h:1bottombar
-							d:hflex
-							ai:center
-							jc:center
-							bg:hue3 @darkmode:hue8
-							fs:xs
-							gap:.20sp
-						css a c:hue7 @darkmode:hue4
-						if admin = yes
-							<admin-tools>
-						else
-							<span> "Currently in Development. Give feedback via "
-							<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
-							<span> " or "
-							<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
-
+				<footer>
+					css c:gray9 @darkmode:gray1
+						h:1bottombar
+						d:hflex
+						ai:center
+						jc:center
+						bg:hue3 @darkmode:hue8
+						fs:xs
+						gap:.20sp
+					css a c:hue7 @darkmode:hue4
+					if admin = yes
+						<admin-tools>
+					else
+						<span> "Currently in Development. Give feedback via "
+						<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
+						<span> " or "
+						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
 
 
 
@@ -124,134 +109,16 @@ tag App
 
 
 
-
-# TAG[epic=NAV, seq=34] lesson-list
-tag lesson-list
-	prop course = {}
-	def render
-		<self>
-			css h:100vh
-				d:vflex
-			<%lesson-title-widget>
-				css bg:gray0/50 @darkmode:gray9
-					rd:md
-					p:1sp
-					bd:2px solid gray1
-				<.icon-title>
-					css d:hflex ai:end
-						mb:0.5sp
-					<i-{course.icon}>
-						css h:25px mr:.3sp
-					<h2 [fs:xl mr:auto]> course..title
-						css h:26px lh:26px
-					if state.learning_data.course_learned_usage
-						<.usage_word_count> "{state.learning_data.course_learned_usage[state.course]}/{course..word_usage_count_sum}"
-							css h:26px lh:26px ai:end d:flex
-							css fs:xxs ff:mono c:gray6
-					
-				if state.learning_data.course_learned_usage
-					<progress-bar[$bg:gray2 @darkmode:gray7] progress=state.learning_data.course_progress[state.course]>
-			if Course.courses[state.course]
-				for own id, lesson of Course.courses[state.course].lessons
-					<lesson-list-item .active=(id == state.lesson) route-to="/course/{state.course}/{id}/0/0" id=id lesson=lesson>
-			else
-				<p> 'Loading...'
-
-# TAG[epic=NAV, seq=35] lesson-list-item
-tag lesson-list-item
-	css self
-		cursor:pointer
-		rd:1rd
-		c:gray5
-		bg:white/50 @darkmode:gray8/20
-		@hover
-			bg:gray1 @darkmode:gray8/50
-	css progress-bar 
-			$bg:gray1
-			$fg:hue3
-		@hover
-			bg:gray1
-			progress-bar
-				$fg:indigo4
-		@darkmode
-			bg:gray9/50
-			c:gray3
-			progress-bar
-				$bg:gray8
-				$fg:gray6
-			&.hover, @hover
-				bg:gray9
-				progress-bar
-					$bg:gray8
-					$fg:indigo4
-	def render
-		let progress = "4/{lesson.word_usage_count_sum}"
-		<self[w:100%].lesson-button .course_active=course_active> # FIX: course active state, not working.
-			
-			<.lesson-name> lesson.title
-			if state.learning_data.lesson_learned_usage
-				<.progress-numbers[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum} words"
-				<progress-bar .color progress=state.learning_data.lesson_progress[state.course][id]>
-
-# TAG[epic=NAV, seq=36] phrase-nav
-tag phrase-nav
-	css self
-		c:gray9
-		w:1phrasebar
-		g:1sp
-		d:vflex ai:center
-	css .number-toggle 
-		rd:full s:30px
-		d:box
-		bg:gray1 @darkmode:gray8
-		@hover
-			bg:gray3 @darkmode:gray7
-		c:gray5 @darkmode:gray4
-		pos:relative
-		cursor:pointer
-	# Goes to the first verse of the next phrase
-	def nextPhrase
-		if phrase_index < last_phrase_index
-			phrase_index++
-			word_index = 0
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
-	
-	# Goes to the last word of hte previous phrase
-	def prevPhraseLast
-		if phrase_index > 0
-			phrase_index--
-			word_index = phrases[phrase_index].khmer.split(' ').length - 1
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
-	# Goes to the first word of the previous phrase
-	def prevPhraseZero
-		if phrase_index > 0
-			phrase_index--
-			word_index = 0
-			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
-	def render
-		let phrases = Course.courses[state.course]..lessons[state.lesson].phrases
-		<self>
-			if phrases
-				for own id, phrase of phrases
-					<.number-toggle route-to="/course/{state.course}/{state.lesson}/{id}/0">
-						let isActive = state.phrase is id
-						let progress = state.learning_data.phrase_progress[state.course][state.lesson][id]
-						<ElemProgressRing .active=isActive progress=progress size=30> 
-							if id is 0 
-								"t"
-							else
-								id
-			else
-				<p> 'Loading...'
 
 
 # TAG[epic=Modal, seq=37] Login Page
-tag CreateAccountPage
+tag signup-page
 	css p:2sp
 	css &.hidden d:none
 	# css pos:absolute inset:0 zi:20
 	# 	d:box d:vflex gap:4sp
-	css .bg pos:absolute inset:0 bg:red zi:20
+	css .bg 
+		pos:absolute inset:0 bg:red zi:20
 		d:vflex d:box g:4sp
 		bg:gray1 @darkmode:gray7
 	css .card
@@ -310,7 +177,7 @@ tag CreateAccountPage
 						<.options>
 							<input .email name="remember-me" type="checkbox" autocomplete="remember-me" required=""> 
 							<label for="remember-me"> "Remember Me"
-						<.login-button @click.mockAuthToggle> "Create Account"
+						<.login-button @click.mockAuthToggle> "Signup"
 						<hr[mt:1sp mb:.4sp]>
 						<thirdparty-logings>
 					
@@ -382,93 +249,5 @@ tag i-people < icon
 			<circle cx="17" cy="5" r="2" />
 			<path d="M15 22v-4h-2l2 -6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1l2 6h-2v4" />
 # ELEMENT[epic=ELEMENT, seq=47] Progress Ring
-
-tag ElemProgressRing
-	### SAMPLE TAG
-	<ProgressRing[$progress-color: purple5 $progress-bg: purple1 
-		$center-color: white $text-color: purple5 $stroke-percent: 80%] 
-		progress=progress size=100> 
-		<span> "habit"
-		<span slot="subtitle"> "{progress}%"
-	###
-	prop size = 100
-	css ta:center
-		$progress-color: hue2 @darkmode:hue7
-		$progress-bg: gray1 @darkmode:gray8
-		$text-color: gray5 @darkmode:gray4
-		$center-color: gray1 @darkmode:gray8
-		&.active
-			$progress-color: hue4 @darkmode:hue6
-			$progress-bg: hue2 @darkmode:hue7
-			$center-color: hue2 @darkmode:hue8
-		@hover
-			$progress-bg:gray2 @darkmode:gray7
-			$progress-color: hue3 @darkmode:hue5
-			$center-color:gray2 @darkmode: gray7
-		$stroke-percent: 70%
-		pos:absolute
-	css &.disabled o:30%
-	css .circular
-		size:$size
-		bg:none
-		pos:relative
-		zi:10
-		.inner
-			bg:$center-color
-			pos:absolute
-			zi:6
-			top:50%
-			left:50%
-			size:$stroke-percent
-			y: -50%	x: -50%
-			rd:full
-			ja:center
-		.title
-			zi:10
-			fs:18px
-			c:$text-color
-			mt:7%
-		.circle
-			.bar
-				pos:absolute
-				size:100%
-				bg:$progress-bg
-				rd:100%
-				tween: rotation 1dur ease-in-out
-				# clip: rect(0px, 100px, 100px, 50px) # TODO ERIC: These numbers must be dynamic
-				.progress
-					bg:$progress-color
-					pos:absolute
-					size:100%
-					rd:100%
-					# clip: rect(0px, 50px, 100px, 0px) # TODO ERIC: These numbers must be dynamic
-			.left rotate: -180deg 
-			.right zi:3
-
-	def render
-		<self>
-			<div .circular[size:{size+'px'}]>
-				<div .inner[d:vflex]>
-					<div .title[fs:sm lh:100%]> <slot>
-				<div .circle>
-					let step = 180 / 50
-					let left_progress = 0
-					let right_progress = 0
-					if progress > 50
-						left_progress = "{(progress - 50) * step}deg"
-						right_progress = "180deg"
-					else
-						left_progress = "0deg"
-						right_progress = "{(progress) * step}deg"
-					css .bar 
-						clip: rect(0px, {size + "px"}, {size + "px"}, {(size / 2) + "px"}) 
-						transition: clip-path 1s
-					css .progress 
-						clip: rect(0px, {(size / 2) + "px"}, {size + "px"}, 0px) 
-						transition: clip-path 1s
-					<div .bar.left>
-						<div .progress[rotate:{left_progress}]>
-					<div .bar.right>
-						<div .progress[rotate:{right_progress}]>
 
 imba.mount <App>, document.getElementById "app"

@@ -14,7 +14,6 @@ let mock-course-data = {
 	]
 }
 tag course-editor
-	# transition
 	css pos:absolute inset:0
 		d:grid zi:12
 		min-height: 100vh
@@ -28,16 +27,13 @@ tag course-editor
 			width: 60vw
 			height: 80vh
 			ofy:scroll
-			
-			
-	css h3
-			fs:.8em c:gray4 m:0
+	css h3 fs:.8em c:gray4 m:0
 	css input
-			bg: gray0 @focus:hue1
-			shadow: 0 0 5px 0px gray2 inset
-			rd:md
-			p:1sp m:0
-			w:100%
+		bg: gray0 @focus:hue1
+		shadow: 0 0 5px 0px gray2 inset
+		rd:md
+		p:1sp m:0
+		w:100%
 	def closeModal
 		state.closeModals!
 	

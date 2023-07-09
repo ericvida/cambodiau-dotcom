@@ -42,5 +42,5 @@ tag main-nav
 			else
 				<button route-to="/login">
 					<div> "Login"
-				<button route-to="/create">
-					<div> "Create Account"
+				<button route-to="/signup">
+					<div> "Signup"

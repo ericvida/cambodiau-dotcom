@@ -88,7 +88,6 @@ tag CourseCard
 		.course-price
 			c:hue6 @darkmode:hue4
 			ff:monospace
-	
 	def render
 		<self .locked=course.locked>
 			<div.not-image> unless course.image

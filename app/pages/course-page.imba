@@ -1,10 +1,6 @@
 import Course from '../data/Course'
 # TAG[epic=PAGE, seq=21] course-page
 tag course-page
-	css w:100% d:hgrid
-		gtc: 1lessonbar 1phrasebar auto
-		p:1sp
-		pos:relative
 	css .course-course
 		d:hflex w:100% 
 	css .close-leftbar
@@ -16,9 +12,7 @@ tag course-page
 		# FIXME: Console.warn fires twice. Not sure why
 		# WARN course
 		<self>
-			# <.lesson-list-wrapper>
-			<lesson-list route="/course/:lesson" course=Course.courses[state.course]>
-			# <.phrase-nav-wrapper>
+			css d:hflex w:100%
+			<lesson-nav route="/course/:lesson" course=Course.courses[state.course]>
 			<phrase-nav course=Course.courses[state.course]>
-			<lesson-viewer course=Course.courses[state.course]>
-			# 	<.main-wrapper[mx:auto]>
+			<phrase-playground course=Course.courses[state.course]>
