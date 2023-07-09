@@ -24,25 +24,33 @@ tag phrase-nav
 		<self>
 			css p:1sp d:vflex
 				c:gray9
-				w:1phrasebar
+				w:2phrasebar
 				g:1sp
 				gap:1sp
 			if phrases
-				for own id, phrase of phrases
-					<.number-toggle route-to="/course/{state.course}/{state.lesson}/{id}/0">
-						css	rd:full s:30px
-							d:box
-							bg:gray1 @darkmode:gray8
-							c:gray5 @darkmode:gray4
-							cursor:pointer
-							@hover
-								bg:gray3 @darkmode:gray7
-						let isActive = state.phrase is id
-						let progress = state.learning_data.phrase_progress[state.course][state.lesson][id]
-						<progress-ring .active=isActive progress=progress size=30> 
-							if id is 0 
-								"t"
-							else
-								id
+				for own phrase_id, phrase of phrases
+					let isActive = state.phrase is phrase_id
+					let progress = state.learning_data.phrase_progress[state.course][state.lesson][phrase_id]
+					<> LOG progress
+					let phrase_words_learned = state.learning_data.phrase_learned_usage[state.course][state.lesson][phrase_id]
+					let phrase_words_used = phrase.word_usage_count_sum
+					# <> LOG phrase.word_usage_count_sum
+					<div[d:hflex gap:.5sp jc:space-around]>
+						<.number-toggle route-to="/course/{state.course}/{state.lesson}/{phrase_id}/0">
+							css	rd:full s:30px
+								d:box
+								bg:gray1 @darkmode:gray8
+								c:gray5 @darkmode:gray4
+								cursor:pointer
+								@hover
+									bg:gray3 @darkmode:gray7
+							<progress-ring .active=isActive progress=progress size=30> 
+								if phrase_id is 0 
+									"t"
+								else
+									phrase_id
+						<div[d:vflex]>
+							<span> "{progress}% "
+							<span> "{phrase_words_learned}/{phrase_words_used}"
 			else
 				<p> 'Loading...'

@@ -65,8 +65,8 @@ tag lesson-nav-item
 			if state.learning_data.lesson_learned_usage
 				<[d:hflex gap:0.6sp]>
 					<progress-ring size=40 progress=state.learning_data.lesson_progress[state.course][id]> 
-						<span> "{state.learning_data.lesson_progress[state.course][id]}"
+						<span> "{Number(id)+1}"
 					<div[d:vflex]>
 						<div.lesson-name> lesson.title
-						<div.progress-numbers[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum}"
+						<div.progress-numbers[opacity:80% fs:xs ff:monospace]> "{state.learning_data.lesson_progress[state.course][id]}% ({state.learning_data.lesson_learned_usage[state.course][id]}/{lesson.word_usage_count_sum})"
 					# <progress-bar .color progress=state.learning_data.lesson_progress[state.course][id]>
