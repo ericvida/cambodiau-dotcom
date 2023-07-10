@@ -12,7 +12,7 @@ tag course-page
 		# FIXME: Console.warn fires twice. Not sure why
 		# WARN course
 		<self>
-			css d:hflex w:100%
+			css d:hflex w:auto
 			<lesson-nav route="/course/:lesson" course=Course.courses[state.course]>
 			<phrase-nav course=Course.courses[state.course]>
 			<phrase-playground course=Course.courses[state.course]>

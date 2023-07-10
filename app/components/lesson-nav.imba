@@ -63,13 +63,13 @@ tag lesson-nav-item
 
 	def render
 		const progress = (state.learning_data.lesson_progress[state.course][id] / lesson.word_usage_count_sum).toFixed(2)
+		LOG state.learning_data.lesson_progress, lesson
 		<self.lesson-button .course_active=course_active> # FIX: course active state, not working.
 			if state.learning_data.lesson_learned_usage
 				<[d:hflex gap:0.6sp]>
-					<progress-ring size=40 progress=progress> 
-						<span> "{progress}%"
+					<progress-ring size=40 progress=(progress*100)> 
 					<div[d:vflex]>
 						<div.lesson-name> lesson.title
 						<div.progress-numbers[opacity:80% fs:xs ff:monospace]>
-							"{state.learning_data.lesson_progress[state.course][id]}/{lesson.word_usage_count_sum}"
+							<span> "{progress*100}% ({state.learning_data.lesson_progress[state.course][id]}/{lesson.word_usage_count_sum})"
 					# <progress-bar .color progress=state.learning_data.lesson_progress[state.course][id]>
