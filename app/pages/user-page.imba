@@ -20,8 +20,8 @@ tag UserPageOwnedCourse
 			<h2[px:1sp fs:xl]> 'Courses'
 			if Object.keys(courses.courses).length
 				<.layout-card-grid>
-					for own id, course of courses.courses
-						<CourseCard.stretchy-card route-to=defaultCourseUrl(id, course) id=id course=course>
+					for own course_slug, course of courses.courses
+						<CourseCard.stretchy-card route-to=defaultCourseUrl(course_slug, course) id=course_slug course=course>
 			else
 				<p> 'Loading...'
 

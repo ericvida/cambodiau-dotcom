@@ -15,6 +15,7 @@ tag phrase-playground
 				<main.course-grid>
 					css d:vflex g:1sp
 						bg:gray9
+						rdtl:xl
 						h:100%
 						p:1sp
 						max-width:800px
@@ -23,6 +24,8 @@ tag phrase-playground
 						css pos:relative
 							w:100%
 							aspect-ratio: 16 / 9
+							rd:xl
+							of:hidden
 						<img src=phrase.image>
 							css pos:absolute 
 								w:100%
@@ -30,9 +33,11 @@ tag phrase-playground
 							css inset:0
 							css pos:absolute 
 								aspect-ratio: 16 / 9
-								bg: linear-gradient(to bottom, gray9/30 50%, gray9 100%)
+								bg: linear-gradient(to bottom, gray9/30 65%, gray9 100%)
 					<%phrase-card.card>
-						css w:100% zi:10
+						css w:90% zi:10
+							mx:auto
+							mt:-70px
 						<phrase-meaning 
 							phrase=phrase>
 						<phrase-khmer @click.commit 
@@ -44,6 +49,7 @@ tag phrase-playground
 							phrase=phrase 
 							dictionary=dictionary>
 					<%word-info-card.card>
+						css w:90% mx:auto
 						<> "word card"
 						if state.active_word
 							<word-card>

@@ -45,14 +45,14 @@ tag phrase-nav
 							ai:center
 							@hover
 								bg:gray3 @darkmode:gray7
-						<progress-ring .active=isActive progress=progress size=30> 
+						<progress-ring size=40 .active=isActive progress=progress > 
 						<%phrase-progress-info>
 							<%phrase-title>
 								css d:inline-block w:auto white-space:nowrap
 								if phrase_id is 0 
 									"N/A"
 								else
-									"Phrase {Number(phrase_id)+1}"
+									"Unit {Number(phrase_id)+1}"
 							<div.progress-numbers>
 								css opacity:80% fs:xs ff:monospace white-space:nowrap
 								"{progress}% ({phrase_words_learned}/{phrase_words_used})"
