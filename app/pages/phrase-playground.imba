@@ -14,11 +14,10 @@ tag phrase-playground
 				# TODO: Make background image dynamic
 				<main.course-grid>
 					css d:vflex g:1sp
-						bg:gray9
+						bg:gray1
 						rdtl:xl
 						h:100%
-						p:1sp
-						max-width:800px
+						# w:100%
 						# gtc: 1fr @md: minmax(1rightbar, 3rightbar) 1rightbar
 					<%phrase-image[zi:0]>
 						css pos:relative
@@ -33,7 +32,7 @@ tag phrase-playground
 							css inset:0
 							css pos:absolute 
 								aspect-ratio: 16 / 9
-								bg: linear-gradient(to bottom, gray9/30 65%, gray9 100%)
+								bg: linear-gradient(to bottom, gray1/30 65%, gray1 100%)
 					<%phrase-card.card>
 						css w:90% zi:10
 							mx:auto
@@ -53,6 +52,6 @@ tag phrase-playground
 						<> "word card"
 						if state.active_word
 							<word-card>
-							if dictionary[state.active_word]..google
-								<word-definitions dictionary=dictionary>
+							# if dictionary[state.active_word]..google
+							<word-definitions dictionary=dictionary>
 						

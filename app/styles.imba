@@ -6,7 +6,6 @@ global css
 		fw:400
 		1sp:16px # space for gaps and paddings
 		1dur:.20s # animation duration
-		1lessonbar: 300px # sidebar-width
 		1topbar: 60px # top bar height and menu button size
 		1bottombar: 40px # top bar height and menu button size
 		1rightbar: 240px # right bar size

@@ -9,7 +9,8 @@ import { User } from './types.ts'
 const initialState = {
 	user: undefined
 	dark: yes
-	left: yes
+	leftnav-lesson: yes
+	leftnav-phrase: yes
 	right: yes
 	ipa: no
 	course: 0
@@ -32,7 +33,8 @@ const auth = getAuth!
 class State
 	user\User = yes
 	dark = yes
-	left = yes
+	leftnav-lesson = yes
+	leftnav-phrase = yes
 	right = yes
 	ipa = no
 	course = 0

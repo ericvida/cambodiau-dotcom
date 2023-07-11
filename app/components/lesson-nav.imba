@@ -67,7 +67,6 @@ tag lesson-nav-item
 			if state.learning_data.lesson_learned_usage
 				<[d:hflex gap:0.6sp]>
 					<progress-ring size=40 progress=(progress*100)> 
-					<> LOG progress
 					<div[d:vflex]>
 						<div.lesson-name> lesson.title
 						<div.progress-numbers[opacity:80% fs:xs ff:monospace]>

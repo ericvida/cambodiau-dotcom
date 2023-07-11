@@ -26,7 +26,6 @@ def logTime fn
 # LAYOUT[epic=LAYOUT, seq=19] App
 tag App
 	css d:hflex
-		tween: margin-left 2dur
 		min-height: 100vh
 		w:100% 
 		bg:white @darkmode:black
