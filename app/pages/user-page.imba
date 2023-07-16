@@ -12,7 +12,6 @@ tag user-page
 tag UserPageOwnedCourse
 	def defaultCourseUrl id, course
 		const firstLesson = Object.values(course.lessons)[0]
-		console.log "/course/{id}/{firstLesson.slug}/0/0/"
 		return "/course/{id}/{firstLesson.slug}/0/0/"
 
 	def render
@@ -21,7 +20,7 @@ tag UserPageOwnedCourse
 			if Object.keys(courses.courses).length
 				<.layout-card-grid>
 					for own course_slug, course of courses.courses
-						<CourseCard.stretchy-card route-to=defaultCourseUrl(course_slug, course) id=course_slug course=course>
+						<course-card.stretchy-card route-to=defaultCourseUrl(course_slug, course) slug=course_slug course=course>
 			else
 				<p> 'Loading...'
 
@@ -42,14 +41,15 @@ tag UserPageLockedCourse
 			<h2> "Purchased Courses"
 			<.card-wrapper route="/">
 				for own id, course of bible_data.course
-					<CourseCard route-to="/buy/{id}" id=id course=course>
+					<course-card route-to="/buy/{id}" id=id course=course>
 
-# CARD[epic=CARD, seq=28] CourseCard
-tag CourseCard
+# CARD[epic=CARD, seq=28] course-card
+tag course-card
 	# prop chapters = []
 	prop link = "https://images.unsplash.com/photo-1599283787923-51b965a58b05?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8Y2FtYm9kaWF8ZW58MHx8MHx8&auto=format&fit=crop&w=300&h=100&q=60"
 	prop locked = yes
 	prop course_active = no
+	prop slug
 
 	css self
 		d:vflex .course_active:vflex ai:center
@@ -93,6 +93,7 @@ tag CourseCard
 		.course-price
 			c:hue6 @darkmode:hue4
 			ff:monospace
+
 	def render
 		<self .locked=course.locked>
 			<div.not-image> unless course.image
@@ -101,12 +102,5 @@ tag CourseCard
 				<.card-info>
 					<.card-title>
 						<h2> "{course.title}"
-						<span.progress-percent> "{Math.floor((state.learning_data.course_learned_usage[id] / course.word_usage_count_sum)* 1000) / 10}%"
-					<progress-bar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.course_progress[id]>
-					# TODO: Calculate Wordcount of used words for course, Lesson, Phrase
-					# <> LOG state.learning_data.course_progress[state.course]
-				# if course.locked
-				# 	<.icon-lock>
-				# 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" .w-6.h-6>
-				# 			<path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd" />
-				# 		<.course-price[]> "${course.price}"
+						<span.progress-percent> "{state.learning_data.course_progress[slug]}%"
+					<progress-bar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.course_progress[slug]>

@@ -37,8 +37,8 @@ class State
 	leftnav-phrase = yes
 	right = yes
 	ipa = no
-	course = 0
-	lesson = 0
+	course = ''
+	lesson = ''
 	phrase = 0
 	word = 0
 	admin = true
@@ -92,12 +92,18 @@ class State
 		modal_open = !modal_open
 		LOG 'course editor modal called', show_course_editor, modal_open
 		save!
-	def toggleLessonEditor
+
+	def toggleLessonEditor lesson_slug
+		if lesson_slug and typeof lesson_slug is 'string'
+			lesson = lesson_slug
 		show_lesson_editor = !show_lesson_editor
 		modal_open = !modal_open
 		LOG 'lesson editor modal called', show_lesson_editor, modal_open
 		save!
-	def togglePhraseEditor
+
+	def togglePhraseEditor phrase_id
+		if phrase_id and typeof phrase_id is 'number'
+			phrase = phrase_id
 		show_phrase_editor = !show_phrase_editor
 		modal_open = !modal_open
 		LOG 'phrase editor modal called', show_phrase_editor, modal_open
@@ -149,7 +155,7 @@ class State
 	# calculates progress from words already learned by the user
 	def calcAllProgress
 		learning_data.user_progress = calcUsageProgressOfObject(Course)
-		learning_data.user_progress_learned_usage = calcLearnedUsageOfObject(Course)
+		learning_data.user_progress_learned_usage = calcWordsUsedLearnedOfObject(Course)
 		learning_data.course_progress = calcCourseProgress(Course)
 		learning_data.course_learned_usage = calcCourseLearnedUsage(Course)
 		learning_data.lesson_progress = calcLessonProgress(Course)
@@ -158,9 +164,9 @@ class State
 		learning_data.phrase_learned_usage = calcPhraseLearnedUsage(Course)
 
 	def calcCourseProgress user
-		let course_progress = []
+		let course_progress = {}
 		for own courseid, course of user.courses
-			course_progress.push calcUsageProgressOfObject(course)
+			course_progress[courseid] = calcUsageProgressOfObject(course)
 		return course_progress
 
 	def calcLessonProgress user
@@ -179,7 +185,7 @@ class State
 			for own lessonid, lesson of course.lessons
 				let phrase_progress = []
 				for phrase in lesson.phrases
-					phrase_progress.push calcUsageProgressOfObject(phrase)
+					phrase_progress.push Math.round(calcUsageProgressOfObject(phrase))
 				lesson_progress[lessonid] = phrase_progress
 			course_progress[courseid] = lesson_progress
 		return course_progress
@@ -190,47 +196,45 @@ class State
 			# if word is not used in object
 			if object.word_usage_count[word]
 				percent += object.word_usage_count[word] / object.word_usage_count_sum
-		percent = Math.round(percent * 100)
+		percent = Number((percent * 100).toFixed(2))
 		return percent
 
 	def calcCourseLearnedUsage user
-		let course_progress = []
+		let course_progress = {}
 		for own courseid, course of user.courses
-			course_progress.push calcLearnedUsageOfObject(course)
+			course_progress[courseid] = calcWordsUsedLearnedOfObject(course)
 		return course_progress
 
 	def calcLessonLearnedUsage user
-		let course_progress = []
+		let course_progress = {}
 		for own courseid, course of user.courses
-			let lesson_progress = []
+			let lesson_progress = {}
 			for own id, lesson of course.lessons
-				lesson_progress.push calcLearnedUsageOfObject(lesson)
+				lesson_progress[id] = calcWordsUsedLearnedOfObject(lesson)
 			course_progress[courseid] = lesson_progress
 		return course_progress
 
 	def calcPhraseLearnedUsage user
-		let course_progress = []
+		let course_progress = {}
 		for own courseid, course of user.courses
-			let lesson_progress = []
+			let lesson_progress = {}
 			for own lessonid, lesson of course.lessons
 				let phrase_progress = []
 				for phrase in lesson.phrases
-					phrase_progress.push calcLearnedUsageOfObject(phrase)
+					phrase_progress.push calcWordsUsedLearnedOfObject(phrase)
 				lesson_progress[lessonid] = phrase_progress
 			course_progress[courseid] = lesson_progress
 		return course_progress
 
 	# Calculates how many times a learned word has been used 
-	def calcLearnedUsageOfObject input
+	def calcWordsUsedLearnedOfObject input
 		let words_used = input.word_usage_count
-		# LOG input, user_learned
-		let learned_words_usage = 0
-		# LOG(user_learned)
+		let words_used_learned = 0
 		for own word, is_learned of user_learned
 			# If words_used containes word
-			if words_used[word] and is_learned
-				learned_words_usage += words_used[word]
-		return Math.round(learned_words_usage)
+			if words_used[word]
+				words_used_learned += words_used[word]
+		return words_used_learned
 
 
 const state = new State

@@ -13,7 +13,7 @@ const auth = getAuth();
 tag login-page
 	css p:2sp
 	css &.hidden d:none
-	css .bg pos:absolute inset:0 bg:red zi:20
+	css .bg pos:fixed inset:0 bg:red zi:20
 		d:vflex d:box g:4sp
 		bg:gray1 @darkmode:gray7
 	css .card

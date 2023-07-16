@@ -30,6 +30,7 @@ class CourseData
 		'"'
 	]
 	courses = {}
+	raw_courses = []
 
 	def constructor
 		console.log('Initialized Course')
@@ -175,7 +176,7 @@ class CourseData
 		return data
 
 	def initCoursesFromFirebase
-		if 'development === true'
+		if not 'development === true'
 			// use predownloaded data for development to speed up the process
 			await setTimeout(0, console.log('fake async delay to make the mock function async'))
 			raw_courses = raw_fb_courses
@@ -194,7 +195,7 @@ class CourseData
 			raw_courses = window.structuredClone data
 			enrichcourseData data
 		
-		LOG('Initialized course data')
+		LOG('Initialized course data', raw_courses)
 
 export const Course = new CourseData
 

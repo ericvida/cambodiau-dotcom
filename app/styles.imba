@@ -41,7 +41,7 @@ global css
 		ff:mono
 	.key-text fs:xs 
 		c:warm6 @darkmode:warm4
-	.modal-bg bg:black pos:absolute top:0 l:0 w:100% h:100% zi:11 o:80% cursor:pointer
+	.modal-bg bg:black pos:fixed top:0 l:0 w:100% h:100% zi:11 o:80% cursor:pointer
 # ui[epic=layout, seq=1] sidebar
 tag layout-sidebar # left sidebar of content
 	css self

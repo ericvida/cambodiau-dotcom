@@ -47,6 +47,7 @@ tag App
 			log courses.courses
 			imba.commit!
 		)
+		saveRouteToState!
 		imba.router.on('change') do saveRouteToState!
 	# FIXME: Not sure why state is not saving and being loaded
 

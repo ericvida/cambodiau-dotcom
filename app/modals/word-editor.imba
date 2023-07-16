@@ -17,7 +17,7 @@ let mock-word-data = {
 }
 tag word-editor
 	# transition
-	css pos:absolute inset:0
+	css pos:fixed inset:0
 		d:grid zi:12
 		min-height: 100vh
 		ja:center

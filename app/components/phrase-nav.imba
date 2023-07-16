@@ -22,7 +22,7 @@ tag phrase-nav
 			router.go("/course/{course_index}/{lesson_index}/{phrase_index}/{word_index}")
 
 	def render
-		let phrases = course..lessons[state.lesson].phrases
+		let phrases = course..lessons[state.lesson]..phrases
 		<self>
 			css p:1sp d
 			if phrases
