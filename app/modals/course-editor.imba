@@ -29,13 +29,11 @@ tag course-editor
 	def render
 		<self >
 			if course
-				<button @click=saveEditedCourse> "save"
-					css pos:absolute 
-						bg:gray1 @hover:hue2
-						t:0 l:0
-						h:50px w:100px
-						zi:30
-				<h1> "Course Editor"
+				<[d:hflex]>
+					<h1[mr:auto]> "Course Editor"
+					<button @click=saveEditedCourse> "save"
+						css w:200px p:.5sp ta:center as:end rd:md
+						css bg:gray1 @hover:hue2
 				<section>
 					<h3> "Course Title"
 					<input bind=course.title type="text">

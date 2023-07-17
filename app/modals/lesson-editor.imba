@@ -8,31 +8,6 @@ tag lesson-editor
 	get lesson
 		return courses.courses[state.course]..lessons[state.lesson]
 
-	# transition
-	css pos:fixed inset:0
-		d:grid zi:12
-		min-height: 100vh
-		ja:center
-		m:0
-		o@off:0 ea:1s
-		.card
-			x@in:100px x@out:100px ea:1s
-			d:flex zi:30 ofy:scroll
-			min-width: 500px
-			width: 60vw
-			height: 80vh
-			ofy:scroll
-			
-			
-	css h3
-			fs:.8em c:gray4 m:0
-	css input
-			bg: gray1
-			shadow: 0 0 5px 0px gray2 inset
-			rd:md
-			p:1sp m:0
-			w:100%
-
 	def closeModal
 		state.hideEditor!
 
@@ -59,13 +34,15 @@ tag lesson-editor
 
 
 	def render
-		<self ease>
+		<self>
 			if lesson
-				<.modal-bg @click.closeModal>
-				<.card[d:flex zi:30]>
-					<span>
-						<button @click.toggleCourseEditor [mr:3px]> "Course > "
-						<button> "Lesson Editor"
+				<$content-wrapper>
+					<[d:hflex]>
+						<span[mr:auto]>
+							<button @click.toggleCourseEditor [mr:3px]> "Course > "
+							<button> "Lesson Editor"
+						<button[w:200px p:.5sp ta:center as:end rd:md] @click=saveEditedLesson> "save"
+							css bg:gray1 @hover:hue2
 					<section>
 						<h3> "Lesson Title"
 						<input bind=lesson.title type="text">
@@ -89,8 +66,5 @@ tag lesson-editor
 											<button[h:20px fs:10px fs:20px filter:grayscale(100%) filter@hover:grayscale(0%)]> "👆" # move up
 											<button[h:20px fs:10px fs:20px filter:grayscale(100%) filter@hover:grayscale(0%)]> "👇" # move down
 					<section[flex-grow:1]>
-					<section[w:100% d:flex jc:end]>
-						<button[w:200px p:.5sp ta:center as:end rd:md] @click=saveEditedLesson> "save"
-							css bg:gray1 @hover:hue2
 			else
 				<p> 'Loading...'

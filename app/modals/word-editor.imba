@@ -17,29 +17,9 @@ let mock-word-data = {
 }
 tag word-editor
 	# transition
-	css pos:fixed inset:0
-		d:grid zi:12
-		min-height: 100vh
-		ja:center
-		m:0
-		o@off:0 ea:1s
-		.card
-			x@in:100px x@out:100px ea:1s
-			d:flex zi:30 ofy:scroll
-			min-width: 500px
-			width: 60vw
-			height: 80vh
-			ofy:scroll
-			
-	css h3
-			fs:.8em c:gray4 m:0
+		
 	css section
 			w:100%
-	css input
-			bg: gray1
-			shadow: 0 0 5px 0px gray2 inset
-			rd:md
-			p:1sp m:0
 	css .word-group input
 			max-width:100%
 			min-width:0%
@@ -94,9 +74,9 @@ tag word-editor
 		closeModal!
 		state.togglePhraseEditor!
 		imba.commit!
-	<self ease>
-		<.modal-bg @click.closeModal>
-		<.card[d:flex zi:30]>
+	<self>
+		<%content-wrapper>
+			css d:vflex zi:30
 			<h1> 
 				<span @click.toggleCourseEditor> "Course > "
 				<span @click.toggleLessonEditor> "Lesson > "
@@ -139,7 +119,3 @@ tag word-editor
 					# if has audio file
 					<button[bg:hue1 @hover:hue2 py:.6sp px:1sp rd:md]> "play"
 					<button[bg:gray1 @hover:rose2 py:.6sp px:1sp rd:md]> "delete file"
-			<div[flg:1]>
-			<section>
-				css w:100% d:flex jc:end
-				<button[bg:gray1 @hover:hue2 py:.6sp px:1sp rd:md]> "save"

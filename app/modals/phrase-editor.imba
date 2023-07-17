@@ -12,29 +12,7 @@ tag phrase-editor
 		return #lesson_phrases[state.phrase]
 
 	# transition
-	css pos:fixed inset:0
-		d:grid zi:12
-		min-height: 100vh
-		ja:center
-		m:0
-		o@off:0 ea:1s
-		.card
-			x@in:100px x@out:100px ea:1s
-			d:flex zi:30 ofy:scroll
-			min-width: 500px
-			width: 60vw
-			height: 80vh
-			ofy:scroll
-		h3
-			fs:.8em c:gray4 m:0
-		section
-			w:100%
-		input
-			w:100%
-			bg: gray1
-			shadow: 0 0 5px 0px gray2 inset
-			rd:md
-			p:1sp m:0
+	css self
 		.word-pill-wrapper
 			flex-wrap:wrap
 			d:flex gap:.4sp
@@ -113,18 +91,23 @@ tag phrase-editor
 		if courses.raw_courses.length && (#lesson_phrases.length === 0 || #phrase_hash != phraseLinkHash!)
 			getRawLessonPhrases!
 
-		<self ease>
+		<self >
 			if phrase
-				<.modal-bg @click.closeModal>
-				<.card[d:flex zi:30]>
-					<h1>
-						<span @click.toggleCourseEditor> "Course > "
-						<span @click.toggleLessonEditor> "Lesson > "
-						<span> "Phrase Editor"
-					<h1>
-						<span @click.toggleCourseEditor> state.course, ' >'
-						<span @click.toggleLessonEditor> state.lesson, ' >'
-						<span> "Editing Phrase {state.phrase}"
+				<$content-wrapper>
+					css d:vflex zi:30
+					<[d:hflex]>
+						<.left>
+							css mr:auto
+							<h1>
+								<span @click.toggleCourseEditor> "Course > "
+								<span @click.toggleLessonEditor> "Lesson > "
+								<span> "Phrase Editor"
+							<h1>
+								<span @click.toggleCourseEditor> state.course, ' >'
+								<span @click.toggleLessonEditor> state.lesson, ' >'
+								<span> "Editing Phrase {state.phrase}"
+						<.button[w:200px p:.5sp ta:center as:end] @click=saveEditedLesson> "save"
+							css bg:gray1 @hover:hue2
 					<section>
 						<h3> "meaning"
 						<input bind=phrase.meaning type="text">
@@ -159,7 +142,3 @@ tag phrase-editor
 										@click.editWord> dictionary[word]..vida
 								else
 									<span.word-pill.not-found @click.editWord> word
-					<section[flex-grow:1]>
-					<section[w:100% d:flex jc:end]>
-						<.button[w:200px p:.5sp ta:center as:end] @click=saveEditedLesson> "save"
-							css bg:gray1 @hover:hue2

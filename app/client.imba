@@ -22,7 +22,6 @@ def logTime fn
 	let endTime = performance.now!
 	# LOG "function took {startTime - endTime} ms"
 	return res
-
 # LAYOUT[epic=LAYOUT, seq=19] App
 tag App
 	css d:hflex
@@ -62,16 +61,19 @@ tag App
 
 			if state.show_editor
 				<editors-page>
-			<%pancake-layout [filter:blur(5px)]=state.show_editor>
+			
+			<%pancake-layout [filter:blur(5px) of:hidden]=state.show_editor>
+				
 				css d:grid
 					grid-template-rows: auto 1fr auto
 					h:100vh
 					w:100%
+					-ms-overflow-style: none
+					scrollbar-width:none
 				<header>
 					<main-nav>
 				<main>
-					
-					# <landing-page route="/">
+					<landing-page route="/">
 					<store-page route="/store">
 					<modules-page route="/learning">
 					<dictionary-page route="/dictionary">
@@ -89,13 +91,10 @@ tag App
 						fs:xs
 						gap:.20sp
 					css a c:hue7 @darkmode:hue4
-					if admin = yes
-						<admin-tools>
-					else
-						<span> "Currently in Development. Give feedback via "
-						<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
-						<span> " or "
-						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
+					<span> "Currently in Development. Give feedback via "
+					<a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
+					<span> " or "
+					<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
 
 
 
