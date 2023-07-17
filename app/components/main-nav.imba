@@ -61,3 +61,7 @@ tag main-nav
 					<div> "Login"
 				<button route-to="/signup">
 					<div> "Signup"
+			if state.admin
+				<button @click=(state.show_editor = !state.show_editor)>
+					css bg:hue3
+					<div> "Editor"

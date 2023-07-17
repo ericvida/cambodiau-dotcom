@@ -96,7 +96,7 @@ tag module-card
 					<span> "{state.learning_data.course_progress[slug]}% "
 						css c:hue6 @darkmode:hue3
 					<span> "of {course.word_set.length} words"
-				
+
 tag loading-card
 	css .loading-animation
 		background-image: linear-gradient(90deg, gray1/50 0px, gray2/50 50%, gray1 100%)

@@ -46,9 +46,9 @@ tag admin-tools
 					rd:sm
 					@hover
 						bg:hue3
-			<div[c:hue1 ta:center]> "Admin Tools"
-			<button @click.toggleEditor>
-				"template"
+			# <div[c:hue1 ta:center]> "Admin Tools"
+			<button @click.downloadJson>
+				"edit json"
 			<button @click.toggleCourseEditor>
 				"course"
 			<button @click.toggleLessonEditor>
@@ -57,6 +57,4 @@ tag admin-tools
 				"phrase"
 			<button @click.toggleWordEditor>
 				"word"
-			<button @click.downloadJson>
-				"edit json"
 			
