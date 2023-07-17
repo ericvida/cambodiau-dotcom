@@ -1,6 +1,6 @@
 import './login-page'
 import './landing-page'
-import './user-page'
+import './modules-page'
 import './dictionary-page'
 import './phonetics-page'
 import './phrase-playground'

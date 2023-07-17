@@ -81,7 +81,7 @@ tag word-editor
 	css .vida-pronunciations, .ipa-pronunciations
 		ff:monospace
 	def closeModal
-		state.closeModals!
+		state.hideEditor!
 	def toggleCourseEditor
 		closeModal!
 		state.toggleCourseEditor!

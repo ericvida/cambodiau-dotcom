@@ -176,7 +176,7 @@ class CourseData
 		return data
 
 	def initCoursesFromFirebase
-		if not 'development === true'
+		if 'development === true'
 			// use predownloaded data for development to speed up the process
 			await setTimeout(0, console.log('fake async delay to make the mock function async'))
 			raw_courses = raw_fb_courses

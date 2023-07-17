@@ -17,6 +17,9 @@ global css
 		$khmer: 'Open Khmer School', serif
 		hue:indigo
 		ff: $copy
+		$max-content-width: 1200px
+	
+	
 	h1,h2,h3,h4,h5,h6
 		ff:$heading
 	h1,h2,h3,h4,h5,h6
@@ -41,7 +44,6 @@ global css
 		ff:mono
 	.key-text fs:xs 
 		c:warm6 @darkmode:warm4
-	.modal-bg bg:black pos:fixed top:0 l:0 w:100% h:100% zi:11 o:80% cursor:pointer
 # ui[epic=layout, seq=1] sidebar
 tag layout-sidebar # left sidebar of content
 	css self
@@ -230,26 +232,7 @@ tag layout-holygrail
 	<div slot="right"> "rightSidebar"
 	<div slot="footer"> "footer"
 ###	
-global css
-	@root
-		1cardmin: 300px
-		1cardmax: 600px
-	.width-container
-		min-width: 1cardmin @sm: calc(2cardmin + 2sp) @lg: calc(3cardmin + 4sp)
-		max-width: 1200px
-		mx:auto
-	.layout-card-grid
-		w: 100%
-		d:grid
-		# gap:1sp
-		mx:auto
-		gtc: minmax(300px, 2cardmax) @sm: repeat(2, minmax(300px, 2cardmax)) @lg: repeat(3, minmax(300px, 500px))
-		ai:center
-	.stretchy-card
-		min-width:300px 
-		max-width:2cardmax
-		w:100%
-		p:1sp
+
 		
 ### NOTE: How to use layout-card-grid
 <layout-card-grid>

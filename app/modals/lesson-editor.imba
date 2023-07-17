@@ -34,7 +34,7 @@ tag lesson-editor
 			w:100%
 
 	def closeModal
-		state.closeModals!
+		state.hideEditor!
 
 	def toggleCourseEditor
 		closeModal!

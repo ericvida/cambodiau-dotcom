@@ -105,7 +105,7 @@ tag loading-card
 			0%
 				background-position: -300px
 			100%
-			background-position: 100px
+				background-position: 100px
 	<self>
 		css bg:white
 			p:1sp

@@ -61,7 +61,7 @@ tag phrase-editor
 			bw:2px
 
 	def closeModal
-		state.closeModals!
+		state.hideEditor!
 
 	def editWord
 		closeModal!

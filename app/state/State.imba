@@ -47,7 +47,7 @@ class State
 	user_learned = {}
 	learned_usage = 0
 	# new below
-	modal_open = no
+	show_editor = no
 	show_course_editor = no
 	show_lesson_editor = no
 	show_phrase_editor = no
@@ -80,39 +80,38 @@ class State
 			save!
 		)
 
-	def closeModals
-		show_course_editor = no
-		show_lesson_editor = no
-		show_phrase_editor = no
-		show_word_editor = no
-		modal_open = no
+	def hideEditor
+		show_editor = no
+		save!
+	def showEditor
+		show_editor = yes
 		save!
 	def toggleCourseEditor
 		show_course_editor = !show_course_editor
-		modal_open = !modal_open
-		LOG 'course editor modal called', show_course_editor, modal_open
+		show_editor = !show_editor
+		LOG 'course editor modal called', show_course_editor, show_editor
 		save!
 
 	def toggleLessonEditor lesson_slug
 		if lesson_slug and typeof lesson_slug is 'string'
 			lesson = lesson_slug
 		show_lesson_editor = !show_lesson_editor
-		modal_open = !modal_open
-		LOG 'lesson editor modal called', show_lesson_editor, modal_open
+		show_editor = !show_editor
+		LOG 'lesson editor modal called', show_lesson_editor, show_editor
 		save!
 
 	def togglePhraseEditor phrase_id
 		if phrase_id and typeof phrase_id is 'number'
 			phrase = phrase_id
 		show_phrase_editor = !show_phrase_editor
-		modal_open = !modal_open
-		LOG 'phrase editor modal called', show_phrase_editor, modal_open
+		show_editor = !show_editor
+		LOG 'phrase editor modal called', show_phrase_editor, show_editor
 		save!
 	
 	def toggleWordEditor
 		show_word_editor = !show_word_editor
-		modal_open = !modal_open
-		LOG 'word editor modal called', show_word_editor, modal_open
+		show_editor = !show_editor
+		LOG 'word editor modal called', show_word_editor, show_editor
 		save!
 	# API[epic=API, seq=7] SAVE
 	def save

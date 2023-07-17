@@ -59,15 +59,8 @@ tag App
 				@hotkey("shift+c+l")=api.clear!
 				@hotkey('enter|s')=state.toggleLearned(state.active_word)
 			>
-			# MODALS
-			if state.show_course_editor
-				<course-editor>
-			if state.show_lesson_editor
-				<lesson-editor>
-			if state.show_phrase_editor
-				<phrase-editor>
-			if state.show_word_editor
-				<word-editor>
+			if state.show_editor
+				<editors-modal>
 			<%pancake-layout>
 				css d:grid
 					grid-template-rows: auto 1fr auto
@@ -76,9 +69,10 @@ tag App
 				<header>
 					<main-nav>
 				<main>
-					<landing-page route="/">
+					# <landing-page route="/">
 					<store-page route="/store">
-					<user-page route="/learning">
+					<modules-page route="/">
+					# <modules-page route="/learning">
 					<dictionary-page route="/dictionary">
 					<phonetics-page route="/phonetics">
 					<login-page route="/login">
