@@ -45,7 +45,7 @@ tag editors-page
 			<button @click=(active_editor = "course") .disabled=!state.course> "course"
 			<button @click=(active_editor = "lesson") .disabled=!state.lesson> "lesson"
 			<button @click=(active_editor = "phrase") .disabled=!state.phrase> "phrase"
-			<button @click=(active_editor = "word") .disabled=!state.lesson> "word"
+			<button @click=(active_editor = "word") .disabled=!state.phrase> "word"
 			<[mx:auto]>
 			<.right>
 				<button @click.hideEditor> "close"
@@ -67,7 +67,7 @@ tag editors-page
 				<div>
 					<label for="course"> "course"
 					<select#course name="course" bind=state.course @change.wait()=(active_editor="course")>
-						<option value="none" selected="selected"> "none"
+						<option value="none" selected="selected">
 						for own key, value of courses.courses
 							<option value=value.slug> value.slug
 				
@@ -75,21 +75,21 @@ tag editors-page
 					<div>
 						<label for="lesson"> "lesson"
 						<select#lesson name="lesson" bind=state.lesson @change.wait()=(active_editor="lesson")>
-							<option value="none" selected="selected"> "none"
+							<option value="none" selected="selected">
 							for own key, value of courses.courses[state.course]..lessons
 								<option value=value.slug> value.slug
 					if state.lesson isnt undefined
 						<div>
 							<label for="phrase"> "phrase"
 							<select#phrase name="phrase" bind=state.phrase @change.wait()=(active_editor="phrase")>
-								<option value="none" selected="selected"> "none"
+								<option value="none" selected="selected">
 								for own key, value of courses.courses[state.course]..lessons[state.lesson]..phrases
 									<option value=value.index> value.index
 						if state.phrase isnt undefined
 							<div>
 								<label for="word"> "word"
 								<select#word name="word" bind=state.active_word @change.wait()=(active_editor="word")>
-									<option value="none" selected="selected"> "none"
+									<option value="none" selected="selected">
 									for khmer, khmer_index in courses.courses[state.course]..lessons[state.lesson]..phrases[state.phrase]..word_set
 										<option value=khmer> khmer
 		<%editor-content-wrapper>
