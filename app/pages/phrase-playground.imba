@@ -17,18 +17,23 @@ tag phrase-playground
 						bg:gray1
 						rdtl:xl
 						h:100%
-						# w:100%
+						pos:relative
 						# gtc: 1fr @md: minmax(1rightbar, 3rightbar) 1rightbar
+					<sidebar-toggle route="/course">
+						css pos:absolute
+							l: 0sp
+							zi:10
 					<%phrase-image[zi:0]>
 						css pos:relative
-							w:100%
 							aspect-ratio: 16 / 9
 							rd:xl
 							of:hidden
+							width:100%
 						<img src=phrase.image>
 							css pos:absolute 
 								w:100%
-						<div.after>
+						<div%image-bottom-fade>
+							css w:100%
 							css inset:0
 							css pos:absolute 
 								aspect-ratio: 16 / 9

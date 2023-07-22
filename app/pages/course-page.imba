@@ -1,20 +1,18 @@
 import Course from '../data/Course'
 # TAG[epic=PAGE, seq=21] course-page
 tag course-page
-	css 1lessonnav: 360px
-	css 1phrasenav: 180px
+	css 1lnw: 300px # lesson nav width
+		1pnw: 180px # phrase nav width
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
-		<self>
-			css d:hflex w:auto
-			<lesson-nav [ml:-1lessonnav]=!state.leftnav-lesson route="/course/:lesson" course=Course.courses[state.course]>
-				css flb:1lessonnav
-					min-height:100vh
-					tween: margin-left 2dur
+		<self [ml:-1lnw]=!state.leftnav-lesson [ml: calc(-1pnw + -1lnw)]=!state.leftnav-phrase > # sidebar toggle animation
+			css d:grid gtc:1lnw 1pnw 1fr
+				tween: margin-left 2dur
+			
+			<lesson-nav  route="/course/:lesson" course=Course.courses[state.course]> # lesson nav width
+				css min-height:100vh
 				
-			<phrase-nav[ml:-1phrasenav]=!state.leftnav-phrase course=Course.courses[state.course]>
-				css flb:1phrasenav
-					min-height:100vh
-					tween: margin-left 2dur
+			<phrase-nav course=Course.courses[state.course]> # phrase nav width
+				css min-height:100vh
 					
 			<phrase-playground[flg:1] course=Course.courses[state.course]>

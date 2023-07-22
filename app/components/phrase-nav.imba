@@ -25,6 +25,7 @@ tag phrase-nav
 		let phrases = course..lessons[state.lesson]..phrases
 		<self>
 			css p:1sp d
+				
 			if phrases
 				for own phrase_id, phrase of phrases
 					let isActive = state.phrase is phrase_id
@@ -43,7 +44,13 @@ tag phrase-nav
 							d:hflex
 							ai:center
 							@hover
-								bg:gray3 @darkmode:gray7
+								bg:gray0 @darkmode:gray8/50
+								bxs:0px 0px 0px 2px gray1
+							&.active
+								bg:hue1
+								c:hue8
+								@hover
+									bg:indigo15
 						<progress-ring size=40 .active=isActive progress=progress > 
 						<%phrase-progress-info>
 							<%phrase-title>

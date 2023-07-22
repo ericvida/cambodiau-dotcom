@@ -16,10 +16,10 @@ tag progress-ring
 			$progress-color: hue4 @darkmode:hue6
 			$progress-bg: hue2 @darkmode:hue7
 			$center-color: hue2 @darkmode:hue8
-		@hover
-			$progress-bg:gray2 @darkmode:gray7
-			$progress-color: hue3 @darkmode:hue5
-			$center-color:gray2 @darkmode: gray7
+		# @hover
+		# 	$progress-bg:gray2 @darkmode:gray7
+		# 	$progress-color: hue3 @darkmode:hue5
+		# 	$center-color:gray2 @darkmode: gray7
 		$stroke-percent: 70%
 		# pos:absolute
 	css &.disabled o:30%
