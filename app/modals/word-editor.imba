@@ -1,20 +1,26 @@
 let mock-active-word = "ឡើង"
-let mock-word-data = {
-	khmer_spellings: ["ឡើង"] # sometimes khmer words can have multiple acceptable spellings
-	rank: "52" # this could generated from how many times a word is used in all the courses compared to other words. most of the current rankings came from someone else's analysis using web khmer data, not my course data.
-	vida_pronunciations: ["laẹṇg"] # sometimes words can have multiple pronunciations
-	vida_pronunciations_generated: "laẹṇg" # generated from online ipa, may not be accurate. I want to replace overtime with my own in the vida array above.
-	ipa_pronunciations: ["laǝŋ"]
-	word_definitions: [
-		use_of_word: "verb"
-		definition: "to go up|ascend|to rise, get up, take off (aircraft)|to climb|to get on|to board (a means of transport)|to swell|rise (of dough)|to increase|to grow"
+let mock_word_data = {
+	spellings: ["ឡើង"] # sometimes khmer words can have multiple acceptable spellings
+	phonetics: [
+		vida: ["laẹṇg"]
+		ipa: ["laǝŋ"]
+	]
+	definitions: [
+		use: "verb"
+		text: "to go up|ascend|to rise, get up, take off (aircraft)|to climb|to get on|to board (a means of transport)|to swell|rise (of dough)|to increase|to grow"
 		source: "vida"
 		---
-		use_of_word: ""
-		definition: "to get on"
+		use: ""
+		text: "to get on"
 		source: "google translate"
 	]
 }
+
+def findByKey key
+	for word in dictionary
+		if word.khmer_spellings.includes(key)
+			return word
+
 tag word-editor
 	# transition
 		
@@ -85,30 +91,28 @@ tag word-editor
 			<section>
 				<h3> "khmer spellings"
 				<.word-group>
-					for word in mock-word-data.khmer_spellings
+					for word in mock_word_data.spellings
 						<input bind=word type="text">
 					<button.add-button> "＋"
 			<section>
 				<h3> "vida pronunciations"
 				<.word-group .vida-pronunciations>
-					for word in mock-word-data.vida_pronunciations
-						<input bind=word type="text">
+					<input bind=mock_word_data.phonetics.vida type="text">
 					<button.add-button> "＋"
 			<section>
 				<h3> "ipa pronunciations (generated from vida)"
 				<.word-group .ipa-pronunciations>
-					for word in mock-word-data.ipa_pronunciations
-						<.word-pill> word
+					<.word-pill> mock_word_data.phonetics.ipa
 			<section>
 				<.definition-list>
 					<.definition-grid>
 						<h3> "definition"
 						<h3> "use"
 						<h3> "source"
-					for item in mock-word-data.word_definitions
+					for item in mock_word_data.definitions
 						<.definition-grid>
-							<input.hdefinition bind=item.definition type="text">
-							<input.use bind=item.use_of_word type="text">
+							<input.hdefinition bind=item.text type="text">
+							<input.use bind=item.use type="text">
 							<input.source bind=item.source type="text">
 					<button.add-button> "＋"
 			<section>

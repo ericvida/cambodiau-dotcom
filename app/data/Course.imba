@@ -6,12 +6,16 @@ import { collection, doc, setDoc, getDocs } from "firebase/firestore"
 import { db } from '../state/firebase'
 import raw_fb_courses from './raw_fb_courses.json'
 
+import dictionary from './dictionary.json'
+
 # import {en} from './input_bible_stories_eng'
 # import {kh} from './input_bible_stories_khmer'
 # import {courses} from './input_bible_stories_titles'
 
 export const COURSES_COLLECTION = 'courses'
 export const LESSONS_SUBCOLLECTION = 'lessons'
+export const DICTIONARY_COLLECTION = 'dictionary'
+export const WORDS_SUBCOLLECTION = 'words'
 
 class CourseData
 	worth_zero = [
@@ -39,6 +43,7 @@ class CourseData
 		# saveGeneratedCourse window.structuredClone consolidated_data
 		# enrichcourseData consolidated_data
 		# convert array tree into object tree
+		# saveDictionary!
 
 	# This just merges the data.
 	# The result should be similar to what we'll store in Firebase -- compact minimal data
@@ -76,6 +81,22 @@ class CourseData
 	# 			const lessonRef = doc(lessonCollectionRef)
 	# 			return setDoc(lessonRef, lesson)
 	# 		))
+
+
+	# def saveDictionary
+	# 	const dictionaryRef = doc(db, DICTIONARY_COLLECTION, 'Khmer')
+
+	# 	await setDoc(dictionaryRef, {
+	# 		info: 'Lorem ipsum dolor sit amet'
+	# 		title: 'Khmer'
+	# 		words: dictionary
+	# 	})
+
+	# 	# await Promise.all(dictionary.map(do(word)
+	# 	# 	const wordCollectionRef = collection(dictionaryRef, WORDS_SUBCOLLECTION)
+	# 	# 	const wordRef = doc(wordCollectionRef)
+	# 	# 	return setDoc(wordRef, word)
+	# 	# ))
 
 
 	# Finds all words used in each course, lesson, and phrase.
@@ -176,7 +197,7 @@ class CourseData
 		return data
 
 	def initCoursesFromFirebase
-		if 'development === true'
+		if !'development === true'
 			// use predownloaded data for development to speed up the process
 			await setTimeout(0, console.log('fake async delay to make the mock function async'))
 			raw_courses = raw_fb_courses
@@ -194,7 +215,7 @@ class CourseData
 
 			raw_courses = window.structuredClone data
 			enrichcourseData data
-		
+
 		LOG('Initialized course data', raw_courses)
 
 export const Course = new CourseData

@@ -16,6 +16,39 @@ import './pages/index'
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 const fuzzy = new Fuzzy
 
+
+# console.log(dictionary)
+
+# let newDictionaryFormat = []
+
+# for own key, item of dictionary
+# 	let definitions = []
+# 	if item.def
+# 		for definition in item.def
+# 			const [use, text] = definition.split('=')
+# 			definitions.push({
+# 				use: use === 'n' ? 'noun' : use,
+# 				text: text ? text.split('|') : text,
+# 				source: 'vida'
+# 			})
+# 	if item.google
+# 		definitions.push({
+# 			use: '',
+# 			text: item.google.split('|'),
+# 			source: 'google'
+# 		})
+
+# 	newDictionaryFormat.push {
+# 		spellings: [key],
+# 		phonetics: {
+# 			vida: item.vida,
+# 			ipa: item.ipa,
+# 		},
+# 		definitions
+# 	}
+
+# console.log(newDictionaryFormat)
+
 def logTime fn
 	let startTime = performance.now!
 	let res = fn

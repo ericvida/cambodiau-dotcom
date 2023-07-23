@@ -2,7 +2,20 @@ import { collection, doc, setDoc } from "firebase/firestore"
 import { COURSES_COLLECTION, LESSONS_SUBCOLLECTION } from '../data/Course'
 import { db } from '../state/firebase'
 
+const emptyLesson = {
+	slug: 'default-lesson'
+	title: 'Default Lesson'
+	phrases: [{
+		image: "https://placeholder.co/800x450",
+		meaning: "0 Always add verse index at the beginning separated by space after it",
+		khmer: "០ Some fancy Khmer text like រឿង ព្រះគម្ពីរ ទី ៣១ - ព្រះយេស៊ូ ដើរ លើ ទឹក ។ - រឿង ព្រះគម្ពីរ ពី ៖ ម៉ាថាយ ១៤ : ២២ - ៣៣ ; ម៉ាកុស ៦ : ៤៥ - ៥២ ; យ៉ូហាន ៦ : ១៦ - ២១"
+	}]
+	image: 2
+}
+
+
 tag lesson-editor
+	prop newLesson = {...emptyLesson}
 	// TODO edit copy of lesson instead of the lesson itself.
 	// Maybe create an edit copy on mount. idk
 	get lesson
@@ -27,6 +40,21 @@ tag lesson-editor
 			slug: lesson.slug
 			title: lesson.title
 		}, { merge: true })
+		console.log(
+			'Updated lesson', lesson.id, lesson.title
+		)
+		// TODO make popup with message thAat it is saved
+
+
+	def addNewLesson
+		// TODO disable button while this is loading
+		const course = courses.courses[state.course]
+		const courseRef = doc(db, COURSES_COLLECTION, course.id)
+		const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
+		await setDoc(doc(lessonCollectionRef), newLesson, { merge: true })
+
+		newLesson = {...emptyLesson}
+
 		console.log(
 			'Updated lesson', lesson.id, lesson.title
 		)

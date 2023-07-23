@@ -5,11 +5,19 @@ import { db } from '../state/firebase'
 # TODO: Make modal close when clicking outside of the modal
 import {dictionary} from '../data/dictionary'
 
+const emptyPhrase = {
+	image: "https://placeholder.co/800x450",
+	meaning: "0 Always add verse index at the beginning separated by space after it",
+	khmer: "០ Some fancy Khmer text like រឿង ព្រះគម្ពីរ ទី ៣១ - ព្រះយេស៊ូ ដើរ លើ ទឹក ។ - រឿង ព្រះគម្ពីរ ពី ៖ ម៉ាថាយ ១៤ : ២២ - ៣៣ ; ម៉ាកុស ៦ : ៤៥ - ៥២ ; យ៉ូហាន ៦ : ១៦ - ២១"
+}
+
 tag phrase-editor
 	#phrase_hash = ''
 	#lesson_phrases = []
 	get phrase
 		return #lesson_phrases[state.phrase]
+	
+	newPhrase = {...emptyPhrase}
 
 	# transition
 	css self
@@ -74,6 +82,23 @@ tag phrase-editor
 			'Updated lesson phrases', lesson, #lesson_phrases 
 		)
 	
+	def addPhraseToLesson
+		// TODO disable button while this is loading
+		const course = courses.courses[state.course]
+		const courseRef = doc(db, COURSES_COLLECTION, course.id)
+		const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
+		const lesson = course..lessons[state.lesson]
+		const lessonRef = doc(lessonCollectionRef, lesson.id)
+		await setDoc(lessonRef, {
+			phrases: [...#lesson_phrases, newPhrase]
+		}, { merge: true })
+
+		newPhrase = {...emptyPhrase}
+		// TODO make popup with message that it is saved
+		console.log(
+			'Create lesson phrase', lesson, #lesson_phrases 
+		)
+	
 	def getRawLessonPhrases
 		for course in courses.raw_courses
 			for lesson in course.lessons
@@ -115,7 +140,7 @@ tag phrase-editor
 						<h3> "khmer"
 						<input bind=phrase.khmer type="text">
 					<section>
-						<[d:hflex gap:1sp mb:1sp]>
+						<[d:hflex gap:1sp m:1sp 0]>
 							<h3> "words (parsed)"
 							<span.word-pill .found> "defined"
 							<span.word-pill .not-defined> "not defined"

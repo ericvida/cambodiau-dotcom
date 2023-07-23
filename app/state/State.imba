@@ -46,12 +46,8 @@ class State
 	learning_data = {}
 	user_learned = {}
 	learned_usage = 0
-	# new below
-	show_editor = no
-	show_course_editor = no
-	show_lesson_editor = no
-	show_phrase_editor = no
-	show_word_editor = no
+
+	active_editor = 'course'
 
 	constructor
 		if imba.locals.state
@@ -86,33 +82,27 @@ class State
 	def showEditor
 		show_editor = yes
 		save!
+
 	def toggleCourseEditor
-		show_course_editor = !show_course_editor
-		show_editor = !show_editor
-		LOG 'course editor modal called', show_course_editor, show_editor
+		active_editor = 'course'
 		save!
 
 	def toggleLessonEditor lesson_slug
 		if lesson_slug and typeof lesson_slug is 'string'
 			lesson = lesson_slug
-		show_lesson_editor = !show_lesson_editor
-		show_editor = !show_editor
-		LOG 'lesson editor modal called', show_lesson_editor, show_editor
+		active_editor = 'lesson'
 		save!
 
 	def togglePhraseEditor phrase_id
 		if phrase_id and typeof phrase_id is 'number'
 			phrase = phrase_id
-		show_phrase_editor = !show_phrase_editor
-		show_editor = !show_editor
-		LOG 'phrase editor modal called', show_phrase_editor, show_editor
+		active_editor = 'phrase'
 		save!
 	
 	def toggleWordEditor
-		show_word_editor = !show_word_editor
-		show_editor = !show_editor
-		LOG 'word editor modal called', show_word_editor, show_editor
+		active_editor = 'word'
 		save!
+
 	# API[epic=API, seq=7] SAVE
 	def save
 		# Using JSON to clean up all functions from state class and convert it to polay object

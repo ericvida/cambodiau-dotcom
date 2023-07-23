@@ -4,8 +4,6 @@ import { db } from '../state/firebase'
 import Course from '../data/Course'
 
 tag editors-page
-	prop active_editor = "course"
-	
 	def hideEditor
 		state.hideEditor!
 		imba.commit!
@@ -41,11 +39,11 @@ tag editors-page
 					bg:gray4
 					pointer-events:none
 					user-select:none
-			<button @click=(active_editor = "json") .disabled=!state.course> "json"
-			<button @click=(active_editor = "course") .disabled=!state.course> "course"
-			<button @click=(active_editor = "lesson") .disabled=!state.lesson> "lesson"
-			<button @click=(active_editor = "phrase") .disabled=!state.phrase> "phrase"
-			<button @click=(active_editor = "word") .disabled=!state.phrase> "word"
+			<button @click=(state.active_editor = "json") .disabled=!state.course> "json"
+			<button @click=(state.active_editor = "course") .disabled=!state.course> "course"
+			<button @click=(state.active_editor = "lesson") .disabled=!state.lesson> "lesson"
+			<button @click=(state.active_editor = "phrase") .disabled=!state.phrase> "phrase"
+			<button @click=(state.active_editor = "word") .disabled=!state.phrase> "word"
 			<[mx:auto]>
 			<.right>
 				<button @click.hideEditor> "close"
@@ -63,37 +61,38 @@ tag editors-page
 					gap:1sp
 					label
 						mr:0.5sp
-					
+
 				<div>
 					<label for="course"> "course"
-					<select#course name="course" bind=state.course @change.wait()=(active_editor="course")>
+					<select#course name="course" bind=state.course>
 						<option value="none" selected="selected">
 						for own key, value of courses.courses
 							<option value=value.slug> value.slug
+
 				
-				if state.course isnt undefined
+				if state.course && courses
 					<div>
 						<label for="lesson"> "lesson"
-						<select#lesson name="lesson" bind=state.lesson @change.wait()=(active_editor="lesson")>
+						<select#lesson name="lesson" bind=state.lesson>
 							<option value="none" selected="selected">
 							for own key, value of courses.courses[state.course]..lessons
 								<option value=value.slug> value.slug
-					if state.lesson isnt undefined
+					if state.lesson and courses.courses[state.course]..lessons[state.lesson]
 						<div>
 							<label for="phrase"> "phrase"
-							<select#phrase name="phrase" bind=state.phrase @change.wait()=(active_editor="phrase")>
+							<select#phrase name="phrase" bind=state.phrase>
 								<option value="none" selected="selected">
-								for own key, value of courses.courses[state.course]..lessons[state.lesson]..phrases
+								for value in courses.courses[state.course]..lessons[state.lesson]..phrases
 									<option value=value.index> value.index
-						if state.phrase isnt undefined
+						if state.phrase and courses.courses[state.course]..lessons[state.lesson]..phrases[state.phrase]
 							<div>
 								<label for="word"> "word"
-								<select#word name="word" bind=state.active_word @change.wait()=(active_editor="word")>
+								<select#word name="word" bind=state.active_word>
 									<option value="none" selected="selected">
 									for khmer, khmer_index in courses.courses[state.course]..lessons[state.lesson]..phrases[state.phrase]..word_set
 										<option value=khmer> khmer
 		<%editor-content-wrapper>
-			css width: $max-content-width
+			css max-width: $max-content-width
 				mx: auto
 				bg:white
 				p:1sp
@@ -106,7 +105,7 @@ tag editors-page
 				rd:md
 				p:1sp m:0
 				w:100%
-			switch active_editor
+			switch state.active_editor
 				when "json"
 					<$json-editor>
 						<[d:hflex]>
