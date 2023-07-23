@@ -42,8 +42,8 @@ tag editors-page
 			<button @click=(state.active_editor = "json") .disabled=!state.course> "json"
 			<button @click=(state.active_editor = "course") .disabled=!state.course> "course"
 			<button @click=(state.active_editor = "lesson") .disabled=!state.lesson> "lesson"
-			<button @click=(state.active_editor = "phrase") .disabled=!state.phrase> "phrase"
-			<button @click=(state.active_editor = "word") .disabled=!state.phrase> "word"
+			<button @click=(state.active_editor = "phrase") .disabled=(state.phrase is undefined)> "phrase"
+			<button @click=(state.active_editor = "word") .disabled=(state.phrase is undefined)> "word"
 			<[mx:auto]>
 			<.right>
 				<button @click.hideEditor> "close"

@@ -94,15 +94,17 @@ tag phrase-khmer
 				@hotkey('d|left')=prevWord 
 				@hotkey('f|right')=nextWord
 			>
-			<h2> "Khmer"
-				css c:hue3
-			<div[d:hflex gap:.5sp]>
-				<h2> "Spaced"
-					css c:hue3
-				<span> "/"
-					css c:gray2
-				<h2> "Joined"
-					css c:gray2
-			<div.word-wrapper>
-				for khmer_word, ki in phrase.khmer.split(' ')
-					<.word .active=(khmer_word is state.active_word) route-to="/course/{state.course}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
+			<[d:vflex]>
+				<div>
+					<div[d:hflex gap:.5sp]>
+						<h2> "Khmer"
+							css c:hue3
+						<h2> "Spaced"
+							css c:hue3
+						<span> "/"
+							css c:gray2
+						<h2> "Joined"
+							css c:gray2
+				<div.word-wrapper>
+					for khmer_word, ki in phrase.khmer.split(' ')
+						<.word .active=(khmer_word is state.active_word) route-to="/course/{state.course}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word

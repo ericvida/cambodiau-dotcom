@@ -16,9 +16,9 @@ global css
 
 # LAYOUT[epic=LAYOUT, seq=21] Home
 tag modules-page
-	def defaultCourseUrl id, course
-		const firstLesson = Object.values(course.lessons)[0]
-		return "/course/{id}/{firstLesson.slug}/0/0/"
+	def defaultCourseUrl course_slug, course
+		const firstLesson = Object.values(course..lessons)[0]
+		return "/course/{course_slug}/{firstLesson..slug}/0/0/"
 
 	def render
 		<self>
@@ -42,8 +42,16 @@ tag modules-page
 						<loading-card>
 						<loading-card>
 						<loading-card>
+					if state.admin
+						<add-card route-to="/create_course">
 					# <p> 'Loading...'
-
+tag add-card
+	<self>
+		css bg:white @hover:hue1
+			cursor:pointer
+			d:flex
+			d:box
+		<span> "create module"
 
 # CARD[epic=CARD, seq=28] module-card
 tag module-card
@@ -65,6 +73,11 @@ tag module-card
 				
 		if course.image
 			<img.image src=course.image>
+				css rd:md 
+					of:hidden
+					aspect-ratio: 16 / 9
+		else
+			<img.image src="https://placehold.co/800x450?text={course.title}">
 				css rd:md 
 					of:hidden
 					aspect-ratio: 16 / 9

@@ -2,20 +2,22 @@ import { collection, doc, setDoc } from "firebase/firestore"
 import { COURSES_COLLECTION, LESSONS_SUBCOLLECTION } from '../data/Course'
 import { db } from '../state/firebase'
 
-const emptyLesson = {
-	slug: 'default-lesson'
-	title: 'Default Lesson'
-	phrases: [{
-		image: "https://placeholder.co/800x450",
-		meaning: "0 Always add verse index at the beginning separated by space after it",
-		khmer: "០ Some fancy Khmer text like រឿង ព្រះគម្ពីរ ទី ៣១ - ព្រះយេស៊ូ ដើរ លើ ទឹក ។ - រឿង ព្រះគម្ពីរ ពី ៖ ម៉ាថាយ ១៤ : ២២ - ៣៣ ; ម៉ាកុស ៦ : ៤៥ - ៥២ ; យ៉ូហាន ៦ : ១៦ - ២១"
-	}]
+const newPhraseDefault = {
+	image: "https://placeholder.co/800x450",
+	meaning: "phrase one. Add english phrase here.",
+	khmer: "ឃ្លា មួយ ។",
+}
+const newLessonDefault = {
+	slug: 'lesson-default'
+	title: 'Lesson-default'
+	phrases: [{...newPhraseDefault}]
 	image: 2
 }
 
 
+
 tag lesson-editor
-	prop newLesson = {...emptyLesson}
+	prop newLesson = {...newLessonDefault}
 	// TODO edit copy of lesson instead of the lesson itself.
 	// Maybe create an edit copy on mount. idk
 	get lesson
@@ -53,13 +55,29 @@ tag lesson-editor
 		const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
 		await setDoc(doc(lessonCollectionRef), newLesson, { merge: true })
 
-		newLesson = {...emptyLesson}
+		newLesson = {...newLessonDefault}
 
 		console.log(
 			'Updated lesson', lesson.id, lesson.title
 		)
 		// TODO make popup with message thAat it is saved
+	
+	def addPhraseToLesson
+		// TODO disable button while this is loading
+		const course = courses.courses[state.course]
+		const courseRef = doc(db, COURSES_COLLECTION, course.id)
+		const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
+		const lesson = course..lessons[state.lesson]
+		const lessonRef = doc(lessonCollectionRef, lesson.id)
+		await setDoc(lessonRef, {
+			phrases: [...#lesson_phrases, newPhrase]
+		}, { merge: true })
 
+		newPhrase = {...newPhraseDefault}
+		// TODO make popup with message that it is saved
+		console.log(
+			'Create lesson phrase', lesson, #lesson_phrases 
+		)
 
 	def render
 		<self>

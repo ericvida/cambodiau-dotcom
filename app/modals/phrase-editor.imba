@@ -5,10 +5,10 @@ import { db } from '../state/firebase'
 # TODO: Make modal close when clicking outside of the modal
 import {dictionary} from '../data/dictionary'
 
-const emptyPhrase = {
+const newPhraseDefault = {
 	image: "https://placeholder.co/800x450",
-	meaning: "0 Always add verse index at the beginning separated by space after it",
-	khmer: "០ Some fancy Khmer text like រឿង ព្រះគម្ពីរ ទី ៣១ - ព្រះយេស៊ូ ដើរ លើ ទឹក ។ - រឿង ព្រះគម្ពីរ ពី ៖ ម៉ាថាយ ១៤ : ២២ - ៣៣ ; ម៉ាកុស ៦ : ៤៥ - ៥២ ; យ៉ូហាន ៦ : ១៦ - ២១"
+	meaning: "phrase one. Add english phrase here.",
+	khmer: "add khmer here. replace spaces with double spaces, and separate words with spaces.",
 }
 
 tag phrase-editor
@@ -17,7 +17,7 @@ tag phrase-editor
 	get phrase
 		return #lesson_phrases[state.phrase]
 	
-	newPhrase = {...emptyPhrase}
+	newPhrase = {...newPhraseDefault}
 
 	# transition
 	css self
@@ -93,7 +93,7 @@ tag phrase-editor
 			phrases: [...#lesson_phrases, newPhrase]
 		}, { merge: true })
 
-		newPhrase = {...emptyPhrase}
+		newPhrase = {...newPhraseDefault}
 		// TODO make popup with message that it is saved
 		console.log(
 			'Create lesson phrase', lesson, #lesson_phrases 

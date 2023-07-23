@@ -60,12 +60,34 @@ tag phrase-nav
 								if phrase_id is 0 
 									"N/A"
 								else
-									"Unit {Number(phrase_id)+1}"
+									"Phrase {Number(phrase_id)+1}"
+									if state.admin
+									<i-edit> # TODO: open modal edit course title, image, slug, etc
+										css cursor:pointer
 							<div.progress-numbers>
 								css opacity:80% 
 									fs:xs 
 									ff:monospace 
 									white-space:nowrap
 								"{progress}% ({phrase_words_learned}/{phrase_words_used})"
+			if state.admin
+				<%add-phrase-nav-item>
+					css cursor:pointer
+						gap:.5sp
+						px:1sp
+						py:.5sp
+						bg:white @darkmode:gray8
+						c:gray5 @darkmode:gray4
+						d:hflex
+						ai:center
+						@hover
+							bg:gray0 @darkmode:gray8/50
+							bxs:0px 0px 0px 2px gray1
+						&.active
+							bg:hue1
+							c:hue8
+							@hover
+								bg:indigo15
+					"add phrase"
 			else
 				<p> 'Loading...'

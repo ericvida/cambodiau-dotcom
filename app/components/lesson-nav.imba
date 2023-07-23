@@ -13,6 +13,9 @@ tag lesson-nav
 						mb:0.5sp
 					<h2 [fs:xl mr:auto]> course..title
 						css h:26px lh:26px
+						if state.admin
+							<i-edit> # TODO: open modal edit course title, image, slug, etc
+								css cursor:pointer
 					
 				if state.learning_data.course_learned_usage
 					<div>
@@ -26,6 +29,25 @@ tag lesson-nav
 				for own lesson_id, lesson of course.lessons
 					let isActive = lesson_id === state.lesson
 					<lesson-nav-item active=isActive @click.log(lesson_id, state.lesson) route-to="/course/{state.course}/{lesson_id}/0/0" lesson_id=lesson_id lesson=lesson>
+				if state.admin
+					<%add-lesson-nav-item>
+						css cursor:pointer
+							gap:.5sp
+							px:1sp
+							py:.5sp
+							bg:white @darkmode:gray8
+							c:gray5 @darkmode:gray4
+							d:hflex
+							ai:center
+							@hover
+								bg:gray0 @darkmode:gray8/50
+								bxs:0px 0px 0px 2px gray1
+							&.active
+								bg:hue1
+								c:hue8
+								@hover
+									bg:indigo15
+						"add lesson"
 			else
 				<p> 'Loading...'
 
@@ -73,6 +95,9 @@ tag lesson-nav-item
 					<progress-ring .active=active size=40 progress=(progress)> 
 					<div[d:vflex]>
 						<div.lesson-name> lesson.title
+							if state.admin
+								<i-edit> # TODO: open modal edit course title, image, slug, etc
+									css cursor:pointer
 						<div.progress-numbers[opacity:80% fs:xs ff:monospace]>
 							<span> "{progress}% ({state.learning_data.lesson_learned_usage[state.course][lesson_id]}/{lesson.word_usage_count_sum})"
 					# <progress-bar .color progress=state.learning_data.lesson_progress[state.course][lesson_id]>

@@ -135,9 +135,6 @@ tag App
 
 
 
-
-
-
 # ELEMENT[epic=ELEMENT, seq=38] UserThumb
 tag UserThumb
 	css bg:hue5

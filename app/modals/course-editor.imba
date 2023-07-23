@@ -2,20 +2,38 @@ import { collection, doc, setDoc } from "firebase/firestore"
 import { COURSES_COLLECTION, LESSONS_SUBCOLLECTION } from '../data/Course'
 import { db } from '../state/firebase'
 
-const emptyCourse = {
-	title: ''
-	slug: ''
-	image: ''
-	info: ''
+
+
+const newPhraseDefault = {
+	image: "https://placeholder.co/800x450",
+	meaning: "0 phrase one.",
+	khmer: "0 ឃ្លា មួយ ។",
+}
+
+const newLessonDefault = {
+	slug: 'lesson-default'
+	title: 'Lesson-default'
+	phrases: [{...newPhraseDefault}]
+	image: "https://placehold.co/800x450?text=lesson-default"
+}
+
+const newCourseDefault = {
+	title: 'course-default'
+	slug: 'course-default'
+	image: 'https://placehold.co/800x450?text=course-default'
+	info: 'course default'
 	price: 0
 }
+
 
 tag course-editor
 	get course
 		return courses.courses[state.course]
 
-	prop newCourse = { ...emptyCourse }
-
+	prop newCourse = { ...newCourseDefault}
+	prop newLesson = {...newLessonDefault}
+	prop newPhrase = {...newPhraseDefault}
+	
 	def closeModal
 		state.hideEditor!
 
@@ -48,28 +66,29 @@ tag course-editor
 			})
 
 		const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
-		await setDoc(doc(lessonCollectionRef), {
-			slug: 'default-lesson'
-			title: 'Default Lesson'
-			phrases: [{
-				image: "https://placeholder.co/800x450",
-				meaning: "0 Always add verse index at the beginning separated by space after it",
-				khmer: "០ Some fancy Khmer text like រឿង ព្រះគម្ពីរ ទី ៣១ - ព្រះយេស៊ូ ដើរ លើ ទឹក ។ - រឿង ព្រះគម្ពីរ ពី ៖ ម៉ាថាយ ១៤ : ២២ - ៣៣ ; ម៉ាកុស ៦ : ៤៥ - ៥២ ; យ៉ូហាន ៦ : ១៦ - ២១"
-			}]
-			image: 2
-		})
+		await setDoc(doc(lessonCollectionRef), {...newLessonDefault})
 
 		console.log(
 			"Created the {newCourse.title} course"
 		)
-		newCourse = { ...emptyCourse }
+		newCourse = { ...newCourseDefault }
 
 		// TODO make popup with message thAat it is saved
-	
-
-
+	def addNewLesson
+		// TODO disable button while this is loading
+		const course = courses.courses[state.course]
+		const courseRef = doc(db, COURSES_COLLECTION, course.id)
+		const lessonCollectionRef = collection(courseRef, LESSONS_SUBCOLLECTION)
+		await setDoc(doc(lessonCollectionRef), newLesson, { merge: true })
+		newLesson = {...newLessonDefault}
+		console.log(
+			'Updated lesson', lesson.id, lesson.title
+		)
+		// TODO make popup with message thAat it is saved
 	def render
 		<self >
+			css section
+				mb:0.5rem
 			if course
 				<[d:hflex]>
 					<h1[mr:auto]> "Course Editor"
@@ -100,6 +119,7 @@ tag course-editor
 								<[d:vflex gap:10px]>
 									<button[h:20px fs:10px fs:20px filter:grayscale(100%) filter@hover:grayscale(0%)]> "👆" # move up
 									<button[h:20px fs:10px fs:20px filter:grayscale(100%) filter@hover:grayscale(0%)]> "👇" # move down
+					<button[bg:gray1 @hover:hue2 rd:md h:50px w:100px] @click.addNewLesson> "add lesson"
 				# <section[flex-grow:1]>
 				# <section[w:100% d:flex jc:end]>
 			
@@ -107,9 +127,10 @@ tag course-editor
 				<form @submit.prevent.stop=createNewCourse>
 					<[d:hflex]>
 						<h1[mr:auto]> "Course Editor"
-						<button @click=saveEditedCourse> "save"
+						<button type="submit" @click=saveEditedCourse> "Add Course"
 							css w:200px p:.5sp ta:center as:end rd:md
 							css bg:gray1 @hover:hue2
+						# <button type="submit" [p:0.5rem 2rem bgc:warmer2 @hover:rose2 rd:0.25rem c:rose9 tween: all 300ms bxs@hover:-2px 4px 8px rose2/40, -1px 2px 4px rose2/40 outline:none border:none]> 'Add Course'
 					<section>
 						<h3> "Course Title"
 						<input bind=newCourse.title type="text" required minLength=5>
@@ -122,8 +143,4 @@ tag course-editor
 					<section>
 						<h3> "Price in USD"
 						<input bind=newCourse.price type="number" required>
-					<button type="submit" [p:0.5rem 2rem bgc:warmer2 @hover:rose2 rd:0.25rem c:rose9 tween: all 300ms bxs@hover:-2px 4px 8px rose2/40, -1px 2px 4px rose2/40 outline:none border:none]> 'Add Course'
-
-	css
-		section
-			mb:0.5rem
+					

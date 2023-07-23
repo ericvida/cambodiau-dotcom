@@ -105,7 +105,7 @@ class CourseData
 	def enrichcourseData course_data
 		for course in course_data
 			for lesson in course..lessons
-				for phrase in lesson..phrases
+				for phrase, phrase_index in lesson..phrases
 					# Separate index from text in Khmer text
 					const firstKhmerSpaceIndex = phrase.khmer.indexOf(' ')
 					phrase.index_kh = phrase.khmer.slice(0, firstKhmerSpaceIndex)
