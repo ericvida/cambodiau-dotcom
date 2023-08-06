@@ -98,7 +98,6 @@ class CourseData
 	# 	# 	return setDoc(wordRef, word)
 	# 	# ))
 
-
 	# Finds all words used in each course, lesson, and phrase.
 	# counts how many times the are use in phrase, lesson, and course.
 	# and store that information for calculating progress later.
@@ -197,7 +196,13 @@ class CourseData
 		return data
 
 	def initCoursesFromFirebase
-		if !'development === true'
+		if 'payloadcms'
+			const res = await window.fetch('/api/courses')
+			const data = await res.json()
+			console.log 'data', data
+			raw_courses = data
+			enrichcourseData data
+		elif 'development === true'
 			// use predownloaded data for development to speed up the process
 			await setTimeout(0, console.log('fake async delay to make the mock function async'))
 			raw_courses = raw_fb_courses
@@ -217,6 +222,16 @@ class CourseData
 			enrichcourseData data
 
 		LOG('Initialized course data', raw_courses)
+
+	def loadCourseLessons course_slug
+		const lessonsRef = collection(db, COURSES_COLLECTION, course_slug, LESSONS_SUBCOLLECTION)
+		const lessonsSnapshot = await getDocs(lessonsRef)
+		const data = lessonsSnapshot.docs.map(do(doc) docDatWithId(doc))
+		enrichcourseData data
+
+		// now assign the data to the course
+		courses[course_slug].lessons = data
+
 
 export const Course = new CourseData
 

@@ -1,6 +1,8 @@
 import express from 'express'
 import index from './app/index.html'
 
+import raw_fb_courses from './app/data/raw_fb_courses.json'
+
 # A simple state that exists until the server stops
 const state = {
 	count: 0,
@@ -29,6 +31,36 @@ app.get('/count') do(req,res)
 	res.send({
 		count: state.count
 	})
+
+app.get('/api/courses') do(req,res)
+	// load courses from payload
+	try
+		const result = await fetch("{process.env.PAYLOAD_URL}/api/course/all")
+		const data = await result.json()
+		return res.send(data)
+	catch e
+		console.error(e)
+
+app.get('/api/upload-lessons') do(req,res)
+	try
+		for course in raw_fb_courses
+			console.log('UPLOADING COURSE LESSONS')
+			const result = await fetch("{process.env.PAYLOAD_URL}/api/lesson/create-lessons", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					course_slug: course.slug
+					lessons: course.lessons
+				})
+			})
+			const data = await result.json()
+			return res.send(data)
+	catch e
+		console.error(e)
+		return res.send(e)
+	return res.send(raw_fb_courses[0].lessons)
 
 # catch-all route that returns our index.html
 app.get(/.*/) do(req,res)

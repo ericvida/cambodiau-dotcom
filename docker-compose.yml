@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  payload:
+    image: node:18-alpine
+    ports:
+      - '3002:3002'
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    working_dir: /home/node/app/
+    command: sh -c "yarn install && yarn dev"
+    depends_on:
+      - mongo
+    env_file: .env
+    security_opt:
+      - label:disable
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - '27017:27017'
+    command:
+      - --storageEngine=wiredTiger
+    volumes:
+      - data:/data/db
+    logging:
+      driver: none
+    security_opt:
+      - label:disable
+
+  imba_frontend:
+    build: ./imba/
+    # context: ./imba/
+    # dockerfile: Dockerfile
+    restart: on-failure
+    container_name: imba_frontend
+    command: npm start
+    volumes:
+      - ./imba:/code:delegated
+    ports:
+      - '3000:3000'
+    env_file: .imba.env
+    # required for SELinux
+    security_opt:
+      - label:disable
+
+volumes:
+  data:
+  node_modules:

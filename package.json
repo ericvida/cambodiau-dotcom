@@ -1,18 +1,57 @@
 {
-  "name": "cambodiau",
+  "name": "prisoner-of-payload",
+  "version": "0.0.1",
+  "author": "Lucky Voice",
+  "repository": "git@github.com:luckyvoice/prisoner-of-payload.git",
+  "main": "dist/server.js",
+  "license": "MIT",
   "scripts": {
-    "start": "imba -w server.imba",
-    "build": "imba build server.imba"
+    "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
+    "build:server": "tsc",
+    "build": "yarn run version && yarn copyfiles && yarn build:payload && yarn build:server",
+    "serve": "cross-env PAYLOAD_CONFIG_PATH=dist/payload.config.js NODE_ENV=production node dist/server.js",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
+    "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
+    "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema",
+    "format": "prettier --write \"src/**/*.{ts,js}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js}\"",
+    "lint": "eslint \"src/**/*.{ts,js}\"",
+    "lint:fix": "eslint --fix \"src/**/*.{ts,js}\"",
+    "version": "check-node-version --node $(cat .nvmrc)",
+    "migrate": "migrate-mongo",
+    "prepare": "husky install",
+    "test": "vitest --config vitest.config.ts",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.370.0",
+    "@aws-sdk/lib-storage": "^3.370.0",
+    "@payloadcms/plugin-cloud-storage": "^1.0.19",
+    "check-node-version": "^4.2.1",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
+    "date-fns": "^2.30.0",
+    "dotenv": "^16.3.1",
     "express": "^4.17.1",
-    "firebase": "^9.22.2",
-    "imba": "^2.0.0-alpha.229"
+    "migrate-mongo": "^10.0.0",
+    "payload": "^1.11.2",
+    "typescript": "^5.1.6"
   },
-  "repository": "ericvida/cambodiau",
-  "description": "Khmer Language learning platform",
-  "version": "0.0.0",
-  "homepage": "https://github.com/ericvida/cambodiau",
-  "author": "Eric Vida (https://github.com/ericvida)",
-  "license": "ISC"
+  "devDependencies": {
+    "@commitlint/cli": "^17.6.6",
+    "@commitlint/config-conventional": "^17.6.6",
+    "@types/express": "^4.17.9",
+    "@typescript-eslint/eslint-plugin": "^6.1.0",
+    "@typescript-eslint/parser": "^6.1.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.0",
+    "ts-node": "^10.9.1",
+    "vitest": "^0.33.0"
+  }
 }
