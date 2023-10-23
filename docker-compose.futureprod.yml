@@ -30,20 +30,21 @@ services:
       - label:disable
 
   imba_frontend:
-    image: node
+    build: ./imba/
+    # context: ./imba/
+    # dockerfile: Dockerfile
+    restart: on-failure
     container_name: imba_frontend
+    command: npm start
+    volumes:
+      - ./imba:/code
+      - ./imba/node_modules:/code/node_modules
     ports:
       - '3000:3000'
-    volumes:
-      - ./imba:/home/node/app
-      - ./imba/node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "npm install && npm start"
     env_file: .imba.env
+    # required for SELinux
     security_opt:
       - label:disable
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
 
 volumes:
   data:
