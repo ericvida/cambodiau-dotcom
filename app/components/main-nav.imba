@@ -23,8 +23,8 @@ tag main-nav
 					mr:auto 
 					cursor:pointer
 					py:.3sp
-			<button route-to="/store">
-				<div> "Store"
+			# <button route-to="/store">
+			# 	<div> "Store"
 			<button route-to="/learning">
 				<div> "Learning"
 			<button route-to="/dictionary">
@@ -32,16 +32,16 @@ tag main-nav
 			<button route-to="/phonetics">
 				<div> "Phonetics"
 			
-			if state.user
-				<button @click.signOut>
-					<div> "Sign out"
-			else
-				<button route-to="/login">
-					<div> "Login"
-				<button route-to="/signup">
-					<div> "Signup"
-			if state.admin
-				<button @click=(state.show_editor = !state.show_editor)>
-					css bg:hue3
-					<div> "Editor"
+			# if state.user
+			# 	<button @click.signOut>
+			# 		<div> "Sign out"
+			# else
+			# 	<button route-to="/login">
+			# 		<div> "Login"
+			# 	<button route-to="/signup">
+			# 		<div> "Signup"
+			# if state.admin
+			# 	<button @click=(state.show_editor = !state.show_editor)>
+			# 		css bg:hue3
+			# 		<div> "Editor"
 					

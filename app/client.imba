@@ -55,6 +55,7 @@ def logTime fn
 	let endTime = performance.now!
 	# LOG "function took {startTime - endTime} ms"
 	return res
+	
 # LAYOUT[epic=LAYOUT, seq=19] App
 tag App
 	css d:hflex
@@ -107,13 +108,13 @@ tag App
 					<main-nav>
 				<main>
 					<landing-page route="/">
-					<store-page route="/store">
+					# <store-page route="/store">
 					<modules-page route="/learning">
-					<dictionary-page route="/dictionary">
-					<phonetics-page route="/phonetics">
-					<login-page route="/login">
-					<signup-page route="/signup">
-					<course-page route="/course">
+					# <dictionary-page route="/dictionary">
+					# <phonetics-page route="/phonetics">
+					# <login-page route="/login">
+					# <signup-page route="/signup">
+					# <course-page route="/course">
 				<footer>
 					css c:gray9 @darkmode:gray1
 						h:1bottombar
