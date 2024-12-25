@@ -5,8 +5,9 @@
     "framework": "other",
     "routes": [
         { 
-            "src": "/(.*)", 
-            "dest": "/$1"
+            "src": "/[^.]+", 
+            "dest": "/",
+            "status": 200 
         }
     ]
 }
