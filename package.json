@@ -7,7 +7,7 @@
 		"dev": "imba -w src/index.html",
 		"start": "npm run dev",
 		"build": "imba build src/index.html",
-		"preview": "npx http-server dist"
+		"vercel-build": "npm run build"
 	},
 	"devDependencies": {
 		"imba": "^2.0.0-alpha.238"
