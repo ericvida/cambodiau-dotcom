@@ -12,6 +12,6 @@
 	"dependencies": {
 		"fitty": "^2.4.2",
 		"localforage": "^1.10.0",
- 		"node": "16.14.2"
+		"node": "^23.5.0"
 	}
 }
