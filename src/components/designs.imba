@@ -1,4 +1,4 @@
-tag moduul-closed
+tag collection-closed
 	css p:1sp d:vflex @lg:hflex g:1sp
 		min-height: calc(100vh - 1topbar)
 		max-width:1000px mx:auto
@@ -19,12 +19,12 @@ tag moduul-closed
 			<div.image> "image"
 			<[d:hgrid w:100% g:1sp gtc: 2fr 1fr]>
 				<div.card> "card"
-				<rightbar-moduul-contents>
+				<rightbar-collection-contents>
 			<[d:hgrid w:100% g:1sp gtc:1fr]> 
 				<rightbar-graduated-students>
 		<student-portal-rightbar>
 
-tag buy-moduul
+tag buy-collection
 	css bg:white p:1sp d:vflex gap:2sp
 	css .pill rd:full fls:1 w:fit-content px:1sp py:.2sp
 		bg:hue1 ..dark:hue8/50
@@ -74,16 +74,16 @@ tag student-portal
 
 tag student-portal-main
 	<self>
-		<moduul-closed route="/closed/">
-		<moduul-open route="/open/">
+		<collection-closed route="/closed/">
+		<collection-open route="/open/">
 		
 tag student-portal-rightbar
 	css self
 		flb:1rightbar
 		d:vflex g:1sp
 	<self>
-		<buy-moduul name="Market moduul" price=5 benefits=['One moduul','5 chapters','400 words']>
-		<buy-moduul[bd:5px solid hue5] name="All moduuls" price=20 benefits=['5 modoules','40 chapters','2200 words']>
+		<buy-collection name="Market collection" price=5 benefits=['One collection','5 chapters','400 words']>
+		<buy-collection[bd:5px solid hue5] name="All collections" price=20 benefits=['5 modoules','40 chapters','2200 words']>
 tag student-portal-topbar
 	css d:flex j:center a:center 
 		h:1topbar

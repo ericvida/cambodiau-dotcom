@@ -5,7 +5,7 @@ import {en} from './input_bible_stories_eng'
 import {kh} from './input_bible_stories_khmer'
 import {titles} from './input_bible_stories_titles'
 
-class CalculatemoduulUsageData
+class CalculatecollectionUsageData
 	prop worth_zero = [
 		"?"
 		"ៗ"
@@ -23,7 +23,7 @@ class CalculatemoduulUsageData
 	]
 	def constructor
 		let consolidated_data = consolidateBibleStoryData!
-		let res = enrichmoduulData consolidated_data
+		let res = enrichcollectionData consolidated_data
 		return res
 		# convert array tree into object tree
 	def consolidateBibleStoryData
@@ -33,11 +33,11 @@ class CalculatemoduulUsageData
 		# let doublespace = /(?<!\s)\s\s(?!\s)/gi
 		let user_updated = []
 		let res_user = titles
-		let moduuls_updated = []
-		for moduul, ci in titles.moduuls
-			let res_moduul = moduul
+		let collections_updated = []
+		for collection, ci in titles.collections
+			let res_collection = collection
 			let lessons_updated = []
-			for lesson, li in moduul.lessons # lesson
+			for lesson, li in collection.lessons # lesson
 				let res_lesson = lesson
 				res_lesson.phrases = kh[li]
 				let phrases_updated = []
@@ -69,26 +69,26 @@ class CalculatemoduulUsageData
 				lessons_updated.push res_lesson
 				# console.log 'lessons', lessons_updated
 			
-			res_moduul.lessons = lessons_updated
-			moduuls_updated.push res_moduul
-			# console.warn 'moduuls', res_moduul, moduuls_updated
+			res_collection.lessons = lessons_updated
+			collections_updated.push res_collection
+			# console.warn 'collections', res_collection, collections_updated
 		
-		res_user.moduuls = moduuls_updated
+		res_user.collections = collections_updated
 		user_updated = res_user
 		# console.error 'user', res_user, user_updated
 		
 		return user_updated
 	
-	# Finds all words used in each moduul, lesson, and phrase.
-	# counts how many times the are use in phrase, lesson, and moduul.
+	# Finds all words used in each collection, lesson, and phrase.
+	# counts how many times the are use in phrase, lesson, and collection.
 	# and store that information for calculating progress later.
-	def enrichmoduulData user
+	def enrichcollectionData user
 		let res_user = user
 		let user_updated = []
-		for moduul in user.moduuls
-			let res_moduul = moduul
-			let moduul_updated = []
-			for lesson in moduul..lessons
+		for collection in user.collections
+			let res_collection = collection
+			let collection_updated = []
+			for lesson in collection..lessons
 				let res_lesson = lesson
 				let lesson_updated = []
 				for phrase in lesson..phrases
@@ -106,18 +106,18 @@ class CalculatemoduulUsageData
 				res_lesson.word_set_count = res_lesson..word_set.length
 				res_lesson.word_usage_count = getChildrenWordUsage(res_lesson..phrases)
 				res_lesson.word_usage_count_sum = getChildrenWordUsageCount(res_lesson..word_usage_count)
-				moduul_updated.push res_lesson
+				collection_updated.push res_lesson
 			
-			res_moduul.lessons = moduul_updated
-			res_moduul.word_set = getChildrenWordSet(res_moduul..lessons)
-			res_moduul.word_set_count = res_moduul..word_set.length
-			res_moduul.word_usage_count = getChildrenWordUsage(res_moduul..lessons)
-			res_moduul.word_usage_count_sum = getChildrenWordUsageCount(res_moduul..word_usage_count)
-			user_updated.push res_moduul
-		res_user.moduuls = user_updated
-		res_user.word_set = getChildrenWordSet(res_user..moduuls)
+			res_collection.lessons = collection_updated
+			res_collection.word_set = getChildrenWordSet(res_collection..lessons)
+			res_collection.word_set_count = res_collection..word_set.length
+			res_collection.word_usage_count = getChildrenWordUsage(res_collection..lessons)
+			res_collection.word_usage_count_sum = getChildrenWordUsageCount(res_collection..word_usage_count)
+			user_updated.push res_collection
+		res_user.collections = user_updated
+		res_user.word_set = getChildrenWordSet(res_user..collections)
 		res_user.word_set_count = res_user..word_set.length
-		res_user.word_usage_count = getChildrenWordUsage(res_user..moduuls)
+		res_user.word_usage_count = getChildrenWordUsage(res_user..collections)
 		res_user.word_usage_count_sum = getChildrenWordUsageCount(res_user..word_usage_count)
 		return res_user
 	
@@ -142,10 +142,10 @@ class CalculatemoduulUsageData
 		return word_count
 		
 	def getChildrenWordSet children
-		let allmoduulsSet = new Set
+		let allcollectionsSet = new Set
 		for child in children
-			child.word_set.forEach(do(x) allmoduulsSet.add(x))
-		let res = [...allmoduulsSet]
+			child.word_set.forEach(do(x) allcollectionsSet.add(x))
+		let res = [...allcollectionsSet]
 		return res	
 	
 	def getChildrenWordUsage children
@@ -165,15 +165,15 @@ class CalculatemoduulUsageData
 			counter += val
 		return counter
 
-export let moduuls_data = new CalculatemoduulUsageData
-# LOG moduuls_data
+export let collections_data = new CalculatecollectionUsageData
+# LOG collections_data
 # To improve application speed.
-# log moduuls_data above with command below
+# log collections_data above with command below
 # copy object from console and paste into export let below
-# then Comment out moduuls_data above.
+# then Comment out collections_data above.
 
-# export let moduuls_data = {}
+# export let collections_data = {}
 
 extend tag Element
-	get moduuls_data
-		return moduuls_data
+	get collections_data
+		return collections_data

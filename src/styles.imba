@@ -162,13 +162,11 @@ tag layout-sidebars
 tag layout-pancakes
 	css self
 		d:grid
-		gtr: auto 1fr auto
+		gtr: auto 1fr 
 		min-height:100vh
 		pos:absolute inset:0
 		ofy:hidden
 		w:100%
-	# css header
-	# 	pos:relative
 	
 	css main
 		ofy:auto

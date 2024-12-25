@@ -7,10 +7,10 @@
 		"preview": "npx http-server dist"
 	},
 	"devDependencies": {
-		"imba": "^2.0.0-alpha.226"
+		"imba": "^2.0.0-alpha.238"
 	},
 	"dependencies": {
-		"fitty": "^2.3.7",
+		"fitty": "^2.4.2",
 		"localforage": "^1.10.0",
 		"node": "^20.2.0"
 	}

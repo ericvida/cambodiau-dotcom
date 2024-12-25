@@ -1,3 +1,3 @@
-import './moduuls_data'
+import './collections_data'
 
 # import './user.imba'

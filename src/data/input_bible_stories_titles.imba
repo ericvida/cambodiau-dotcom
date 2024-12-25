@@ -1,5 +1,5 @@
 export let titles = {
-	moduuls: [
+	collections: [
 		title: "Bible Stories",
 		icon: 'market'
 		route: "0",

@@ -4268,4 +4268,4 @@ export let dictionary = {
 	'៩': {rank: false, vida: '9', vida_auto: '9', google: "nine", ipa: '9', def: ["digit=number nine"]},
 	'០': {rank: false, vida: '0', vida_auto: '0', google: "zero", ipa: '0', def: ["digit=number zero"]},
 }
-# NOTE: Add symbols to moduuls_data under prop worth_zero.
+# NOTE: Add symbols to collections_data under prop worth_zero.
