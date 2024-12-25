@@ -7,12 +7,10 @@
 		"dev": "imba -w src/index.html",
 		"start": "npm run dev",
 		"build": "imba build src/index.html",
-		"vercel-build": "npm run build"
-	},
-	"devDependencies": {
-		"imba": "^2.0.0-alpha.238"
+		"vercel-build": "npm install && npm run build"
 	},
 	"dependencies": {
+		"imba": "^2.0.0-alpha.238",
 		"fitty": "^2.4.2",
 		"localforage": "^1.10.0"
 	}
