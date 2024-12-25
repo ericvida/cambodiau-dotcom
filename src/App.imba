@@ -414,7 +414,7 @@ tag App
 							fs:xs
 							gap:.20sp
 						css a c:hue7 @darkmode:hue4
-						<span> "Currently in Development. Give feedback via "
+						<span> "Currently in Development. Give feedback via ->"
 						# <a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
 						# <span> " or "
 						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
