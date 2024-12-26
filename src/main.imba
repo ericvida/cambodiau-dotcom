@@ -3,6 +3,7 @@
 import fitty from 'fitty' # for fitting text in WordCard
 import Fuzzy from './fuzzy.imba' # for fitting text in WordCard
 import {audio} from './audio.imba'
+import {images} from './images.imba'
 import {clusters} from './data/clusters.imba'
 import {dictionary} from './data/dictionary.imba'
 import {collections_data} from './data/collections_data.imba'
@@ -430,6 +431,7 @@ tag LandingPage
 		p:1sp rd:md
 	<self[d:vtc @lg:hcc py:5sp gap:2sp]>
 		<div [d:vtc @lg:vcl p:2sp gap:0.6sp]>
+			<img src="./assets/images/obs-en-1-1.jpg">
 			<div [c:hue5 fw:bold fs:1.6em]> "Learn 4000+ Khmer words"
 			<div [c:cool4 fw:thin fs:1.3em]> "by reading Bible stories"
 			# <h1[p:1sp bg:cool0 bd:2px solid cool3 rd:md m:1sp]> "Learn 4000+ bible related words"
@@ -532,7 +534,6 @@ tag Dictionary
 		console.log audio[arg], arg
 		track = audio[arg]
 		$track.src = audio[arg]
-		LOG $track
 		if $track.paused
 			$track.play
 		else
@@ -586,7 +587,8 @@ tag UserPage
 		<self>
 			<.width-container>
 				<UserPageOwnedCollections>
-			# <UserPageLockedCollections>
+				
+				
 # TAG[epic=PAGE, seq=1] CMSAdminPage
 tag CMSAdminPage
 	def render
@@ -1100,7 +1102,7 @@ tag LessonLayout
 		<self>
 			<main.collection-grid>
 				<.left>
-					<img$image src=phrase.image .image>
+					<img$image src=images[phrase.image] .image>
 					<WordNav.card @click.commit collection=collection phrase=phrase rt=route>
 					<.card> 
 						<h2> "Phonetics"
@@ -1568,30 +1570,6 @@ tag WordCard
 			if audio.hasOwnProperty(state.active_word)
 				<AudioPlayer>
 
-tag AudioPlayerForBar
-	<self>
-		# if state.collection > 0
-		let word = ""
-		if manual
-			word = manual
-		else
-			word = state.active_word
-		<> console.log word
-		<audio$track2 @ended.commit src=audio[word] type="audio/mpeg" preload="metadata">
-		
-		<.button-wrapper[d:hflex ai:center]>
-			if $track2.paused # when paused
-				<div .play-audio[w:2em cursor:pointer] @hotkey('space|a') @click=$track2.play> 
-					<svg[size:24px] stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000000">
-						<path[stroke:indigo6 fill:indigo6]  d="M6.906 4.537A.6.6 0 006 5.053v13.894a.6.6 0 00.906.516l11.723-6.947a.6.6 0 000-1.032L6.906 4.537z" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-			
-			else # when playing
-				<div .play-audio[w:2em cursor:pointer] @hotkey('space') @click=$track2.pause> 
-					<svg[size:24px] stroke-width="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="#000" viewBox="0 0 24 24">
-						<path[stroke:indigo6 fill:indigo2] d="M6 18.4V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6H6.6a.6.6 0 0 1-.6-.6zm8 0V5.6a.6.6 0 0 1 .6-.6h2.8a.6.6 0 0 1 .6.6v12.8a.6.6 0 0 1-.6.6h-2.8a.6.6 0 0 1-.6-.6z"/>
-					# <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-					# 	<path[stroke:indigo6 fill:indigo2] d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-					# 	<path[stroke:indigo6 fill:indigo6] d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
 tag AudioPlayer
 	<self>
 		# if state.collection > 0
@@ -1600,7 +1578,6 @@ tag AudioPlayer
 			word = manual
 		else
 			word = state.active_word
-		console.log word, audio["{word}"]
 		<audio$track @ended.commit src=audio["{word}"] type="audio/mpeg" preload="true">
 		
 		<.button-wrapper[d:hflex ai:center]>
@@ -2158,29 +2135,7 @@ tag CreateAccountPage
 						<.login-button @click.mockAuthToggle> "Create Account"
 						<hr[mt:1sp mb:.4sp]>
 						<ThirdPartyLogins>
-					
-# ELEMENT[epic=ELEMENT, seq=38] UserThumb
-tag UserThumb
-	css bg:hue5
-		rd:full
-	css img
-		o@hover:50% tween:opacity .2s cursor:pointer
-	def render
-		<self>
-			<img[s:40px rd:full] src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=80&h=80&q=60">
-
-# ELEMENT[epic=ELEMENT, seq=39] Icon Left Chevron
-tag IconLeftChevron
-	<self>
-		<svg[s:20px] xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-			<path fill-rule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clip-rule="evenodd" />	
-
-# ELEMENT[epic=ELEMENT, seq=40] Icon Right Chevron
-tag IconRightChevron
-	<self>
-		<svg[s:20px] xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-			<path fill-rule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clip-rule="evenodd" />
-
+	
 # ELEMENT[epic=ELEMENT, seq=41] Progress Bar
 tag ProgressBar
 	css w:100%

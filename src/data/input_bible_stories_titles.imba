@@ -3,7 +3,7 @@ export let titles = {
 		title: "Bible Stories",
 		icon: 'market'
 		route: "0",
-		image: "https://github.com/ericvida/cambodiau-images/blob/main/obs-en-50-11.jpg?raw=true"
+		image: "obs-en-50-11.jpg"
 		price: "20"
 		info: "Learn the Vocabulary of the Bible"
 		lessons: [
