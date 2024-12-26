@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "imba-esbuild-template",
   "scripts": {
     "dev": "imba -w index.html",
@@ -12,21 +11,4 @@
   "dependencies": {
     "fitty": "^2.4.2"
   }
-=======
-	"name": "11-cambodiau-u",
-	"scripts": {
-		"dev": "imba -w src/index.html",
-		"start": "npm run dev",
-		"build": "imba build src/index.html",
-		"preview": "npx http-server dist"
-	},
-	"devDependencies": {
-		"imba": "^2.0.0-alpha.238"
-	},
-	"dependencies": {
-		"fitty": "^2.4.2",
-		"localforage": "^1.10.0",
-		"node": "22.0.0"
-	}
->>>>>>> 682ed01d985777028be0e34a0b2bffdbf2c20a72
 }
