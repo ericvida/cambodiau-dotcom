@@ -431,7 +431,6 @@ tag LandingPage
 		p:1sp rd:md
 	<self[d:vtc @lg:hcc py:5sp gap:2sp]>
 		<div [d:vtc @lg:vcl p:2sp gap:0.6sp]>
-			<img src="./assets/images/obs-en-1-1.jpg">
 			<div [c:hue5 fw:bold fs:1.6em]> "Learn 4000+ Khmer words"
 			<div [c:cool4 fw:thin fs:1.3em]> "by reading Bible stories"
 			# <h1[p:1sp bg:cool0 bd:2px solid cool3 rd:md m:1sp]> "Learn 4000+ bible related words"
@@ -1102,6 +1101,7 @@ tag LessonLayout
 		<self>
 			<main.collection-grid>
 				<.left>
+					<img$image src=images[phrase.image] .image>
 					<WordNav.card @click.commit collection=collection phrase=phrase rt=route>
 					<.card> 
 						<h2> "Phonetics"
