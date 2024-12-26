@@ -1102,7 +1102,6 @@ tag LessonLayout
 		<self>
 			<main.collection-grid>
 				<.left>
-					<img$image src=images[phrase.image] .image>
 					<WordNav.card @click.commit collection=collection phrase=phrase rt=route>
 					<.card> 
 						<h2> "Phonetics"
