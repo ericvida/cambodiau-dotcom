@@ -211,6 +211,7 @@ class Api
 	# API[epic=FrontEnd, seq=9] DARKMODE
 	def toggleDark
 		state.dark = !state.dark
+		console.log 'toggled darkmode', state.dark
 		if state.dark
 		then setDarkmode!
 		else unsetDarkmode!
@@ -529,14 +530,6 @@ tag Dictionary
 	css svg size:24px
 		path stroke:indigo6 fill:indigo6
 	prop track = ""
-	def toggleDictionaryAudio arg
-		console.log audio[arg], arg
-		track = audio[arg]
-		$track.src = audio[arg]
-		if $track.paused
-			$track.play
-		else
-			$track.pause
 	css .searchbar
 		input
 			d:hflex gap:1sp
@@ -1103,7 +1096,7 @@ tag LessonLayout
 				<.left>
 					<img$image src=images[phrase.image] .image>
 					<WordNav.card @click.commit collection=collection phrase=phrase rt=route>
-					<.card> 
+					<.card>
 						<h2> "Phonetics"
 						<p.phonetics>
 							if state.ipa
@@ -1229,22 +1222,37 @@ tag WordNav
 		last_phrase_index = Object.keys(phrases).length - 1
 		last_word_index = phrase.khmer.split('|').length - 1
 		state.active_word = word
+	
+	def playWord player, filename
+		if !!audio[filename]
+			player.src = audio[filename]
+			player.play!
+		else
+			console.warn 'no audio'
+	def handleHold word
+		console.log 'held'
+		state.active_word = word
+		api.toggleLearned(state.active_word)
+		
 	def render
 		updateActiveWordData!
 		# @click=(state.active_word = khccmer_word)
 		<self>
 			<h2> phrase.title
 			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
-			
 			<global 
 				@hotkey('e|up')=prevPhraseZero
 				@hotkey('r|down')=nextPhrase
 				@hotkey('d|left')=prevWord 
 				@hotkey('f|right')=nextWord
 			>
+			<audio$word_audio src="" type="audio/mpeg">
 			<div.word-wrapper>
 				for khmer_word, ki in phrase.khmer.split('|')
-					<.word .active=(khmer_word is state.active_word) route-to="/collection/{state.collection}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word)> khmer_word
+					<.word .active=(khmer_word is state.active_word) route-to="/collection/{state.collection}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word) 
+					@dblclick.playWord($word_audio, khmer_word) 
+					@mousedown.debounce(1s).handleHold(khmer_word)
+					> khmer_word
 
 # LAYOUT[epic=LAYOUT, seq=26] LearnModulePreview
 tag LearnModulePreview
@@ -1577,7 +1585,7 @@ tag AudioPlayer
 			word = manual
 		else
 			word = state.active_word
-		<audio$track @ended.commit src=audio["{word}"] type="audio/mpeg" preload="true">
+		<audio$track @ended.commit src=audio[word] type="audio/mpeg" preload="auto">
 		
 		<.button-wrapper[d:hflex ai:center]>
 			if $track.paused # when paused
@@ -1614,57 +1622,72 @@ tag DefinitionCard
 
 # CARD[epic=CARD, seq=32] ShortcutCard
 tag ShortcutCard
+	css .shortcut-wrapper
+		d:grid gtc:1fr 1fr ai:center
+	css .key-wrapper
+		d:vcl gap:0.4sp w:100px
+		&.horizontal
+			d:hsl
+	css .key-text 
+		fs:xs 
+		c:warm6 @darkmode:warm4
+		wrap:wrap
+		fls:1 flg:0
 	css .key
-		mx:.5sp
-			
+		px:.4sp 
+		rd:md 
+		fs:.7em
+		py:.2sp
+		lh:1sp
+		bd:1px solid warm4 @darkmode:1px solid indigo4
+		c:warm5 @darkmode: indigo4
+		ff:mono
 	<self .shortcuts.card>
 		# TAG[epic=SHORTCUTS, seq=20] Global Shortcuts
 		
 		<h2> "Shortcuts"
-		<div>
-			<span.key-text> "toggle learned"
-			<span.key> "s"
-			<span.key-text> "or"
-			<span.key> "enter"
-		<div>
-			<span.key-text> "play audio "
-			<span.key> "a"
-			<span.key-text> "or"
-			<span.key> "space" 
-		<div>
-			<span.key-text> "previous lesson"
-			<span.key> "e"
-			<span.key-text> "or"
-			<span.key> "↑"
-		<div>
-			<span.key-text> "next lesson"
-			<span.key> "r"
-			<span.key-text> "or"
-			<span.key> "↓" 
-		<div>
-			<span.key-text> "previous word"
-			<span.key> "d"
-			<span.key-text> "or"
-			<span.key> "←"
-		<div>
-			<span.key-text> "next word"
-			<span.key> "f"
-			<span.key-text> "or"
-			<span.key> "→"
-		# <div>
-		# 	<span.key-text> "play audio if available"
-		# 	<span.key[ml:.5sp]> "a"
-		<div>
-			<span.key-text> "toggle dark mode"
-			<span.key> "shift & d"
-		<div>
-			<span.key-text> "change phonetics system"
-		<div>
-			<span.key> "v"
-			<span.key-text> "or"
-			<span.key> "shift & i"
-		<div>
-			<span.key-text> "clear all progres"
+		<div.shortcut-wrapper>
+			<span.key-text> "Toggle learned"
+			<span.key-wrapper>
+				<span.key> "s"
+				<span.key> "enter"
+				<span.key> "hold word"
+		<div.shortcut-wrapper>
+			<span.key-text> "Play audio "
+			<span.key-wrapper.horizontal>
+				<span.key> "a"
+				<span.key> "space" 
+		<div.shortcut-wrapper>
+			<span.key-text> "Previous lesson"
+			<span.key-wrapper.horizontal>
+				<span.key> "e"
+				<span.key> "↑"
+		<div.shortcut-wrapper>
+			<span.key-text> "Next lesson"
+			<span.key-wrapper.horizontal>
+				<span.key> "r"
+				<span.key> "↓" 
+		<div.shortcut-wrapper>
+			<span.key-text> "Previous word"
+			<span.key-wrapper.horizontal>
+				<span.key> "d"
+				<span.key> "←"
+		<div.shortcut-wrapper>
+			<span.key-text> "Next word"
+			<span.key-wrapper.horizontal>
+				<span.key> "f"
+				<span.key> "→"
+		<div.shortcut-wrapper>
+			<span.key-text> "Toggle dark mode"
+			<span.key-wrapper.horizontal>
+				<span.key> "shift & d"
+		<div.shortcut-wrapper>
+			<span.key-text> "Change phonetics system"
+			<span.key-wrapper>
+				<span.key> "v"
+				<span.key> "shift & i"
+		<div.shortcut-wrapper>
+			<span.key-text> "Clear all progres. Refresh browser after"
 			<span.key> "shift & c & l"
 # CARD[epic=CARD, seq=33] SpellingCard
 	
