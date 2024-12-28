@@ -1261,7 +1261,7 @@ tag WordNav
 				@hotkey('e|up')=prevPhraseZero
 				@hotkey('r|down')=nextPhrase
 				@hotkey('d|left')=prevWord 
-				@hotkey('f|right')=nextWord
+				@hotkey('f|right')=nebunxtWord
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			<div.word-wrapper>
