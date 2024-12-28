@@ -1,6 +1,14 @@
 export default {
 	bundler: "vite",
 	client: {
-		plugins: []
+		build: {
+			ssr: false,
+			ssrManifest: false
+		},
+		worker: {
+			plugins() {
+				return []
+			}
+		}
 	}
 }
