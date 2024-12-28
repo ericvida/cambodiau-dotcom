@@ -1251,7 +1251,7 @@ tag WordNav
 				for khmer_word, ki in phrase.khmer.split('|')
 					<.word .active=(khmer_word is state.active_word) route-to="/collection/{state.collection}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word) 
 					@dblclick.playWord($word_audio, khmer_word) 
-					@mousedown.debounce(1s).handleHold(khmer_word)
+					@touch.hold.handleHold(khmer_word)
 					> khmer_word
 
 # LAYOUT[epic=LAYOUT, seq=26] LearnModulePreview
