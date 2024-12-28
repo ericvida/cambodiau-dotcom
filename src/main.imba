@@ -1153,6 +1153,7 @@ tag WordNav
 			fs:2xl
 			lh:2em
 			pt:.4em
+			user-select:none
 			cursor:pointer
 			px:0.5sp
 			rd:md
@@ -1229,11 +1230,27 @@ tag WordNav
 			player.play!
 		else
 			console.warn 'no audio'
+	
+	step = 50
+	elapsed = 0
 	def handleHold word
-		console.log 'held'
-		state.active_word = word
 		api.toggleLearned(state.active_word)
+		stopTimer!
+		resetTimer!
+		console.log 'held'
+		imba.commit!
 		
+	def pressAndHold word, duration
+		state.active_word = word
+		#interval = setInterval(&, step) do
+			if elapsed >= duration 
+			then (handleHold!)
+			else elapsed = elapsed + step
+		
+	
+	def stopTimer do #interval && clearInterval(#interval)
+	def resetTimer do elapsed = 0; imba.commit!
+	
 	def render
 		updateActiveWordData!
 		# @click=(state.active_word = khccmer_word)
@@ -1251,7 +1268,8 @@ tag WordNav
 				for khmer_word, ki in phrase.khmer.split('|')
 					<.word .active=(khmer_word is state.active_word) route-to="/collection/{state.collection}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word) 
 					@dblclick.playWord($word_audio, khmer_word) 
-					@touch.hold.handleHold(khmer_word)
+					@mousedown.pressAndHold(khmer_word, 1s)
+					@mouseup.stopTimer
 					> khmer_word
 
 # LAYOUT[epic=LAYOUT, seq=26] LearnModulePreview
@@ -1651,12 +1669,13 @@ tag ShortcutCard
 			<span.key-wrapper>
 				<span.key> "s"
 				<span.key> "enter"
-				<span.key> "hold word"
+				<span.key> "hold 1s"
 		<div.shortcut-wrapper>
 			<span.key-text> "Play audio "
-			<span.key-wrapper.horizontal>
+			<span.key-wrapper>
 				<span.key> "a"
-				<span.key> "space" 
+				<span.key> "space"
+				<span.key> "dbl tap"
 		<div.shortcut-wrapper>
 			<span.key-text> "Previous lesson"
 			<span.key-wrapper.horizontal>
