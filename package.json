@@ -1,12 +1,14 @@
 {
-  "name": "imba-esbuild-template",
+  "name": "template-imba-vite",
+  "type": "module",
   "scripts": {
-    "dev": "imba -w index.html",
-    "build": "imba build index.html",
-    "preview": "npx vite preview"
+    "dev": "imba serve",
+    "build": "imba build",
+    "preview": "imba preview"
   },
   "devDependencies": {
-    "imba": "^2.0.0-alpha.238"
+    "imba": "^2.0.0-alpha.238",
+    "vite": "^6.0.6"
   },
   "dependencies": {
     "fitty": "^2.4.2"
