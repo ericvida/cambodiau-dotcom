@@ -2,11 +2,8 @@
     "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }],
     "builds": [
         {
-            "src": "package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "nodeVersion": "18.x"
-            }
+            "src": "dist/**",
+            "use": "@vercel/static"
         }
     ]
 }
