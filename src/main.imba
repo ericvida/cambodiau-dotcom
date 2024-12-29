@@ -1258,10 +1258,10 @@ tag WordNav
 			<h2> phrase.title
 			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
 			<global 
-				@hotkey('e|up')=prevPhraseZero
-				@hotkey('r|down')=nextPhrase
-				@hotkey('d|left')=prevWord 
-				@hotkey('f|right')=nebunxtWord
+				@hotkey('e|up')=prevPhraseZero!
+				@hotkey('r|down')=nextPhrase!
+				@hotkey('d|left')=prevWord!
+				@hotkey('f|right')=nextWord!
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			<div.word-wrapper>
