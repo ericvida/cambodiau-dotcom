@@ -124,7 +124,9 @@ tag app
 		# 		<div>
 		# 			<p> "Crush it {DATA.local.user.email.split('@').shift!}!"
 		# 			<button @click=(API.logout!, email_input = '')> "logout"
+		<div route='/collection/0/0/0/0'> 'HELLO'
 		<app-dashboard>
+		
 
 
 imba.mount <app>

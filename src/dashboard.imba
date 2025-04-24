@@ -364,6 +364,7 @@ tag app-dashboard
 	
 	def saveRouteToState
 		let route_array = router.pathname.replace('/','').split('/')
+		console.log route_array
 		state.collection = route_array[1]
 		state.lesson = route_array[2]
 		state.phrase = route_array[3]
@@ -405,7 +406,8 @@ tag app-dashboard
 					# <login-page route="/login">
 					# <create-account-page route="/create">
 					<.width-container>
-						<CollectionPage route="/collection/0/0/0/0">
+						<CollectionPage route="/collection/:collection/:lesson/:chapter/:paragraph">
+						# <CollectionPage route="/collection/0/0/0/0/">
 				
 				<div slot="bottom">
 						css c:gray9 @darkmode:gray1
@@ -1035,15 +1037,15 @@ tag CollectionPage
 		h:100vh
 	
 	
-		
-	def mount
-		console.log imba.router.url.pathname
+	def routed params
+		console.log params
+	
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
 		# WARN collection
 		<self>
 			# <.lesson-nav-wrapper>
-			<LessonNav route="/collection/:collection/:lesson" collection=collections_data.collections[state.collection]>
+			<LessonNav route="/collection/:collection/:lesson/" collection=collections_data.collections[state.collection]>
 			# <.phrase-nav-wrapper>
 			<ChapterNav collection=collections_data.collections[state.collection]>
 			<lesson-layout collection=collections_data.collections[state.collection]>
