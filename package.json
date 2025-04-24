@@ -1,16 +1,18 @@
 {
-  "name": "template-imba-vite",
+  "name": "bun-instantdb-imba-template",
+  "module": "./src/index.imba",
   "type": "module",
-  "scripts": {
-    "dev": "imba serve",
-    "build": "imba build",
-    "preview": "imba preview"
-  },
   "devDependencies": {
-    "imba": "^2.0.0-alpha.238",
-    "vite": "^6.0.6"
+    "bimba-cli": "latest",
+    "imba": "latest"
   },
   "dependencies": {
-    "fitty": "^2.4.2"
+    "@instantdb/core": "^0.18.9",
+    "fitty": "^2.4.2",
+    "imba-phosphor-icons": "^2.2.0"
+  },
+  "scripts": {
+    "dev": "bunx bimba src/index.imba --outdir public --watch --clearcache",
+    "bundle": "bunx bimba src/index.imba --outdir public --minify"
   }
 }

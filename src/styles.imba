@@ -159,7 +159,9 @@ tag layout-pancakes
 		d:grid
 		gtr: auto 1fr 
 		min-height:100vh
-		pos:absolute inset:0
+		bd:1px solid red
+		# pos:absolute 
+		# inset:0
 		ofy:hidden
 		w:100%
 	
