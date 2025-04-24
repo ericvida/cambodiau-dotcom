@@ -3,7 +3,9 @@
   "module": "./src/index.imba",
   "type": "module",
   "devDependencies": {
+    "@types/bun": "latest",
     "bimba-cli": "latest",
+    "bun-types": "^1.2.10",
     "imba": "latest"
   },
   "dependencies": {
@@ -14,5 +16,9 @@
   "scripts": {
     "dev": "bunx bimba src/index.imba --outdir public --watch --clearcache",
     "bundle": "bunx bimba src/index.imba --outdir public --minify"
+  },
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }

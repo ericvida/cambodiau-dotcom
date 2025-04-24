@@ -15,6 +15,7 @@ import './styles.imba'
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 const fuzzy = new Fuzzy
 const STATEKEY = 'app-state-20221119'
+
 def logTime fn
 	let startTime = performance.now!
 	let res = fn
@@ -439,7 +440,7 @@ tag landing-page
 			<[h:2sp]>
 			<button.button route-to="/collection/0/0/0/0/"> "Start Learning"
 		<div>
-			<iframe [w:450px @md:600px h:300px @md:400px] src="https://www.youtube.com/embed/20dpm0bNjIU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
+			<iframe [w:450px @md:600px h:300px @md:400px] src="https://www.youtube.com/embed/20dpm0bNjIU" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
 
 # TAG[epic=NAV, seq=1] TopNavigation
 tag TopNavigation
@@ -1784,20 +1785,11 @@ tag SpellingCard
 			let kh_v = "([ិ-៑]+)|" # matches ិីឹឺុ... េះ ោះ ាះ ាំ ុំ
 			let kh_c = "([ក-ឡ])|" # matches
 			
+			# kh_nuh +
+			# kh_nih +
+			# kh_eeh +
 			let regtest = new RegExp
-				# kh_nuh +
-				# kh_nih +
-				# kh_eeh +
-				kh_leg +
-				kh_aang +
-				kh_eaq +
-				kh_bantok_piir +
-				kh_treisap +
-				kh_s_stress +
-				kh_c_stress +
-				kh_v +
-				kh_c +
-				'.', 'g'
+				kh_leg + kh_aang + kh_eaq + kh_bantok_piir + kh_treisap + kh_s_stress +	kh_c_stress + kh_v + kh_c +	'.', 'g'
 			
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
 			let testword = state.active_word
