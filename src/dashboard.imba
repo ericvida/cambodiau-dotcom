@@ -398,7 +398,7 @@ tag app-dashboard
 						<TopNavigation>
 				<div slot="middle">
 					<landing-page route="/">
-					# <user-page route="/@username">
+					<user-page route="/@username">
 					<app-dictionary-page route="/dictionary">
 					<phonetics-page route="/phonetics">
 					<info-page route="/info">
@@ -406,7 +406,7 @@ tag app-dashboard
 					# <login-page route="/login">
 					# <create-account-page route="/create">
 					<.width-container>
-						<CollectionPage route="/collection/:collection/:lesson/:chapter/:paragraph">
+						<CollectionPage route="/collection/:collection/:lesson/:paragraph/:word">
 						# <CollectionPage route="/collection/0/0/0/0/">
 				
 				<div slot="bottom">
@@ -1036,7 +1036,6 @@ tag CollectionPage
 		flb:1lessonbar
 		h:100vh
 	
-	
 	def routed params
 		console.log params
 	
@@ -1044,11 +1043,11 @@ tag CollectionPage
 		# FIXME: Console.warn fires twice. Not sure why
 		# WARN collection
 		<self>
-			# <.lesson-nav-wrapper>
-			<LessonNav route="/collection/:collection/:lesson/" collection=collections_data.collections[state.collection]>
+			<.lesson-nav-wrapper>
+				<LessonNav route="/collection/:collection/:lesson/" collection=collections_data.collections[state.collection]>
 			# <.phrase-nav-wrapper>
 			<ChapterNav collection=collections_data.collections[state.collection]>
-			<lesson-layout collection=collections_data.collections[state.collection]>
+			<LessonLayout collection=collections_data.collections[state.collection]>
 			# 	<.main-wrapper[mx:auto]>
 # LAYOUT[epic=LAYOUT, seq=22] user-page-owned-collections
 tag user-page-owned-collections
@@ -1081,8 +1080,8 @@ tag user-page-locked-collections
 				for own id, collection of bible_data.collections
 					<collection-card route-to="/buy/{id}" id=id collection=collection>
 
-# LAYOUT[epic=LAYOUT, seq=23] lesson-layout
-tag lesson-layout
+# LAYOUT[epic=LAYOUT, seq=23] LessonLayout
+tag LessonLayout
 	css d:vflex @lg:hflex g:1sp
 		# bg:red
 	css .collection-grid
@@ -1104,7 +1103,8 @@ tag lesson-layout
 		<self>
 			<main.collection-grid>
 				<.left>
-					<img$image src=images[phrase.image] .image>
+					<> console.log phrase.image
+					<img$image src=images["{phrase.image}"] .image>
 					<WordNav.card @click.commit collection=collection phrase=phrase rt=route>
 					<.card>
 						<h2> "Phonetics"
