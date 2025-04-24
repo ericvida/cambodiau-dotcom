@@ -1,4 +1,4 @@
-const INSTANT_APP_ID = "YOUR_INSANTDB_PUBLIC_APP_ID_HERE" 
+const INSTANT_APP_ID = "610003c4-b4d1-4b7f-84fb-47bbf3cf5e0c" 
 const LOCAL_DB_NAME = "instantdb-imba-template"
 # import {ClientIDB} from './lib/instantdb-imba/index.imba'
 import 'imba/preflight.css'
@@ -6,7 +6,7 @@ import * as PH from 'imba-phosphor-icons'
 import {init, tx, id} from '@instantdb/core'
 import {images} from './images.imba'
 global.IMAGES = images
-import './dashboard.imba'
+import './app-dashboard.imba'
 class dataSYNC
 	def constructor
 		local = imba.locals(LOCAL_DB_NAME)
@@ -24,7 +24,7 @@ class InstantAPI
 		DATA.instant = init({ appId: INSTANT_APP_ID});
 	def subscribe
 		DATA.instant.subscribeAuth do(auth)
-			# console.log('Auth state changed:', auth)
+			console.log('Auth state changed:', auth)
 			if auth.error
 				console.log 'Error during authentication'
 			elif auth.user
@@ -104,28 +104,27 @@ tag app
 		css bg:gray1 d:vcc gap:2em
 		<h1 [fs:xx-large ff:mono my:2em]> "cambodiau.com"
 		# <div.card>
-		# 	unless DATA.local.user
-		# 		<div.col>
-		# 			if INSTANT_APP_ID is 'REPLACE_WITH_YOUR_PUBLIC_APP_ID'
-		# 				<p> 'Please set your InstantDB App ID on line 1 in src/index.imba'
-		# 			else
-		# 				if DATA.local.sentCode?
-		# 					<p> "Check your email for the magic code."
-		# 					<div.row>
-		# 						<input [] type="text" bind=magic_code placeholder="Enter magic code">
-		# 						<button @click=API.loginWithCode(magic_code)> "Login"
-		# 				else
-		# 					<p> "Please enter your email and click 'get code' to receive a magic code."
-		# 					<div.row>
-		# 						<input [w:auto] type="text" bind=email_input placeholder="Enter your email">
-		# 						<button[px:1em] @click=API.sendMagicCode!> "get code"
-			
-		# 	else # When user is logged in
-		# 		<div>
-		# 			<p> "Crush it {DATA.local.user.email.split('@').shift!}!"
-		# 			<button @click=(API.logout!, email_input = '')> "logout"
-		<div route='/collection/0/0/0/0'> 'HELLO'
-		<app-dashboard>
+		unless DATA.local.user
+			<div.col>
+				if INSTANT_APP_ID is 'REPLACE_WITH_YOUR_PUBLIC_APP_ID'
+					<p> 'Please set your InstantDB App ID on line 1 in src/index.imba'
+				else
+					if DATA.local.sentCode?
+						<p> "Check your email for the magic code."
+						<div.row>
+							<input [] type="text" bind=magic_code placeholder="Enter magic code">
+							<button @click=API.loginWithCode(magic_code)> "Login"
+					else
+						<p> "Please enter your email and click 'get code' to receive a magic code."
+						<div.row>
+							<input [w:auto] type="text" bind=email_input placeholder="Enter your email">
+							<button[px:1em] @click=API.sendMagicCode!> "get code"
+		
+		else # When user is logged in
+			# <div>
+			# 	<p> "Crush it {DATA.local.user.email.split('@').shift!}!"
+			# 	<button @click=(API.logout!, email_input = '')> "logout"
+			<app-dashboard>
 		
 
 

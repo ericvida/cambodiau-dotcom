@@ -211,7 +211,7 @@ class Api
 	# API[epic=FrontEnd, seq=9] DARKMODE
 	def toggleDark
 		state.dark = !state.dark
-		console.log 'toggled darkmode', state.dark
+		# console.log 'toggled darkmode', state.dark
 		if state.dark
 		then setDarkmode!
 		else unsetDarkmode!
@@ -1036,15 +1036,15 @@ tag CollectionPage
 		flb:1lessonbar
 		h:100vh
 	
-	def routed params
-		console.log params
+	# def routed params
+	# 	console.log params
 	
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
 		# WARN collection
 		<self>
 			<.lesson-nav-wrapper>
-				<LessonNav route="/collection/:collection/:lesson/" collection=collections_data.collections[state.collection]>
+				<LessonNav route="/collection/:collection/:lesson" collection=collections_data.collections[state.collection]>
 			# <.phrase-nav-wrapper>
 			<ChapterNav collection=collections_data.collections[state.collection]>
 			<LessonLayout collection=collections_data.collections[state.collection]>
@@ -1103,7 +1103,6 @@ tag LessonLayout
 		<self>
 			<main.collection-grid>
 				<.left>
-					<> console.log phrase.image
 					<img$image src=images["{phrase.image}"] .image>
 					<WordNav.card @click.commit collection=collection phrase=phrase rt=route>
 					<.card>
@@ -1275,6 +1274,7 @@ tag WordNav
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			<div.word-wrapper>
+				<> console.log phrase
 				for khmer_word, ki in phrase.khmer.split('|')
 					<.word .active=(khmer_word is state.active_word) route-to="/collection/{state.collection}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word) 
 					@dblclick.playWord($word_audio, khmer_word) 
