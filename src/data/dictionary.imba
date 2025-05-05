@@ -4,7 +4,7 @@
 # API[epic=DATA, seq=1] DICTIONARY DATA
 # NOTE: definition format ["n=act|result|work|job|function|activity|happening"]
 export let dictionary = {
-	"បាន": {rank: "1", vida: "baaṇ", vida_auto: "baan", google: "Yes|did|obtain", ipa: "baan", def: [""]},
+	"បាន": {rank: "1", vida: "baaṇ", vida_auto: "baan", google: "Yes|did|obtain", ipa: "baan", def: false},
 	"ការ": {rank: "2", vida: "kaa", vida_auto: "kaa", google: "The", ipa: "kaa", def: ["n=act|result|work|job|function|activity|happening"]},
 	"នៅ": {rank: "3", vida: "ṇẹụ", vida_auto: "nẹụ", google: "In", ipa: "nɨv", def: false},
 	"និង": {rank: "4", vida: "nẹṇg", vida_auto: "nụṇg", google: "And", ipa: "nɨŋ", def: false},

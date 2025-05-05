@@ -3,7 +3,6 @@ class Fuzzy
 		if typeof haystack is 'string'
 			if searchcheckInclude(searchSubstring(searchNormalize(needle)), searchNormalize(haystack)) and searchMatchLength(needle, haystack)
 				return true
-				console.log string
 			elif searchCheckPattern(searchSubstring(needle), searchSubstring(haystack))
 				return true
 			else
@@ -83,7 +82,6 @@ class Fuzzy
 		res = res.replace('ʔ', ' ')
 		res = res.replace('ʰ', 'h')
 		res = res.replace(/\s|/gi, '')
-		# console.log res
 		return res
 
 

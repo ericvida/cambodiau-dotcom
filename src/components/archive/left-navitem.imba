@@ -43,6 +43,7 @@ tag left-navitem
 					<.collection-wordcount[ta:right]>
 						<div> progress
 				# let active = self.flags.contains('active')
+				# <> console.warn 'test'
 				<progress-bar[hue:indigo $bg:gray3 @darkmode:gray7]=collection_active progress=progress>
 			
 			

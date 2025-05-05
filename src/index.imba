@@ -24,23 +24,19 @@ class InstantAPI
 		DATA.instant = init({ appId: INSTANT_APP_ID});
 	def subscribe
 		DATA.instant.subscribeAuth do(auth)
-			console.log('Auth state changed:', auth)
 			if auth.error
-				console.log 'Error during authentication'
+				console.error 'Error during authentication'
 			elif auth.user
 				DATA.local.user = auth.user
 				DATA.local.login? = yes
 				imba.commit!
 				if DATA.local.user
-					console.log DATA.local.user.id
 					const query = 
 						tasks: 
 							$:
 								where: 
 									"$users.id": DATA.local.user.id
-					console.log('Executing query:', query)
 					const unsub = DATA.instant.subscribeQuery query, do(resp)
-						console.log('Query response:', resp)
 						if resp.error
 							console.error('Uh oh!', resp.error.message)
 						elif resp.data
@@ -79,6 +75,22 @@ class InstantAPI
 		await DATA.instant.auth.signInWithMagicCode({ email: DATA.local.email_input, code: magic_code })
 		DATA.local.email_input = false
 		DATA.local.sentCode? = false
+	
+	def persistProgress progress
+		let profileID = "26b9500e-dcaf-4867-bded-1edd4304c988"
+		if !!profileID
+			await DATA.instant.transact([
+				tx.profile[profileID].update({
+					progress: progress
+					createdAt: Date.now()
+				}).link({$users: DATA.local.user.id}) # link the task to the logged in user
+			])
+		else
+			await DATA.instant.transact [
+				tx.profile[id()].update({
+					progress: progress
+				})
+			]
 global.API = new InstantAPI()
 
 
@@ -101,8 +113,7 @@ tag app
 		DATA.local.email_input
 		API.subscribe!
 	<self>
-		css bg:gray1 d:vcc gap:2em
-		<h1 [fs:xx-large ff:mono my:2em]> "cambodiau.com"
+		css bg:gray1 d:flex gap:2em
 		# <div.card>
 		unless DATA.local.user
 			<div.col>
@@ -112,7 +123,7 @@ tag app
 					if DATA.local.sentCode?
 						<p> "Check your email for the magic code."
 						<div.row>
-							<input [] type="text" bind=magic_code placeholder="Enter magic code">
+							<input type="text" bind=magic_code placeholder="Enter magic code">
 							<button @click=API.loginWithCode(magic_code)> "Login"
 					else
 						<p> "Please enter your email and click 'get code' to receive a magic code."

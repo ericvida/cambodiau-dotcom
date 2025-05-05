@@ -87380,6 +87380,7 @@ export let collections_data = {
 	"word_usage_count_sum": 30173
 }
 
+
 extend tag Element
 	get collections_data
 		return collections_data

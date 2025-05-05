@@ -7,6 +7,7 @@ import {images} from './images.imba'
 import {clusters} from './data/clusters.imba'
 import {dictionary} from './data/dictionary.imba'
 import {collections_data} from './data/collections_data.imba'
+import {library_data} from './data/library_data.imba'
 # import {state.learning_data} from './data'
 import './elements/index.imba'
 import './components/index.imba'
@@ -15,13 +16,6 @@ import './styles.imba'
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 const fuzzy = new Fuzzy
 const STATEKEY = 'app-state-20221119'
-
-def logTime fn
-	let startTime = performance.now!
-	let res = fn
-	let endTime = performance.now!
-	# LOG "function took {startTime - endTime} ms"
-	return res
 
 let state = {
 	auth: yes
@@ -83,28 +77,124 @@ class Api
 			learned_usage: 0
 		}
 		save!
-		# LOG "cleared local storage"
 
 	def toggleLearned word
 		if state.user_learned.hasOwnProperty(word)
 			delete state.user_learned[word]
 		else
 			state.user_learned[word] = yes
-		# LOG 'toggled', word, state.user_learned.hasOwnProperty(word)
-		calcAllProgress!
+		calcAllProgress! # DELETE: Delete when done with calcAllProgressFlat is implemented
+		state.learning_data_flat = calcAllProgressFlat!
 		save!
+	def hasLearned word
+		if state.user_learned.hasOwnProperty(word)
+			return true
+		else
+			return false
+	def calcAllProgressFlat
+		### TODO
+		Make word refs be generated at library_data.imba at static level, not here.
+		###
+		let progress_data = {}
+		let temp_refs = {}
+		for own phrase_key, phrase of library_data.phrases
+			
+			# NOTE: Init Progress data
+			progress_data[phrase_key] = {words_learned: 0, words_total: library_data.phrases[phrase_key].weight, words_progress: 0}
+			
+			# NOTE: Init lesson data once]
+			if !progress_data["{phrase.c}-{phrase.l}"]
+				progress_data["{phrase.c}-{phrase.l}"] = {words_learned: 0, words_total: library_data.lessons["{phrase.c}-{phrase.l}"].weight, words_progress: 0}
+			
+			# NOTE: Init Progress data once
+			if !progress_data[phrase.c]
+				progress_data[phrase.c] = {words_learned: 0, words_total: library_data.collections[phrase.c].weight, words_progress: 0}
+			
+			for own word, val of phrase.words
+				
+				# NOTE: Add unique words to reference lists
+				if temp_refs[word] isa Array
+					temp_refs[word].push phrase_key
+				else
+					temp_refs[word] = [phrase_key]
+					
+				# NOTE: If word is learned add weight to progress data
+				if hasLearned(word)
+					progress_data[phrase_key].words_learned += val.weight | 0
+					progress_data["{phrase.c}-{phrase.l}"].words_learned += val.weight | 0
+					progress_data[phrase.c].words_learned += val.weight | 0
+				
+				# NOTE: count unique words in phrase
+				progress_data[phrase_key].words_unique = countKeys(phrase.words)
+				
+				# NOTE: count unique words in lesson once
+				if !progress_data["{phrase.c}-{phrase.l}"].words_unique
+					progress_data["{phrase.c}-{phrase.l}"].words_unique = countKeys(library_data.lessons["{phrase.c}-{phrase.l}"].words)
+				
+				# NOTE: count unique words in collection once
+				if !progress_data[phrase.c].words_unique
+					progress_data[phrase.c].words_unique = countKeys(library_data.collections[phrase.c].words)
+		
+		for own key, value of temp_refs
+			library_data.words[key].refs = value
+		
+		# NOTE: calculate progress for each colelction, lesson, phrase from data
+		for own key, value of progress_data
+			let learned = progress_data[key].words_learned
+			let weight = progress_data[key].words_total
+			progress_data[key].words_progress = calcPercent(learned, weight)
+		
+		for own key, value of library_data.collections
+			value.words_learned = progress_data[key].words_learned
+			value.words_progress = progress_data[key].words_progress
+			value.words_total = progress_data[key].words_total
+			value.words_unique = progress_data[key].words_unique
+		
+		for own key, value of library_data.lessons
+			value.words_learned = progress_data[key].words_learned
+			value.words_progress = progress_data[key].words_progress
+			value.words_total = progress_data[key].words_total
+			value.words_unique = progress_data[key].words_unique
+		
+		for own key, value of library_data.phrases
+			value.words_learned = progress_data[key].words_learned
+			value.words_progress = progress_data[key].words_progress
+			value.words_total = progress_data[key].words_total
+			value.words_unique = progress_data[key].words_unique
+		
+		return library_data
+		
+		
+	def countKeys obj
+		Object.keys(obj).length
+	def calcPercent learned, total
+		Math.round(learned / total * 100)
 	
 	# calculates progress from words already learned by the user
 	def calcAllProgress
 		state.learning_data.user_progress = calcUserProgress(collections_data)
+		
+		# NOTE: Generating a Flat Progress "1-1-1":10% instead of 1: {1: {1: 10$}}
+		let progress = {}
+		progress.user = state.learning_data.user_progress
 		state.learning_data.user_progress_learned_usage = calcUserLearnedUsage(collections_data)
-		state.learning_data.collection_progress = calcCollectionProgress(collections_data)
+		let col_array = state.learning_data.collection_progress = calcCollectionProgress(collections_data)
+		for col_prog, col_i in col_array
+			progress[col_i] = col_prog
 		state.learning_data.collection_learned_usage = calcCollectionLearnedUsage(collections_data)
-		state.learning_data.lesson_progress = calcLessonProgress(collections_data)
+		let col_les_array = state.learning_data.lesson_progress = calcLessonProgress(collections_data)
+		for les_array, ci in col_les_array
+			for lesson_prog, li in les_array
+				progress["{ci}-{li}"] = lesson_prog
 		state.learning_data.lesson_learned_usage = calcLessonLearnedUsage(collections_data)
-		state.learning_data.phrase_progress = calcPhraseProgress(collections_data)
+		let col_les_phr_array = state.learning_data.phrase_progress = calcPhraseProgress(collections_data)
+		for lesson_array, ci in col_les_phr_array
+			for phrase_prog, li in lesson_array
+				for phrase_prog, pi in phrase_prog
+					progress["{ci}-{li}-{pi}"] = phrase_prog
 		state.learning_data.phrase_learned_usage = calcPhraseLearnedUsage(collections_data)
-	
+		API.persistProgress progress
+		
 	def calcUserProgress user_data
 		return calcUsageProgressOfObject(user_data)
 	
@@ -178,7 +268,6 @@ class Api
 	# Calculates how many times a learned word has been used 
 	def calcLearnedUsageOfObject input
 		let words_used = input.word_usage_count
-		# LOG input, state.user_learned
 		let learned_words_usage = 0
 		for own word, is_learned of state.user_learned
 			# If words_used containes word
@@ -190,13 +279,10 @@ class Api
 	# API[epic=API, seq=7] SAVE
 	def save
 		imba.locals.state = state
-		# store(STATEKEY, state)
-		# LOG 'saved', state
 	
 	# API[epic=API, seq=7] LOAD
 	def load
 		state = imba.locals.state if imba.locals.state
-		# LOG 'loaded', state
 
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
@@ -211,7 +297,6 @@ class Api
 	# API[epic=FrontEnd, seq=9] DARKMODE
 	def toggleDark
 		state.dark = !state.dark
-		# console.log 'toggled darkmode', state.dark
 		if state.dark
 		then setDarkmode!
 		else unsetDarkmode!
@@ -232,11 +317,9 @@ class Api
 	def logOut
 		if state.auth is yes
 			state.auth = no
-			# LOG 'logged out'
 		save!
 
 	def search needle, haystack
-		# LOG needle, haystack
 		let haystackLength = haystack.length # tlen
 		let needleLength = needle.length # qlen
 		if needleLength > haystackLength
@@ -256,125 +339,27 @@ class Api
 			let needleLetterCode = needle.charCodeAt(needleLetter++)
 			while haystackLetter < haystackLength
 				if haystack.charCodeAt(haystackLetter++) is needleLetterCode
-					# LOG 'matched?'
 					break match = true
 			continue if match
 			return false
 		return true
-
 let api = new Api
-# set server address here. It should NOT end with a /
-let serverAddress = 'http://api.cambodiau.com'
-# CLASS[epic=CLASS, seq=12] Remote API
-class RemoteAPI
-	# API[epic=Remote, seq=13] callAPI
-	# wrapper to call API
-	def callAPI method, endpoint, data, token
-		# let url = serverAddress + endpoint
-		let body = data ? JSON.stringify(data) : null
-		let headers = {
-			'Content-Type': 'application/json',
-			'Accept': 'application/json'
-			}
-
-		if token 
-			headers.Authorization = 'Bearer ' + token
-
-		let res = await fetch(url, {
-			method,
-			headers,
-			body
-		})
-
-		return await res.json()
-
-	# API[epic=Remote, seq=14] register API call
-	def register name, email, username, password
-		let body = {
-			name,
-			email,
-			username,
-			password
-			}
-		let res = await callAPI 'POST', '/api/register', body
-
-		if res.status === 201
-			return true
-		else
-			LOG(res)
-	
-	# API[epic=Remote, seq=15] login API call
-	def login email, password
-		let body = {
-			email,
-			password
-			}
-
-		let res = await callAPI 'POST', '/api/login', body
-
-		if res.status = 200
-			return res.token
-		else
-			LOG(res)
-
-	# API[epic=Remote, seq=16] logout API call
-	def logout token
-		await callAPI 'GET', '/api/logout', null, token
-
-	# API[epic=Remote, seq=17] get user API call
-	def getUser token
-		let res = await callAPI 'GET', '/api/user', null, token
-
-		if res.status == 200
-			return res.user
-		else
-			LOG(res)
-
-
-	# API[epic=Remote, seq=18] sample use
-	def doStuff
-		let name = 'qq'
-		let email = 'aa@bb.ccd'
-		let username = 'sdflask'
-		let password = 'dlfkasdlkfjsflkj##lkj'
-
-		register(name, email, username, password)
-
-		# save token somewhere on local storage because it'll be needed for future calls
-		let token = login(email, password)
-
-		# get user data
-		let user = getUser(token)
-		LOG(user)
-
-		# on logout clear token from local storage
-		logout(token)
-
-let remote = new RemoteAPI
 
 # LAYOUT[epic=LAYOUT, seq=19] App
 tag app-dashboard
 	css d:hflex
 		tween: margin-left 2dur
 		# min-height: 100vh
-		# w:100% 
+		w:100% 
 		bg:white @darkmode:black
 		&.open
 			ml:0px
-	
-	def saveRouteToState
-		let route_array = router.pathname.replace('/','').split('/')
-		console.log route_array
-		state.collection = route_array[1]
-		state.lesson = route_array[2]
-		state.phrase = route_array[3]
-		state.word = route_array[4]
-		api.save!
-	
+			
 	def build 
 		api.init!
-		api.calcAllProgress!
-		imba.router.on('change') do saveRouteToState!
+		api.calcAllProgress! # DELETE: Delete when progress working from state.learning_data_flat
+		state.learning_data_flat = api.calcAllProgressFlat!
+		api.save!
 	# FIXME: Not sure why state is not saving and being loaded
 
 	def render
@@ -406,7 +391,7 @@ tag app-dashboard
 					# <login-page route="/login">
 					# <create-account-page route="/create">
 					<.width-container>
-						<CollectionPage route="/collection/:collection/:lesson/:paragraph/:word">
+						<CollectionPage route="/learn">
 						# <CollectionPage route="/collection/0/0/0/0/">
 				
 				<div slot="bottom">
@@ -455,7 +440,6 @@ tag TopNavigation
 	def toggleLeftNav
 		state.left = !state.left
 		api.save!
-		LOG 'toggled nav', state.left
 		imba.commit!
 	def logOut
 		api.logOut!
@@ -463,7 +447,7 @@ tag TopNavigation
 	def render
 		<self>
 			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
-			<a route-to="/collection/0/0/0/0/">
+			<a route-to="/learn">
 				<div> "Learn"
 			<a route-to="/dictionary">
 				<div> "app-dictionary"
@@ -589,7 +573,7 @@ tag user-page
 tag cms-admin-page
 	def render
 		<self>
-			<h1[p:1sp bg:rose0 bd:2px solid coo3 rd:md m:1sp]> "Learn 4000+ bible related words"
+			<h1[p:1sp bg:rose0 bd:2px solid cool3 rd:md m:1sp]> "Learn 4000+ bible related words"
 			<div route="/cms/">
 				<CMSLearnModuleList>
 			# <CMSLessonList route="/cms/0/">
@@ -1036,19 +1020,63 @@ tag CollectionPage
 		flb:1lessonbar
 		h:100vh
 	
-	# def routed params
-	# 	console.log params
-	
 	def render
 		# FIXME: Console.warn fires twice. Not sure why
-		# WARN collection
 		<self>
-			<.lesson-nav-wrapper>
-				<LessonNav route="/collection/:collection/:lesson" collection=collections_data.collections[state.collection]>
-			# <.phrase-nav-wrapper>
-			<ChapterNav collection=collections_data.collections[state.collection]>
-			<LessonLayout collection=collections_data.collections[state.collection]>
-			# 	<.main-wrapper[mx:auto]>
+			<div[d:vflex] route="/learn/">
+				for own ci, collection of state.learning_data_flat.collections
+					<CollectionCard collection=collection route-to="/learn/{ci}">
+			<div[d:flex]>
+				<.lesson-nav-wrapper>
+					<LessonNav route="/learn/:learning_id">
+				<.phrase-nav-wrapper>
+					<PhraseNav route="/learn/:learning_id">
+				<.main-wrapper>
+					<LessonLayout route="/learn/:learning_id">
+			
+			
+# CARD[epic=CARD, seq=29] CollectionCard
+tag CollectionCard
+	prop name = "Collection"
+	prop price = 0
+	prop benefits = [
+		"Benefit 1"
+		"Benefit 2"
+		"Benefit 3"
+	]
+	css bg:white p:1sp d:vflex gap:2sp w:100%
+		cursor:pointer
+	css .pill rd:full fls:1 w:fit-content px:1sp py:.2sp
+		bg:hue1 @darkmode:hue8/50
+		c:hue6 @darkmode:hue4
+	css .price 
+		fw:bold
+		# h:64px
+		d:hflex ai:center jc:start gap:0.5sp
+		my:2sp
+	css .num
+		fs:5xl lh:inherit ff:$copy
+	css .text 
+		fs:1xl lh:inherit ff:$heading
+		c:warm4
+	css .button
+		rd:1rd ta:center p:1sp
+		bg:gray3 @darkmode:gray7
+		c:gray9 @darkmode:gray0
+		@hover
+			bg:hue5 @darkmode:hue5
+		cursor:pointer
+	# css .benefits
+	<self.card> 
+		<span.pill> "🇰🇭 khmer"
+		<.title> collection.title
+		<div> "{collection.words_learned} learned"
+		<div> "{collection.words_total} total"
+		<div> "{collection.words_unique} unique"
+		<.progress> "{collection.words_progress}%"
+		
+			
+			
 # LAYOUT[epic=LAYOUT, seq=22] user-page-owned-collections
 tag user-page-owned-collections
 	def render
@@ -1098,42 +1126,45 @@ tag LessonLayout
 		gap:1sp
 	css .phonetics
 		ff:mono d:flex gap:0.5sp flex-wrap:wrap
+	def mount
+		learning_id = route.params.learning_id
+		phrase = state.learning_data_flat.phrases[route.params.learning_id]
 	def render
-		let phrase = collection.lessons[state.lesson].phrases[state.phrase]
 		<self>
 			<main.collection-grid>
-				<.left>
-					<img$image src=images["{phrase.image}"] .image>
-					<WordNav.card @click.commit collection=collection phrase=phrase rt=route>
-					<.card>
-						<h2> "Phonetics"
-						<p.phonetics>
-							if state.ipa
-								for word in phrase.khmer.split('|')
-									let obj = dictionary[word]
-									if obj..ipa || obj..vida || obj..vida_auto || word
-										<span> obj..ipa || obj..vida || obj..vida_auto || word
-									else
-										<span> "n/a"
-										<> ERROR word, "no phonetics available"
-							else
-								for word in phrase.khmer.split('|')
-									let obj = dictionary[word]
-									if obj..vida || obj..vida_auto || obj..ipa || word
-										<span> obj..vida || obj..vida_auto || obj..ipa || word
-									unless obj..vida || obj..vida_auto || obj..ipa || word
-										<span> "n/a"
-										<> ERROR word, "no phonetics available"
-					<.card>
-						<h2> "Meaning"
-						<p> phrase.meaning
-				<.right>
-					if state.active_word
-						<WordCard.card>
-						if dictionary[state.active_word]..google
-							<DefinitionCard.card>
-						<SpellingCard.card>
-					<ShortcutCard.card>
+				if phrase
+					<.left>
+						<img$image src=images["{phrase.img}"] .image>
+						<WordNav.card @click.commit phrase_key=phrase_key phrase=phrase route="/:page/:learning_id/:word">
+						<.card>
+							<h2> "Phonetics"
+							<p.phonetics>
+								if state.ipa
+									for word in phrase.phrase
+										let obj = dictionary[word]
+										if obj..ipa or obj..vida or obj..vida_auto or word
+											<span> obj..ipa or obj..vida or obj..vida_auto or word
+										else
+											<span> "n/a"
+											<> ERROR word, "no phonetics available"
+								else
+									for word in phrase.phrase
+										let obj = dictionary[word]
+										if obj..vida or obj..vida_auto or obj..ipa or word
+											<span> obj..vida or obj..vida_auto or obj..ipa or word
+										unless obj..vida or obj..vida_auto or obj..ipa or word
+											<span> "n/a"
+											<> ERROR word, "no phonetics available"
+						<.card>
+							<h2> "Meaning"
+							<p> phrase.meaning
+					<.right>
+						if state.active_word
+							<WordCard.card>
+							if dictionary[state.active_word]..google
+								<DefinitionCard.card>
+							<SpellingCard.card>
+						<ShortcutCard.card>
 tag AdminTools
 	css self
 		nav
@@ -1147,7 +1178,6 @@ tag AdminTools
 			@hover
 				bg:hue3
 	<self>
-		LOG state
 		<nav>
 			<button>
 				"edit phrase"
@@ -1182,56 +1212,94 @@ tag WordNav
 			bg:rose1 @darkmode:rose5/50
 			@hover, &.active
 				bxs:0px 0px 0px 4px rose2 inset @darkmode:0px 0px 0px 4px rose2/10 inset
-	
+	def routed params
+		let ids = params.learning_id.split('-')
+		_ci = ids[0]
+		_li = ids[1]
+		_pi = ids[2]
+		_wi = params.word
 	# Goes to the next word in the phrase
-	def nextWord
-		if word_index < last_word_index
-			word_index++
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
-		else 
-			# if last word of phrase, goes to the first word of the next phrase
-			nextPhrase!
-		# LOG 'phrase', phrase_index, 'word', word_index, 'lastw', last_word_index
-
-	# Goes to the previous word in the phrase
+	def nextWord phrase
+		let last_wi = phrase..phrase.length - 1
+		console.log 'true or false', last_wi == _wi
+		# let last_wi = state.learning_data_flat.phrases[phrase_key].phrase.length - 1
+		# if _wi < last_wi
+		# 	router.go("/learn/{_ci}-{_li}-{_pi}/{incValue(_wi)}")
+		# else
+		# 	nextPhrase!
+	def nextPhrase
+		let final_index = state.learning_data_flat.lessons["{_ci}-{_li}"].phrase_keys.length - 1
+		if _pi < final_index
+			_wi = 0
+			router.go("/learn/{_ci}-{_li}-{incValue(_pi)}/{_wi}")
+		else
+			nextLesson!
+	def nextLesson
+		let final_index = state.learning_data_flat.collections[_ci].lesson_keys.length - 1
+		if _li < final_index
+			_pi = "01"
+			_wi = 0
+			router.go("/learn/{_ci}-{incValue(_li)}-{_pi}/{_wi}")
+		else
+			LOG 'final lesson for this collection'
+	
+	def incValue string
+		if "{string}".length > 1
+			formatNum parseInt(string) + 1
+		else
+			parseInt(string) + 1
+	def decValue string
+		if "{string}".length > 1
+			formatNum parseInt(string) - 1 
+		else
+			parseInt(string) - 1
+	def formatNum num
+		num.toString().padStart(2, '0');
+	# NOTE: Goes to the previous word in the phrase
 	def prevWord
 		if word_index > 0
 			word_index--
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
 		else
-			# if no previous word in this phrase goes to the last word of the previous phrase
+			# NOTE: if no previous word in this phrase goes to the last word of the previous phrase
 			prevPhraseLast!
-	# Goes to the first verse of the next phrase
-	def nextPhrase
-		if phrase_index < last_phrase_index
-			phrase_index++
-			word_index = 0
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
+	# NOTE: Goes to the first verse of the next phrase
+	# def nextPhrase
+	# 	if phrase_index < last_phrase_index
+	# 		phrase_index++
+	# 		word_index = 0
+	# 		router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
 	
 	# Goes to the last word of hte previous phrase
 	def prevPhraseLast
 		if phrase_index > 0
 			phrase_index--
-			word_index = phrases[phrase_index].khmer.split('|').length - 1
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
+			word_index = phrases[phrase_index].phrase.length - 1
+			router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
 	# Goes to the first word of the previous phrase
 	def prevPhraseZero
 		if phrase_index > 0
 			phrase_index--
 			word_index = 0
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
+			router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
 	
 	def updateActiveWordData
-		route_array = router.pathname.replace('/','').split('/')
-		collection_index = route_array[1]
-		lesson_index = route_array[2]
-		phrase_index = route_array[3]
-		word_index = route_array[4]
-		word = phrase.khmer.split('|')[word_index]
-		phrases = collection.lessons[lesson_index].phrases
-		last_phrase_index = Object.keys(phrases).length - 1
-		last_word_index = phrase.khmer.split('|').length - 1
-		state.active_word = word
+		let phrase_key = "{state.collection}-{state.lesson}-{state.phrase}"
+		let lesson_key = "{state.collection}-{state.lesson}"
+		let collection_key = "{state.collection}"
+		let collection = state.collection
+		let lesson = state.lesson
+		let phrase = state.phrase
+		# collection_index = route_array[1]
+		# lesson_index = route_array[2]
+		# phrase_index = route_array[3]
+		# LOG 'word index', route.params.learning_id
+		# word_index = route_array[4]
+		# word = phrase.phrase[word_index]
+		# phrases = state.learning_data_flat.lessons[lesson_key].phrases
+		# last_phrase_index = Object.keys(phrases).length - 1
+		# last_word_index = phrase.phrase.length - 1
+		# state.active_word = word
 	
 	def playWord player, filename
 		if !!audio[filename]
@@ -1246,7 +1314,6 @@ tag WordNav
 		api.toggleLearned(state.active_word)
 		stopTimer!
 		resetTimer!
-		console.log 'held'
 		imba.commit!
 		
 	def pressAndHold word, duration
@@ -1270,17 +1337,21 @@ tag WordNav
 				@hotkey('e|up')=prevPhraseZero!
 				@hotkey('r|down')=nextPhrase!
 				@hotkey('d|left')=prevWord!
-				@hotkey('f|right')=nextWord!
+				@hotkey('f|right')=nextWord(phrase)
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			<div.word-wrapper>
-				<> console.log phrase
-				for khmer_word, ki in phrase.khmer.split('|')
-					<.word .active=(khmer_word is state.active_word) route-to="/collection/{state.collection}/{state.lesson}/{state.phrase}/{ki}" .known=state.user_learned.hasOwnProperty(khmer_word) .not_in_dict=!dictionary.hasOwnProperty(khmer_word) 
-					@dblclick.playWord($word_audio, khmer_word) 
-					@mousedown.pressAndHold(khmer_word, 1s)
-					@mouseup.stopTimer
-					> khmer_word
+				for word, word_index in phrase.phrase
+					let phrase_key = "{phrase.c}-{phrase.l}-{phrase.p}"
+					<.word 
+						.active=(word is state.active_word) 
+						route-to="/learn/{phrase_key}/{word_index}" 
+						.known=state.user_learned.hasOwnProperty(word) 
+						.not_in_dict=!dictionary.hasOwnProperty(word) 
+						@dblclick.playWord($word_audio, word) 
+						@mousedown.pressAndHold(word, 1s)
+						@mouseup.stopTimer
+					> word
 
 # LAYOUT[epic=LAYOUT, seq=26] LearnModulePreview
 tag LearnModulePreview
@@ -1422,7 +1493,6 @@ tag collection-card
 					<span.progress-percent> "{Math.floor((state.learning_data.collection_learned_usage[id] / collection.word_usage_count_sum)* 1000) / 10}%"
 				<ProgressBar[$fg:hue5 $bg:gray3 @darkmode:gray7] progress=state.learning_data.collection_progress[id]>
 				# TODO: Calculate Wordcount of used words for collection, Lesson, Phrase
-				<> LOG state.learning_data.collection_progress[state.collection]
 				# if collection.locked
 				# 	<.icon-lock>
 				# 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" .w-6.h-6>
@@ -1637,12 +1707,13 @@ tag DefinitionCard
 			<h2> "Definition"
 			<ol>
 				for item in word_object.def
-					let line = item.split('=')
-					let use = line[0]
-					let translations = line[1].split('|')
-					<li>
-						<span.use> "{use.toUpperCase!} "
-						<span.def> translations.join(', ')
+					if item.includes('=')
+						let line = item.split('=')
+						let use = line[0]
+						let translations = line[1].split('|')
+						<li>
+							<span.use> "{use.toUpperCase!} "
+							<span.def> translations.join(', ')
 		else
 			<h2> "Google Definition"
 			for defi in dictionary[state.active_word].google.split('|')
@@ -1796,7 +1867,6 @@ tag SpellingCard
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
 			let testword = state.active_word
 			let groups = testword.match regtest
-			# # LOG groups
 			for item in groups
 				let cluster = clusters[item]
 				let vowel = item.match /[ា-៑]/
@@ -1811,6 +1881,7 @@ tag SpellingCard
 
 # TAG[epic=NAV, seq=34] LessonNav
 tag LessonNav
+	prop lessons
 	css self
 		# ml:-1lessonbar
 		h:100vh
@@ -1823,23 +1894,34 @@ tag LessonNav
 		bg:white @darkmode:gray9
 		rd:md
 		p:1sp
+	css .active bg:white
 	css .icon-title
 		d:hflex
 	css .usage_word_count
 		fs:xxs ff:mono c:gray6
+	def routed params, test
+		let [col,les,phr] = params.learning_id.split('-')
+		state.collection = col
+		state.lesson = les or false
+		state.phrase = phr or false
+		api.save!
 	def render
 		<self>
-			<.title-card>
-				<.icon-title>
-					<i-{collection.icon}[pr:5px]>
-					<h2 [fs:xl]> collection.title
-				<.usage_word_count> "{state.learning_data.collection_learned_usage[state.collection]}/{collection.word_usage_count_sum} words"
-				<ProgressBar[$bg:gray4/30 @darkmode:gray7] progress=state.learning_data.collection_progress[state.collection]>
-			for own id, lesson of collections_data.collections[state.collection].lessons
-				<LessonNavItem .active=(id == state.lesson) route-to="/collection/{state.collection}/{id}/0/0" id=id lesson=lesson>
+			# FIXME
+			# problem is when I route to lesson or phrase, 
+			# i don't have lesson_keys array anymore. 
+			# So i need to persist collection ID in state.
+			let active_collection = state.learning_data_flat.collections[state.collection]
+			for lesson_key in active_collection.lesson_keys
+				let lesson_item = state.learning_data_flat.lessons[lesson_key]
+				<LessonNavItem 
+					.active=(state.lesson is lesson_key.split('-')[1]) 
+					route-to="/learn/{lesson_key}-1/1" 
+					lesson=state.learning_data_flat.lessons[lesson_key]>
 
 # TAG[epic=NAV, seq=35] LessonNavItem
 tag LessonNavItem
+	prop lesson
 	css self
 		cursor:pointer
 		rd:1rd
@@ -1867,16 +1949,15 @@ tag LessonNavItem
 					$bg:gray8
 					$fg:indigo4
 	def render
-		let progress = "4/{lesson.word_usage_count_sum}"
-		<self[w:100%].lesson-button .chapter_active=no>
+		<self[w:100% ].lesson-button .chapter_active=no>
 			<.chapter-text[d:hflex jc:space-between ai:end]>
-				<.chapter-name> lesson.title	
-			let progress_string = "{state.learning_data.lesson_learned_usage[state.collection][id]}/{lesson.word_usage_count_sum}"
-			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress_string} words"
-			<ProgressBar .color progress=state.learning_data.lesson_progress[state.collection][id]>
+				<.chapter-name> lesson.title
+			let progress_string = "{lesson.words_progress}"
+			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{lesson.words_learned}/{lesson.words_total} words"
+			<ProgressBar .color progress=lesson.words_progress>
 
-# TAG[epic=NAV, seq=36] ChapterNav
-tag ChapterNav
+# TAG[epic=NAV, seq=36] PhraseNav
+tag PhraseNav
 	css self
 		c:gray9
 		w:1phrasebar
@@ -1891,39 +1972,49 @@ tag ChapterNav
 		c:gray5 @darkmode:gray4
 		pos:relative
 		cursor:pointer
-	# Goes to the first verse of the next phrase
+	
+	# NOTE: Goes to the first verse of the next phrase
 	def nextPhrase
 		if phrase_index < last_phrase_index
 			phrase_index++
 			word_index = 0
 			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
 	
-	# Goes to the last word of hte previous phrase
+	# NOTE: Goes to the last word of hte previous phrase
 	def prevPhraseLast
 		if phrase_index > 0
 			phrase_index--
 			word_index = phrases[phrase_index].khmer.split('|').length - 1
 			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
-	# Goes to the first word of the previous phrase
+	
+	# NOTE: Goes to the first word of the previous phrase
 	def prevPhraseZero
 		if phrase_index > 0
 			phrase_index--
 			word_index = 0
 			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
+	def routed params, test
+		let [col,les,phr] = params.learning_id.split('-')
+		state.collection = col
+		state.lesson = les or false
+		state.phrase = phr or false
+		api.save!
+	def build
+		phrases = state.learning_data_flat.phrases
+		progress = 0
 	def render
-		let phrases = collections_data.collections[state.collection].lessons[state.lesson].phrases
-		let progress = 0
 		<self>
-			for own id, phrase of phrases
-				<.number-toggle route-to="/collection/{state.collection}/{state.lesson}/{id}/0">
-					let isActive = state.phrase is id
-					let progress = state.learning_data.phrase_progress[state.collection][state.lesson][id]
-					<ElemProgressRing .active=isActive progress=progress size=30> 
-						if id is 0 
-							"t"
-						else
-							id
-
+			if state.lesson
+				let lesson = state.learning_data_flat.lessons["{state.collection}-{state.lesson}"]
+				for phrase_key in lesson.phrase_keys
+					let phrase_item = state.learning_data_flat.phrases[phrase_key]
+					if phrase_item
+						<.number-toggle route-to="/learn/{phrase_key}/1">
+							let isActive = state.phrase == phrase_item.p
+							<ElemProgressRing 
+								.active=isActive
+								progress=phrase_item.words_progress
+								size=30> phrase_item.p
 
 # TAG[epic=Modal, seq=37] Login Page
 tag login-page
@@ -1985,6 +2076,7 @@ tag login-page
 						<.login-button @click.mockAuthToggle> "Sign In"
 						<hr[mt:1sp mb:.4sp]>
 						<ThirdPartyLogins>
+
 tag ThirdPartyLogins
 	css .login-button-wrapper
 		d:vflex gap:1sp
@@ -2199,6 +2291,7 @@ tag ProgressBar
 			# let progress_percent = (split_progress[0] / split_progress[1] * 100)
 			<.progress-bg>
 				<.progress-fg[flb:{progress+"%"}]>
+
 # ELEMENT[epic=ELEMENT, seq=42] Icon Template
 tag icon
 	css self d:inline mb:4px
@@ -2224,6 +2317,7 @@ tag i-market < icon
 			<line x1="5" y1="21" x2="5" y2="10.85" />
 			<line x1="19" y1="21" x2="19" y2="10.85" />
 			<path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" />
+
 # ELEMENT[epic=ELEMENT, seq=45] Compass Icon
 tag i-compass < icon
 	<self>
@@ -2235,6 +2329,7 @@ tag i-compass < icon
 			<line x1="12" y1="19" x2="12" y2="21" />
 			<line x1="3" y1="12" x2="5" y2="12" />
 			<line x1="19" y1="12" x2="21" y2="12" />
+
 # ELEMENT[epic=ELEMENT, seq=46] People Icon
 tag i-people < icon
 	<self>
@@ -2244,6 +2339,7 @@ tag i-people < icon
 			<path d="M5 22v-5l-1 -1v-4a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4l-1 1v5" />
 			<circle cx="17" cy="5" r="2" />
 			<path d="M15 22v-4h-2l2 -6a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1l2 6h-2v4" />
+
 # ELEMENT[epic=ELEMENT, seq=47] Progress Ring
 
 tag ElemProgressRing
