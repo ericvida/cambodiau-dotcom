@@ -278,7 +278,7 @@ export const audio = {
 	"ម៉ោង" : "/assets/audio/0277.mp3"
 	"ការពារ" : "/assets/audio/0278.mp3"
 	"កាន់តែ" : "/assets/audio/0279.mp3"
-	"កណ្តាល" : "/assets/audio/0280.mp3"
+	"កណ្ដាល" : "/assets/audio/0280.mp3"
 	"ហាង" : "/assets/audio/0281.mp3"
 	"ពេញ" : "/assets/audio/0282.mp3"
 	"នានា" : "/assets/audio/0283.mp3"

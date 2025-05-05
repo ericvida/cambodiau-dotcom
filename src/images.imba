@@ -1,4 +1,5 @@
 export const images = {
+	"1": "/assets/images/obs-en-50-11.jpg"
 	"1-1" : "/assets/images/obs-en-1-1.jpg"
 	"1-2" : "/assets/images/obs-en-1-2.jpg"
 	"1-3" : "/assets/images/obs-en-1-3.jpg"

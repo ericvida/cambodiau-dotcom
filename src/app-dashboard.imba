@@ -32,6 +32,7 @@ let state = {
 	learning_data: [{}]
 	user_learned: {}
 	learned_usage: 0
+	khmer_writing: true
 }
 
 class Api
@@ -54,6 +55,7 @@ class Api
 				learning_data: [{}]
 				user_learned: {}
 				learned_usage: 0
+				khmer_writing: true
 			}
 		if state.dark
 			setDarkmode!
@@ -75,6 +77,7 @@ class Api
 			learning_data: [{}]
 			user_learned: {}
 			learned_usage: 0
+			khmer_writing: true
 		}
 		save!
 
@@ -383,7 +386,7 @@ tag app-dashboard
 						<TopNavigation>
 				<div slot="middle">
 					<landing-page route="/">
-					<user-page route="/@username">
+					# <user-page route="/@username">
 					<app-dictionary-page route="/dictionary">
 					<phonetics-page route="/phonetics">
 					<info-page route="/info">
@@ -391,9 +394,8 @@ tag app-dashboard
 					# <login-page route="/login">
 					# <create-account-page route="/create">
 					<.width-container>
-						<CollectionPage route="/learn">
-						# <CollectionPage route="/collection/0/0/0/0/">
-				
+						<CoursesPage route="/courses">
+						<LearningPage route="/learn/:ci/:li/:pi/:wi">
 				<div slot="bottom">
 						css c:gray9 @darkmode:gray1
 							h:1bottombar
@@ -425,7 +427,7 @@ tag landing-page
 			<div [c:cool4 fw:thin fs:1.3em]> "by reading Bible stories"
 			# <h1[p:1sp bg:cool0 bd:2px solid cool3 rd:md m:1sp]> "Learn 4000+ bible related words"
 			<[h:2sp]>
-			<button.button route-to="/collection/0/0/0/0/"> "Start Learning"
+			<button.button route-to="/learn/1/1/1/1/"> "Start Learning"
 		<div>
 			<iframe [w:450px @md:600px h:300px @md:400px] src="https://www.youtube.com/embed/20dpm0bNjIU" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
 
@@ -436,7 +438,8 @@ tag TopNavigation
 	css a, button
 		bg:gray2 @darkmode:gray7
 		c:gray7	@darkmode:gray2
-		p:1sp rd:md
+		d:vcc
+		px:1sp rd:md
 	def toggleLeftNav
 		state.left = !state.left
 		api.save!
@@ -447,7 +450,7 @@ tag TopNavigation
 	def render
 		<self>
 			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
-			<a route-to="/learn">
+			<a route-to="/courses">
 				<div> "Learn"
 			<a route-to="/dictionary">
 				<div> "app-dictionary"
@@ -455,6 +458,10 @@ tag TopNavigation
 				<div> "Phonetics"
 			<a route-to="/info">
 				<div> "Info"
+			# <a route-to="/info">
+			<a.button [d:hcc h:auto gap:0.6sp bg:white bg:sky0 @hover:sky1] href="https://t.me/+E5Y-uCV0oHQ5NWJl" target="_blank">
+				<TelegramIcon [size:.5topbar solid red]> 
+				<div> "Community"
 
 tag app-dictionary-page
 	css p:1sp w:100%
@@ -1007,43 +1014,54 @@ tag PhoneticVowels
 					<div.dot @click.activeWord(10)>
 						<span> char[10][ipa]
 		
-# TAG[epic=PAGE, seq=21] CollectionPage
-tag CollectionPage
-	css w:100% d:hgrid
-		gtc: 1lessonbar 1phrasebar auto
+# TAG[epic=PAGE, seq=21] CoursesPage
+tag CoursesPage
+	css w:100%
 		p:1sp
-	css .collection-collection
-		d:hflex w:100% 
-	css .close-leftbar
-		ml: -1lessonbar
-	css .left-bar
-		flb:1lessonbar
-		h:100vh
-	
 	def render
-		# FIXME: Console.warn fires twice. Not sure why
-		<self>
-			<div[d:vflex] route="/learn/">
+		<self.width-container>
+			<.layout-card-grid>
+				css gtc: repeat(2,1fr) # column num, size
+					gtr: repeat(1,1fr) # row num, size
+					max-width: 800px
+					gap:1sp
 				for own ci, collection of state.learning_data_flat.collections
-					<CollectionCard collection=collection route-to="/learn/{ci}">
-			<div[d:flex]>
-				<.lesson-nav-wrapper>
-					<LessonNav route="/learn/:learning_id">
-				<.phrase-nav-wrapper>
-					<PhraseNav route="/learn/:learning_id">
-				<.main-wrapper>
-					<LessonLayout route="/learn/:learning_id">
-			
-			
-# CARD[epic=CARD, seq=29] CollectionCard
-tag CollectionCard
+					<CourseCard.stretchy-card collection=collection route-to="/learn/{ci}/1/1/0">
+		# <self.layout-card-flex-grid>
+
+tag LearningPage
+	def routed params
+		rt=params
+	def render
+		<self>
+			<LessonNav.ln rt=rt>
+			<PhraseNav.pn rt=rt>
+			<LessonContent.lc rt=rt>
+			<RightBar.rb rt=rt>
+	css self
+		d:hflex
+		py:1sp
+		g:1sp
+		
+	css .ln, .lc, .pn, .rb
+			d:vflex g:1sp
+	css .ln
+		w:1sidebar
+		fls:0
+	css .lc
+		d:vflex g:1sp
+	css .pn
+		w:.1sidebar
+		d:vflex g:1sp
+		fls:0
+	css .rb
+		w:.8sidebar
+		d:vflex g:1sp
+		fls:0
+	
+# CARD[epic=CARD, seq=29] CourseCard
+tag CourseCard
 	prop name = "Collection"
-	prop price = 0
-	prop benefits = [
-		"Benefit 1"
-		"Benefit 2"
-		"Benefit 3"
-	]
 	css bg:white p:1sp d:vflex gap:2sp w:100%
 		cursor:pointer
 	css .pill rd:full fls:1 w:fit-content px:1sp py:.2sp
@@ -1066,15 +1084,22 @@ tag CollectionCard
 		@hover
 			bg:hue5 @darkmode:hue5
 		cursor:pointer
-	# css .benefits
+	def calcUniqueLearned unique
+		let arr = []
+		for own key, value of state.user_learned
+			arr.push Object.keys(unique).includes(key)
+		return arr.length
 	<self.card> 
-		<span.pill> "🇰🇭 khmer"
-		<.title> collection.title
-		<div> "{collection.words_learned} learned"
-		<div> "{collection.words_total} total"
-		<div> "{collection.words_unique} unique"
-		<.progress> "{collection.words_progress}%"
-		
+		<img src=images["{collection.img}"]>
+		<[d:hbs jc:space-between]>
+			<h1.title[fs:2xl ff:sans-serif fw:bold ]> collection.title
+			<span.pill[as:end]> "🇰🇭 khmer"
+		<.description> "{collection.info}"
+			let unique_learned = Object.keys(collection.words_learned).length
+			<p[fs:xs c:cool4]> "You have learned {collection.words_learned}/{collection.words_total} words ({calcUniqueLearned(collection.words)}/{collection.words_unique} unique)"
+		<.progress[d:hcc gap:1sp]> 
+			<ProgressBar .color=#context.active progress=collection.words_progress>
+			<span> "{collection.words_progress}%"
 			
 			
 # LAYOUT[epic=LAYOUT, seq=22] user-page-owned-collections
@@ -1082,7 +1107,7 @@ tag user-page-owned-collections
 	def render
 		<self>
 			<h2[px:1sp fs:xl]>
-			<.layout-card-grid>
+			<.div.layout-card-grid>
 				for own id, collection of collections_data.collections
 					<collection-card.stretchy-card route-to="/collection/{id}/0/0/0/" id=id collection=collection>
 					# <collection-card.stretchy-card route-to="/collection/{id}/0/0/0/" id=id collection=collection>
@@ -1108,88 +1133,77 @@ tag user-page-locked-collections
 				for own id, collection of bible_data.collections
 					<collection-card route-to="/buy/{id}" id=id collection=collection>
 
-# LAYOUT[epic=LAYOUT, seq=23] LessonLayout
-tag LessonLayout
-	css d:vflex @lg:hflex g:1sp
-		# bg:red
-	css .collection-grid
-		# flg:1 d:vflex g:1sp
-		d:grid g:1sp
-		gtc: 1fr @md: minmax(1rightbar, 3rightbar) 1rightbar
-		# grid-template-areas: "a a b", "a a b"
+tag RightBar
+	def render
+		<self>
+			if state.active_word
+				<WordCard.card>
+				if dictionary[state.active_word]..google
+					<DefinitionCard.card>
+				<SpellingCard.card>
+			<ShortcutCard.card>
+
+
+
+# LAYOUT[epic=LAYOUT, seq=23] LessonContent
+tag LessonContent
+	prop rt
+	prop phrase
 	css .image 
 		rd:1rd
 		aspect-ratio: 2 / 1
 		w:100%
-	css .left, .right
-		d:vflex
-		gap:1sp
+	def render
+		phrase = state.learning_data_flat.phrases["{rt.ci}-{rt.li}-{rt.pi}"]
+		<self>
+			if phrase
+				<img$image src=images["{phrase.img}"] .image>
+				<MeaningCard phrase=phrase>
+				<WordNav.card @click.commit route="/learn/:ci/:li/:pi/:wi">
+				# <PhoneticsCard phrase=phrase>
+tag MeaningCard
+	def render
+		<self.card>
+			<h2> "Meaning"
+			<p> phrase.translation
+tag PhoneticsCard
 	css .phonetics
 		ff:mono d:flex gap:0.5sp flex-wrap:wrap
-	def mount
-		learning_id = route.params.learning_id
-		phrase = state.learning_data_flat.phrases[route.params.learning_id]
-	def render
-		<self>
-			<main.collection-grid>
-				if phrase
-					<.left>
-						<img$image src=images["{phrase.img}"] .image>
-						<WordNav.card @click.commit phrase_key=phrase_key phrase=phrase route="/:page/:learning_id/:word">
-						<.card>
-							<h2> "Phonetics"
-							<p.phonetics>
-								if state.ipa
-									for word in phrase.phrase
-										let obj = dictionary[word]
-										if obj..ipa or obj..vida or obj..vida_auto or word
-											<span> obj..ipa or obj..vida or obj..vida_auto or word
-										else
-											<span> "n/a"
-											<> ERROR word, "no phonetics available"
-								else
-									for word in phrase.phrase
-										let obj = dictionary[word]
-										if obj..vida or obj..vida_auto or obj..ipa or word
-											<span> obj..vida or obj..vida_auto or obj..ipa or word
-										unless obj..vida or obj..vida_auto or obj..ipa or word
-											<span> "n/a"
-											<> ERROR word, "no phonetics available"
-						<.card>
-							<h2> "Meaning"
-							<p> phrase.meaning
-					<.right>
-						if state.active_word
-							<WordCard.card>
-							if dictionary[state.active_word]..google
-								<DefinitionCard.card>
-							<SpellingCard.card>
-						<ShortcutCard.card>
-tag AdminTools
-	css self
-		nav
-			d:flex
-			g:1sp
-		button
-			list-style-type:none
-			bg:gray2
-			px:.6sp py:.5sp
-			rd:sm
-			@hover
-				bg:hue3
-	<self>
-		<nav>
-			<button>
-				"edit phrase"
+	<self.card>
+		<h2> "Phonetics"
+		<p.phonetics>
+			if state.ipa
+				for word in phrase.phrase
+					let obj = dictionary[word]
+					if obj..ipa or obj..vida or obj..vida_auto or word
+						<span> obj..ipa or obj..vida or obj..vida_auto or word
+					else
+						<span> "n/a"
+						<> ERROR word, "no phonetics available"
+			else
+				for word in phrase.phrase
+					let obj = dictionary[word]
+					if obj..vida or obj..vida_auto or obj..ipa or word
+						<span> obj..vida or obj..vida_auto or obj..ipa or word
+					unless obj..vida or obj..vida_auto or obj..ipa or word
+						<span> "n/a"
+						<> ERROR word, "no phonetics available"
+
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
+	# NOTE: relies on state.khmer_writing = true/false
+	def routed params
+		rt = params
+		phrase = state.learning_data_flat.phrases["{rt.ci}-{rt.li}-{rt.pi}"]
 	css self
-		d:hflex g:.4sp flf:wrap
+		d:hflex g:.4sp flex-wrap:wrap
 	css .word-wrapper
-		d:hflex flf:wrap g:.5sp
+		d:hflex flex-wrap:wrap g:.5sp
 	css .word
-			ff:$khmer
-			fs:2xl
+			ff:mono fs:md
+			&.khmer
+				ff:$khmer
+				fs:xl
 			lh:2em
 			pt:.4em
 			user-select:none
@@ -1212,95 +1226,166 @@ tag WordNav
 			bg:rose1 @darkmode:rose5/50
 			@hover, &.active
 				bxs:0px 0px 0px 4px rose2 inset @darkmode:0px 0px 0px 4px rose2/10 inset
-	def routed params
-		let ids = params.learning_id.split('-')
-		_ci = ids[0]
-		_li = ids[1]
-		_pi = ids[2]
-		_wi = params.word
+	css .no_phonetics
+		bg:amber1 @darkmode:amber5/20
+		@hover, &.active
+			bxs:0px 0px 0px 4px amber1 inset @darkmode: 0px 0px 0px 4px amber2/10 inset
+		&.known
+			bg:amber1 @darkmode:amber5/50
+			@hover, &.active
+				bxs:0px 0px 0px 4px amber2 inset @darkmode:0px 0px 0px 4px amber2/10 inset
+
+	def render
+		# @click=(state.active_word = khccmer_word)
+		<self>
+			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
+			<global 
+				@hotkey('e|up')=prevPhraseFirstWord!
+				@hotkey('r|down')=nextPhrase!
+				@hotkey('d|left')=prevWord(phrase)
+				@hotkey('f|right')=nextWord(phrase)
+			>
+			<audio$word_audio src="" type="audio/mpeg">
+			# TODO: make a toggle to switch khmer to ipa and display khmer if ipa not available
+			<ToggleSwitch .active=!state.khmer_writing @click.toggleKhmer [align-self:end]> 
+				if !state.khmer_writing
+					"phonetics"
+				else
+					<span [ff:mono]> "khmer"
+			<div.word-wrapper [d:hflex flex-wrap:wrap]>
+				for word, word_index in phrase.phrase
+					let phrase_key = "{phrase.c}-{phrase.l}-{phrase.p}"
+					let in_dict = dictionary.hasOwnProperty(word)
+					let ipa = dictionary[word]..ipa or false
+					let vida = dictionary[word]..vida or false
+					let vida_auto = dictionary[word]..vida_auto or false
+					let no_phonetics = false
+					let display_word = word
+					if in_dict 
+						if state.khmer_writing
+							display_word = word
+						elif state.ipa
+							if !!ipa
+								display_word = ipa
+						else
+							if !!vida
+								display_word = vida
+							elif !!vida_auto
+								display_word = vida_auto
+							else
+								no_phonetics = true
+								display_word = khmer
+					<.word 
+						.active=(word is state.active_word) 
+						route-to="/learn/{phrase.c}/{phrase.l}/{phrase.p}/{word_index}" 
+						.known=state.user_learned.hasOwnProperty(word) 
+						.not_in_dict=!in_dict
+						.no_phonetics=no_phonetics
+						@dblclick.playWord($word_audio, word) 
+						@mousedown.pressAndHold(word, 1s)
+						@mouseup.stopTimer
+						.khmer=state.khmer_writing
+						> display_word
+	def toggleKhmer
+		state.khmer_writing = !state.khmer_writing
+		imba.commit!
 	# Goes to the next word in the phrase
 	def nextWord phrase
-		let last_wi = phrase..phrase.length - 1
-		console.log 'true or false', last_wi == _wi
-		# let last_wi = state.learning_data_flat.phrases[phrase_key].phrase.length - 1
-		# if _wi < last_wi
-		# 	router.go("/learn/{_ci}-{_li}-{_pi}/{incValue(_wi)}")
-		# else
-		# 	nextPhrase!
+		### NOTE
+		if current word is not the last word in the phrase,
+		route to the next word. If it is the last word of the phrase,
+		go to the first word of the next phrase.
+		###
+		let current_word_i = rt.wi
+		let last_word_of_phrase_i = phrase..phrase.length - 1
+		let is_last_word = last_word_of_phrase_i == current_word_i
+		if is_last_word
+			nextPhrase!
+		else
+			let next_word_i = inc(rt.wi)
+			state.active_word = phrase.phrase[next_word_i]
+			goTo rt.ci, rt.li, rt.pi, next_word_i
+			
 	def nextPhrase
-		let final_index = state.learning_data_flat.lessons["{_ci}-{_li}"].phrase_keys.length - 1
-		if _pi < final_index
-			_wi = 0
-			router.go("/learn/{_ci}-{_li}-{incValue(_pi)}/{_wi}")
-		else
+		let current_phrase_i = rt.pi
+		let last_phrase_of_lesson_i = state.learning_data_flat.lessons["{rt.ci}-{rt.li}"].phrase_keys.length
+		let is_last_phrase = last_phrase_of_lesson_i == current_phrase_i
+		if is_last_phrase
 			nextLesson!
+		else
+			let next_phrase_i = inc(rt.pi)
+			goTo rt.ci, rt.li, next_phrase_i
+		
 	def nextLesson
-		let final_index = state.learning_data_flat.collections[_ci].lesson_keys.length - 1
-		if _li < final_index
-			_pi = "01"
-			_wi = 0
-			router.go("/learn/{_ci}-{incValue(_li)}-{_pi}/{_wi}")
+		let current_lesson_i = rt.li
+		let last_lesson_of_collection_i = state.learning_data_flat.collections[rt.ci].lesson_keys.length
+		let is_last_lesson = last_lesson_of_collection_i == current_lesson_i
+		if is_last_lesson
+			LOG '🎉 This is the last lesson for this collection!'
 		else
-			LOG 'final lesson for this collection'
+			router.go("/learn/{rt.ci}/{inc(rt.li)}/1/0")
 	
-	def incValue string
-		if "{string}".length > 1
-			formatNum parseInt(string) + 1
-		else
-			parseInt(string) + 1
-	def decValue string
-		if "{string}".length > 1
-			formatNum parseInt(string) - 1 
-		else
-			parseInt(string) - 1
-	def formatNum num
-		num.toString().padStart(2, '0');
 	# NOTE: Goes to the previous word in the phrase
-	def prevWord
-		if word_index > 0
-			word_index--
-			router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
+	def prevWord phrase
+		### NOTE
+		if current word is not the last word in the phrase,
+		route to the next word. If it is the last word of the phrase,
+		go to the first word of the next phrase.
+		###
+		let current_word_i = rt.wi
+		let first_word_of_phrase_i = 0 # NOTE: words are zero index
+		let is_first_word = first_word_of_phrase_i == current_word_i
+		if is_first_word
+			prevPhraseLastWord!
 		else
-			# NOTE: if no previous word in this phrase goes to the last word of the previous phrase
-			prevPhraseLast!
-	# NOTE: Goes to the first verse of the next phrase
-	# def nextPhrase
-	# 	if phrase_index < last_phrase_index
-	# 		phrase_index++
-	# 		word_index = 0
-	# 		router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
-	
-	# Goes to the last word of hte previous phrase
-	def prevPhraseLast
-		if phrase_index > 0
-			phrase_index--
-			word_index = phrases[phrase_index].phrase.length - 1
-			router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
-	# Goes to the first word of the previous phrase
-	def prevPhraseZero
-		if phrase_index > 0
-			phrase_index--
-			word_index = 0
-			router.go("/learn/{collection_index}-{lesson_index}-{phrase_index}/{word_index}")
-	
-	def updateActiveWordData
-		let phrase_key = "{state.collection}-{state.lesson}-{state.phrase}"
-		let lesson_key = "{state.collection}-{state.lesson}"
-		let collection_key = "{state.collection}"
-		let collection = state.collection
-		let lesson = state.lesson
-		let phrase = state.phrase
-		# collection_index = route_array[1]
-		# lesson_index = route_array[2]
-		# phrase_index = route_array[3]
-		# LOG 'word index', route.params.learning_id
-		# word_index = route_array[4]
-		# word = phrase.phrase[word_index]
-		# phrases = state.learning_data_flat.lessons[lesson_key].phrases
-		# last_phrase_index = Object.keys(phrases).length - 1
-		# last_word_index = phrase.phrase.length - 1
-		# state.active_word = word
-	
+			let prev_word_i = dec(rt.wi)
+			state.active_word = phrase.phrase[prev_word_i]
+			goTo rt.ci, rt.li, rt.pi, prev_word_i
+				
+	def prevPhraseLastWord
+		let current_phrase = state.learning_data_flat.phrases["{rt.ci}-{rt.li}-{rt.pi}"]
+		if current_phrase.isfirst
+			prevLessonLastPhraseLastWord!
+		else
+			let prev_phrase = state.learning_data_flat.phrases["{rt.ci}-{rt.li}-{dec(rt.pi)}"]
+			prev_phrase.last_word_i = prev_phrase.phrase.length - 1
+			goTo rt.ci, rt.li, dec(rt.pi), prev_phrase.last_word_i
+			
+	def prevPhraseFirstWord		
+		let current_phrase = state.learning_data_flat.phrases["{rt.ci}-{rt.li}-{rt.pi}"]
+		if current_phrase.isfirst
+			prevLessonLastPhrase!
+		else
+			# let prev_phrase = state.learning_data_flat.phrases["{rt.ci}-{rt.li}-{dec(rt.pi)}"]
+			goTo rt.ci, rt.li, dec(rt.pi), 0
+			
+	def prevLessonLastPhraseLastWord
+		# NOTE: Current Lesson
+		let cl = state.learning_data_flat.lessons["{rt.ci}-{rt.li}"]
+		if cl.isfirst
+			LOG '🏁 this is the first lesson of the collection'
+		else
+			# NOTE: PreviousLesson
+			let prev_lesson = state.learning_data_flat.lessons["{rt.ci}-{dec(rt.li)}"]
+			# NOTE: Prev Lesson, last phrase index
+			prev_lesson.last_phrase_key = prev_lesson.phrase_keys[-1]
+			prev_lesson.last_phrase_i = prev_lesson.phrase_keys.length
+			let prev_phrase = state.learning_data_flat.phrases[prev_lesson.last_phrase_key]
+			prev_lesson.last_word_i = prev_phrase.phrase.length - 1
+			LOG prev_lesson
+			goTo rt.ci, prev_lesson.li, prev_lesson.last_phrase_i, prev_lesson.last_word_i
+		
+	# NOTE: router simplifier
+	def goTo c, l, p, w
+		if w
+			router.go("/learn/{c}/{l}/{p}/{w}")
+		elif p
+			router.go("/learn/{c}/{l}/{p}/0")
+		elif l
+			router.go("/learn/{c}/{l}/1/0")
+		elif c
+			router.go("/learn/{c}/1/1/0")
+		
 	def playWord player, filename
 		if !!audio[filename]
 			player.src = audio[filename]
@@ -1308,14 +1393,23 @@ tag WordNav
 		else
 			console.warn 'no audio'
 	
-	step = 50
-	elapsed = 0
+	def inc num
+		let res = Number(num) + 1
+		return res
+	
+	def dec num
+		let res = Number(num) - 1
+		return res
+
 	def handleHold word
 		api.toggleLearned(state.active_word)
 		stopTimer!
 		resetTimer!
 		imba.commit!
 		
+	step = 50 # NOTE: used
+	elapsed = 0 # NOTE: used
+	
 	def pressAndHold word, duration
 		state.active_word = word
 		#interval = setInterval(&, step) do
@@ -1327,31 +1421,6 @@ tag WordNav
 	def stopTimer do #interval && clearInterval(#interval)
 	def resetTimer do elapsed = 0; imba.commit!
 	
-	def render
-		updateActiveWordData!
-		# @click=(state.active_word = khccmer_word)
-		<self>
-			<h2> phrase.title
-			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
-			<global 
-				@hotkey('e|up')=prevPhraseZero!
-				@hotkey('r|down')=nextPhrase!
-				@hotkey('d|left')=prevWord!
-				@hotkey('f|right')=nextWord(phrase)
-			>
-			<audio$word_audio src="" type="audio/mpeg">
-			<div.word-wrapper>
-				for word, word_index in phrase.phrase
-					let phrase_key = "{phrase.c}-{phrase.l}-{phrase.p}"
-					<.word 
-						.active=(word is state.active_word) 
-						route-to="/learn/{phrase_key}/{word_index}" 
-						.known=state.user_learned.hasOwnProperty(word) 
-						.not_in_dict=!dictionary.hasOwnProperty(word) 
-						@dblclick.playWord($word_audio, word) 
-						@mousedown.pressAndHold(word, 1s)
-						@mouseup.stopTimer
-					> word
 
 # LAYOUT[epic=LAYOUT, seq=26] LearnModulePreview
 tag LearnModulePreview
@@ -1486,7 +1555,7 @@ tag collection-card
 	def render
 		<self .locked=collection.locked>
 			<div.not-image> unless collection.image
-			<img.image src=collection.image> if collection.image
+			<img.image src=images["{collection.img}"]> if collection.image
 			<.card-info>
 				<.card-title>
 					<h2> "{collection.title}"
@@ -1559,7 +1628,7 @@ tag WordBar
 		bg:gray0 @darkmode:gray7
 		c:gray4
 		w:90px
-		&.learned
+		.learned
 			bc:hue4 @darkmode:hue8
 			bg:hue2 @darkmode:hue5
 			c:hue8 @darkmode:hue1
@@ -1594,13 +1663,15 @@ tag WordBar
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic [fs:2xl]> "request"
-			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)>
-				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
+			<ToggleSwitch .learned=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)> "learned"
+				
+
+
+
 # CARD[epic=CARD, seq=30] WordCard
 tag WordCard
 	css self 
 		d:vflex ai:center gap:1sp
-		min-width:1rightbar
 		w:100%
 	css .khmer
 		lh:60px
@@ -1608,7 +1679,7 @@ tag WordCard
 		ff:$khmer
 		c:hue6
 	css .phonetic
-		ff:monospace fs:xl
+		ff:monospace fs:xs
 		c:hue5 @darkmode:hue4
 	css .switch-wrapper
 		h:30px w:110px rd:full
@@ -1670,10 +1741,38 @@ tag WordCard
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "unavailable"
-			<.switch-wrapper .learned=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)>
-				<.switch .learned=state.user_learned.hasOwnProperty(state.active_word)> "learned"
+			<ToggleSwitch .active=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)> "learned"
 			if audio.hasOwnProperty(state.active_word)
 				<AudioPlayer>
+
+tag ToggleSwitch
+	css self
+		h:30px w:110px rd:full
+		bg:gray3 @darkmode:black/60
+		cursor:pointer
+		tween:all 1dur back-in-out
+		&.active
+			bg:hue4 @darkmode:hue8
+		# mt:auto
+	css .switch
+		ml:0px
+		tween:all 1dur back-in-out
+		h:30px rd:full 
+		bd:3px fs:xs c:black d:box
+		w:fit-content px:1sp
+		bc:gray3 @darkmode:gray8
+		bg:gray0 @darkmode:gray7
+		c:gray4
+		w:90px
+		^.active
+			bc:hue4 @darkmode:hue8
+			bg:hue2 @darkmode:hue5
+			c:hue8 @darkmode:hue1
+			ml:20px
+	def render
+		<self>
+			<.switch>
+				<slot> "on"
 
 tag AudioPlayer
 	<self>
@@ -1705,15 +1804,16 @@ tag DefinitionCard
 		let word_object = dictionary[state.active_word]
 		if word_object.def isnt false
 			<h2> "Definition"
-			<ol>
-				for item in word_object.def
-					if item.includes('=')
-						let line = item.split('=')
-						let use = line[0]
-						let translations = line[1].split('|')
-						<li>
-							<span.use> "{use.toUpperCase!} "
-							<span.def> translations.join(', ')
+			for item in word_object.def
+				if item.includes('=')
+					let line = item.split('=')
+					let use = line[0]
+					let translations = line[1].split('|')
+					<ol [list-style:decimal pl:1sp]>
+						for item, item_i in translations
+							if item_i is 0
+								<p.use [c:cool3]> "{use}"
+							<li.def [fs:xs]> item
 		else
 			<h2> "Google Definition"
 			for defi in dictionary[state.active_word].google.split('|')
@@ -1881,15 +1981,9 @@ tag SpellingCard
 
 # TAG[epic=NAV, seq=34] LessonNav
 tag LessonNav
-	prop lessons
+	prop rt
 	css self
-		# ml:-1lessonbar
-		h:100vh
-		overflow-y:scroll
-		w:1lessonbar
-		ofy: scroll
-		d:vflex
-		g:1sp
+		d:vflex g:1sp
 	css .title-card 
 		bg:white @darkmode:gray9
 		rd:md
@@ -1899,32 +1993,29 @@ tag LessonNav
 		d:hflex
 	css .usage_word_count
 		fs:xxs ff:mono c:gray6
-	def routed params, test
-		let [col,les,phr] = params.learning_id.split('-')
-		state.collection = col
-		state.lesson = les or false
-		state.phrase = phr or false
-		api.save!
 	def render
 		<self>
-			# FIXME
-			# problem is when I route to lesson or phrase, 
-			# i don't have lesson_keys array anymore. 
-			# So i need to persist collection ID in state.
-			let active_collection = state.learning_data_flat.collections[state.collection]
+			let active_collection = state.learning_data_flat.collections[rt.ci]
 			for lesson_key in active_collection.lesson_keys
+				let keys = [...lesson_key.split('-')]
+				let col_key = keys[0]
+				let les_key = keys[1]
 				let lesson_item = state.learning_data_flat.lessons[lesson_key]
 				<LessonNavItem 
-					.active=(state.lesson is lesson_key.split('-')[1]) 
-					route-to="/learn/{lesson_key}-1/1" 
-					lesson=state.learning_data_flat.lessons[lesson_key]>
+					.active=(rt.li is les_key) 
+					route-to="/learn/{col_key}/{les_key}/1/0" 
+					lesson=lesson_item
+					rt=rt
+					>
 
 # TAG[epic=NAV, seq=35] LessonNavItem
 tag LessonNavItem
 	prop lesson
+	prop rt
 	css self
 		cursor:pointer
 		rd:1rd
+		w:100%
 		px:1sp py:1sp
 		c:gray5
 		bg:white/50 @darkmode:gray8/20
@@ -1958,6 +2049,7 @@ tag LessonNavItem
 
 # TAG[epic=NAV, seq=36] PhraseNav
 tag PhraseNav
+	prop rt
 	css self
 		c:gray9
 		w:1phrasebar
@@ -1972,49 +2064,21 @@ tag PhraseNav
 		c:gray5 @darkmode:gray4
 		pos:relative
 		cursor:pointer
-	
-	# NOTE: Goes to the first verse of the next phrase
-	def nextPhrase
-		if phrase_index < last_phrase_index
-			phrase_index++
-			word_index = 0
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
-	
-	# NOTE: Goes to the last word of hte previous phrase
-	def prevPhraseLast
-		if phrase_index > 0
-			phrase_index--
-			word_index = phrases[phrase_index].khmer.split('|').length - 1
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
-	
-	# NOTE: Goes to the first word of the previous phrase
-	def prevPhraseZero
-		if phrase_index > 0
-			phrase_index--
-			word_index = 0
-			router.go("/collection/{collection_index}/{lesson_index}/{phrase_index}/{word_index}")
-	def routed params, test
-		let [col,les,phr] = params.learning_id.split('-')
-		state.collection = col
-		state.lesson = les or false
-		state.phrase = phr or false
-		api.save!
-	def build
-		phrases = state.learning_data_flat.phrases
-		progress = 0
 	def render
 		<self>
-			if state.lesson
-				let lesson = state.learning_data_flat.lessons["{state.collection}-{state.lesson}"]
-				for phrase_key in lesson.phrase_keys
-					let phrase_item = state.learning_data_flat.phrases[phrase_key]
-					if phrase_item
-						<.number-toggle route-to="/learn/{phrase_key}/1">
-							let isActive = state.phrase == phrase_item.p
-							<ElemProgressRing 
-								.active=isActive
-								progress=phrase_item.words_progress
-								size=30> phrase_item.p
+			let lesson = state.learning_data_flat.lessons["{rt.ci}-{rt.li}"]
+			for phrase_key in lesson.phrase_keys
+				let phrase_item = state.learning_data_flat.phrases[phrase_key]
+				let keys = [...phrase_key.split('-')]
+				let col_key = keys[0]
+				let les_key = keys[1]
+				let phr_key = keys[2]
+				if phrase_item
+					<.number-toggle route-to="/learn/{col_key}/{les_key}/{phr_key}/0">
+						<ElemProgressRing 
+							.active=(rt.pi == phrase_item.p) # NOTE: if route matches phrase id.
+							progress=phrase_item.words_progress
+							size=30> phrase_item.p
 
 # TAG[epic=Modal, seq=37] Login Page
 tag login-page
@@ -2113,6 +2177,14 @@ tag GoogleIcon
 				<path [fill:$googlered] d="M23.714 10.133c3.311 0 6.302 1.174 8.652 3.094L39.202 6.4C35.036 2.773 29.695.533 23.714.533a23.43 23.43 0 0 0-21.09 13.071l7.908 6.04a13.849 13.849 0 0 1 13.182-9.51" />
 				<path [fill:$googlegreen] d="M23.714 37.867a13.849 13.849 0 0 1-13.182-9.51l-7.909 6.038a23.43 23.43 0 0 0 21.09 13.072c5.732 0 11.205-2.036 15.312-5.849l-7.507-5.804c-2.118 1.335-4.786 2.053-7.804 2.053" />
 				<path [fill:$googleblue] d="M46.145 24c0-1.387-.213-2.88-.534-4.267H23.714V28.8h12.604c-.63 3.091-2.346 5.468-4.8 7.014l7.507 5.804c4.314-4.004 7.12-9.969 7.12-17.618" />
+
+tag TelegramIcon
+	css $brandcolor: #58a9e7
+	<self>
+		<svg viewBox="4 4 16 16">
+			<path [fill:$brandcolor ]  
+				d="M12 4C10.4178 4 8.87103 4.46919 7.55544 5.34824C6.23985 6.22729 5.21447 7.47672 4.60897 8.93853C4.00347 10.4003 3.84504 12.0089 4.15372 13.5607C4.4624 15.1126 5.22433 16.538 6.34315 17.6569C7.46197 18.7757 8.88743 19.5376 10.4393 19.8463C11.9911 20.155 13.5997 19.9965 15.0615 19.391C16.5233 18.7855 17.7727 17.7602 18.6518 16.4446C19.5308 15.129 20 13.5823 20 12C20 9.87827 19.1571 7.84344 17.6569 6.34315C16.1566 4.84285 14.1217 4 12 4ZM15.93 9.48L14.62 15.67C14.52 16.11 14.26 16.21 13.89 16.01L11.89 14.53L10.89 15.46C10.8429 15.5215 10.7824 15.5715 10.7131 15.6062C10.6438 15.6408 10.5675 15.6592 10.49 15.66L10.63 13.66L14.33 10.31C14.5 10.17 14.33 10.09 14.09 10.23L9.55 13.08L7.55 12.46C7.12 12.33 7.11 12.03 7.64 11.83L15.35 8.83C15.73 8.72 16.05 8.94 15.93 9.48Z"
+				/>
 tag AppleIcon
 	<self>
 		<svg viewBox="-3.5 0 48 48">

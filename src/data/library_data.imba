@@ -182,12 +182,12 @@ export let library_data = {
 			"islast": true,
 			"isfirst": true,
 			"ci": 1,
-			"info": "Learn the Vocabulary of the Bible",
+			"info": "In this course you will learn nearly 2000 khmer words through reading 50 bible stories.",
 			"price": "20",
-			"title": "Bible Stories",
+			"title": "50 Bible Stories",
 			"order": "0",
 			"icon": "market",
-			"img": "obs-en-50-11.jpg",
+			"img": "1",
 			"slug": "bible-stories",
 			"words": {
 				"0": {
@@ -652,7 +652,7 @@ export let library_data = {
 				"ថែទាំ": {
 					"weight": 1
 				},
-				"កណ្តាល": {
+				"កណ្ដាល": {
 					"weight": 2
 				},
 				"សួន": {
@@ -6193,7 +6193,7 @@ export let library_data = {
 				"ថែទាំ": {
 					"weight": 1
 				},
-				"កណ្តាល": {
+				"កណ្ដាល": {
 					"weight": 1
 				},
 				"សួន": {
@@ -26276,7 +26276,7 @@ export let library_data = {
 				"ទៅ": {
 					"weight": 8
 				},
-				"កណ្តាល": {
+				"កណ្ដាល": {
 					"weight": 1
 				},
 				"បឹង": {
@@ -42256,7 +42256,7 @@ export let library_data = {
 			"type": "phrase",
 			"phrase": [
 				"នៅ",
-				"កណ្តាល",
+				"កណ្ដាល",
 				"សួន",
 				"ច្បារ",
 				"ព្រះ",
@@ -42318,7 +42318,7 @@ export let library_data = {
 				"នៅ": {
 					"weight": 1
 				},
-				"កណ្តាល": {
+				"កណ្ដាល": {
 					"weight": 1
 				},
 				"សួន": {
@@ -108852,7 +108852,7 @@ export let library_data = {
 				"ជ្រៅ",
 				"ទើប",
 				"ទៅ",
-				"កណ្តាល",
+				"កណ្ដាល",
 				"បឹង",
 				"។"
 			],
@@ -108918,7 +108918,7 @@ export let library_data = {
 				"ទៅ": {
 					"weight": 1
 				},
-				"កណ្តាល": {
+				"កណ្ដាល": {
 					"weight": 1
 				},
 				"បឹង": {
@@ -157547,7 +157547,7 @@ export let library_data = {
 		"ថែទាំ": {
 			"weight": 1
 		},
-		"កណ្តាល": {
+		"កណ្ដាល": {
 			"weight": 2
 		},
 		"សួន": {
