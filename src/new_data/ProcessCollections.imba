@@ -78,6 +78,7 @@ class LibraryProcessor
 			new_c.slug = _collection.slug
 			new_c.of = collections_in.length
 			new_c.cid = Number(_collection.cid)
+			new_c.key = "{new_c.cid}"
 			new_c.isFirst = (_ci is 0)
 			new_c.isLast = (_ci is collections_in.length - 1)
 			new_c.lessons = 0

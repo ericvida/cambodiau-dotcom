@@ -258,6 +258,7 @@ class Progress
 		checkLocal! # NOTE: loads state in local storage before calculating progress
 		state.progress_flat = calcProgress library
 		return progress
+	
 	def checkLocal 
 		if imba.locals.state
 			state = imba.locals.state
@@ -343,7 +344,7 @@ tag app-dashboard
 			ml:0px
 	def build 
 		api.init!
-		state.learning_data_flat = api.calcAllProgressFlat!
+		# state.learning_data_flat = api.calcAllProgressFlat!
 		# LOG library
 		api.save!
 
@@ -701,8 +702,8 @@ tag CoursesPage
 					gtr: repeat(1,1fr) # row num, size
 					max-width: 800px
 					gap:1sp
-				for own ci, collection of state.learning_data_flat.collections
-					<CourseCard.stretchy-card collection=collection route-to="/learn/{ci}/1/1/0">
+				for own _cid, collection of library.collections
+					<CourseCard.stretchy-card collection=collection route-to="/learn/{_cid}/1/1/0">
 		# <self.layout-card-flex-grid>
 
 tag LearningPage
@@ -735,7 +736,6 @@ tag LearningPage
 	
 # CARD[epic=CARD, seq=29] CourseCard
 tag CourseCard
-	prop name = "Collection"
 	css bg:white p:1sp d:vflex gap:2sp w:100%
 		cursor:pointer
 	css .pill rd:full fls:1 w:fit-content px:1sp py:.2sp
@@ -763,17 +763,20 @@ tag CourseCard
 		for own key, value of state.user_learned
 			arr.push Object.keys(unique).includes(key)
 		return arr.length
-	<self.card> 
-		<img src=images["{collection.img}"]>
-		<[d:hbs jc:space-between]>
-			<h1.title[fs:2xl ff:sans-serif fw:bold ]> collection.title
-			<span.pill[as:end]> "🇰🇭 khmer"
-		<.description> "{collection.info}"
-			let unique_learned = Object.keys(collection.words_learned).length
-			<p[fs:xs c:cool4]> "You have learned {collection.words_learned}/{collection.words_total} words ({calcUniqueLearned(collection.words)}/{collection.words_unique} unique)"
-		<.progress[d:hcc gap:1sp]> 
-			<ElementProgressBar .color=#context.active progress=collection.words_progress>
-			<span> "{collection.words_progress}%"
+	def render
+		let col_item = state.progress_flat[collection.key]
+		LOG col_item
+		<self.card> 
+			<h1> 'test'
+			<img src=images["{collection.key}"]>
+			<[d:hbs jc:space-between]>
+				<h1.title[fs:2xl ff:sans-serif fw:bold ]> collection.name
+				<span.pill[as:end]> "🇰🇭 khmer"
+			<.description> "{collection.info}"
+				<p[fs:xs c:cool4]> "You have learned {col_item.weight_learned}/{col_item.weight} words ({col_item.unique_learned}/{col_item.unique} unique)"
+			<.progress[d:hcc gap:1sp]> 
+				<ElementProgressBar .color=#context.active progress=col_item.weight_progress>
+				<span> "{col_item.weight_progress}%"
 			
 		
 tag RightBar
