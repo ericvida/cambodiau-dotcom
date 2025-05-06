@@ -1,8 +1,8 @@
 global.LOG = console.log
 global.WARN = console.warn
 global.ERROR = console.error
-import {en} from './input_bible_stories_eng.imba'
-import {kh} from './input_bible_stories_khmer.imba'
+# import {en} from './input_bible_stories_eng.imba'
+# import {kh} from './input_bible_stories_khmer.imba'
 import {titles} from './input_bible_stories_titles.imba'
 
 class CalculatecollectionUsageData

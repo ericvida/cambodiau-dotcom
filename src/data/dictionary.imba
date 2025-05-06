@@ -1078,7 +1078,7 @@ export let dictionary = {
 	"កាំភ្លើង": {rank: "1499", vida: false, vida_auto: "kaṃplẹẹṇg", google: false, ipa: "kamplǝǝŋ", def: false},
 	"ចម្លង": {rank: "1500", vida: false, vida_auto: "cȯṃlȯȯṇg", google: false, ipa: "cɑmlɑɑŋ", def: false},
 	"ក្លិន": {rank: "1501", vida: "kḷẹṇ", vida_auto: "klẹn", google: "Smell", ipa: "klǝn", def: false},
-	"លេច": {rank: "1502", vida: "ḷeec", vida_auto: false, google: "Leaked", ipa: false, def: false},
+	"លេច": {rank: "1502", vida: "ḷeec", vida_auto: false, google: "to appear", ipa: false, def: false},
 	"ចៅ": {rank: "1503", vida: "caụ", vida_auto: "cav", google: "Grandson", ipa: "cav", def: false},
 	"រួមគ្នា": {rank: "1509", vida: "ṛuạṃḳṇiạ", vida_auto: false, google: "Together", ipa: false, def: false},
 	"ចែង": {rank: "1513", vida: "caėṇg", vida_auto: "caėṇg", google: "Stated", ipa: "caeŋ", def: false},

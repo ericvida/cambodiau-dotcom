@@ -5,6 +5,7 @@ import 'imba/preflight.css'
 import * as PH from 'imba-phosphor-icons'
 import {init, tx, id} from '@instantdb/core'
 import {images} from './images.imba'
+import './new_data/ProcessCollection.imba'
 global.IMAGES = images
 import './app-dashboard.imba'
 class dataSYNC
