@@ -1,19 +1,12 @@
 # import {learning_data_out} from './data/learning_data_out'
 
 import fitty from 'fitty' # for fitting text in WordCard
-import Fuzzy from './fuzzy.imba' # for fitting text in WordCard
-import {audio} from './audio.imba'
 import {clusters} from './data/clusters.imba' 
 import {dictionary} from './data/dictionary.imba'
-import {collections_data} from './data/collections_data.imba' # DELETE once dynamic library below is implemented
+# import {collections_data} from './data/collections_data.imba' # DELETE once dynamic library below is implemented
 import {library_data} from './data/library_data.imba' # DELETE once dynamic library below is implemented
-
-
-# import {state.learning_data} from './data'
-
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
-const fuzzy = new Fuzzy
-const STATEKEY = 'app-state-20221119'
+
 
 ### NOTE
 This static state is necessary to prevent errors if progress
@@ -370,15 +363,6 @@ tag app-dictionary-page
 		
 	def render
 		<self>
-			let learned_length = Object.keys(state.user_learned).length
-			let dict_length = Object.keys(dictionary).length
-			let learned_percent = state.learning_data.user_progress
-			let learned_usage = state.learning_data.user_progress_learned_usage
-			let all_word_usage_count = collections_data.word_usage_count_sum
-			let all_wordset_length = collections_data.word_set_count
-			let dict_percent = Math.floor((learned_length / dict_length) * 1000) / 10
-			let lessons_percent = Math.floor((learned_length / all_wordset_length) * 1000) / 10
-			
 			<.page-wrapper>
 				css .wrapper
 					bg:hue3 @darkmode: hue9
@@ -387,9 +371,11 @@ tag app-dictionary-page
 					rd:md
 				<div.wrapper[py:1sp mb:1sp ta:center w:100% d:vflex]>
 					<h2> "You have learned "
-					<p[m:0]> "{lessons_percent}% of all words used in all lessons. ({learned_length} of {all_wordset_length})"
-					<p[m:0]> "{learned_percent}% of all word instances in all lessons. ({learned_usage} of {all_word_usage_count})"
-					<p[m:0]> "{dict_percent}% of all words in this dictionary. ({learned_length} of {dict_length})"
+					<p[m:0]> "You have learned {PROG.unique_progress}% of the unique words in your courses. ({PROG.unique_learned} of {PROG.unique})"
+					<p[m:0]> "You have learned {PROG.weight_progress}% of the words repeated in your courses. ({PROG.weight_learned} of {PROG.weight})"
+					let dict_length = Object.keys(dictionary).length
+					let dict_percent = Math.floor((PROG.unique_learned / dict_length) * 1000) / 10
+					<p[m:0]> "You have learned {dict_percent}% of all words in this dictionary. ({PROG.unique_learned} of {dict_length})"
 			<.page-wrapper>
 				<app-dictionary>
 				<WordCard.card[w:200px h:260px]>
@@ -449,7 +435,7 @@ tag app-dictionary
 					if state.ipa then "ipa" else "vida"
 				<span> "google"
 			for own word, info of dictionary
-				if fuzzy.search(query, word) | fuzzy.search(query, info..vida) | fuzzy.search(query, info..google) | fuzzy.search(query, info..ipa)
+				if FUZZY.search(query, word) | FUZZY.search(query, info..vida) | FUZZY.search(query, info..google) | FUZZY.search(query, info..ipa)
 					<div.row .learned=(state.user_learned.hasOwnProperty(word)) @click=(state.active_word = word)>
 						# if info..rank then <span.mono> info..rank else <span.err> '-'
 						<a href="http://sealang.net/api/api.pl?query={word}&service=dictionary" target="_blank"> 
@@ -951,8 +937,8 @@ tag WordNav
 			router.go("/learn/{c}/1/1/0")
 		
 	def playWord player, filename
-		if !!audio[filename]
-			player.src = audio[filename]
+		if !!AUDIO[filename]
+			player.src = AUDIO[filename]
 			player.play!
 		else
 			console.warn 'no audio'
@@ -1059,7 +1045,7 @@ tag WordCard
 					else
 						<div.phonetic> "unavailable"
 			<ToggleSwitch .active=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)> "learned"
-			if audio.hasOwnProperty(state.active_word)
+			if AUDIO.hasOwnProperty(state.active_word)
 				<AudioPlayer>
 
 tag ToggleSwitch
@@ -1099,7 +1085,7 @@ tag AudioPlayer
 			word = manual
 		else
 			word = state.active_word
-		<audio$track @ended.commit src=audio[word] type="audio/mpeg" preload="auto">
+		<audio$track @ended.commit src=AUDIO[word] type="audio/mpeg" preload="auto">
 		
 		<.button-wrapper[d:hflex ai:center]>
 			if $track.paused # when paused

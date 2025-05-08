@@ -163,11 +163,11 @@ class CalculatecollectionUsageData
 		return counter
 
 # NOTE: UNCOMMENT FOR DYNAMIC DATA
-# export let collections_data = new CalculatecollectionUsageData
+# export let cdata = new CalculatecollectionUsageData
 # To improve application speed.
-# log collections_data above with command below
+# log cdata above with command below
 # copy object from console and paste into export let below
-# then Comment out collections_data above.
+# then Comment out cdata above.
 
 # NOTE: UNCOMMENT BELOW FOR STATIC DATA
 export let collections_data = {
