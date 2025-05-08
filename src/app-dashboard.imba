@@ -3,12 +3,11 @@
 import fitty from 'fitty' # for fitting text in WordCard
 import Fuzzy from './fuzzy.imba' # for fitting text in WordCard
 import {audio} from './audio.imba'
-import {images} from './images.imba'
 import {clusters} from './data/clusters.imba' 
 import {dictionary} from './data/dictionary.imba'
 import {collections_data} from './data/collections_data.imba' # DELETE once dynamic library below is implemented
 import {library_data} from './data/library_data.imba' # DELETE once dynamic library below is implemented
-import {library} from './new_data/ProcessCollections.imba'
+
 
 # import {state.learning_data} from './data'
 import './elements/index.imba'
@@ -251,88 +250,7 @@ class Api
 
 let api = new Api
 
-class Progress
-	prop progress = {}
-	def constructor library
-		initProgressProps library
-		checkLocal! # NOTE: loads state in local storage before calculating progress
-		state.progress_flat = calcProgress library
-		return progress
-	
-	def checkLocal 
-		if imba.locals.state
-			state = imba.locals.state
-	
-	def initProgressProps library
-		progress.unique = library.unique
-		progress.weight = library.weight
-		for own key, val of library.collections
-			unless progress[key]
-				progress[key] =
-					unique: val.unique
-					weight: val.weight
-					words: val.words
-		
-		for own key, val of library.lessons
-			unless progress[key]
-				progress[key] =
-					unique: val.unique
-					weight: val.weight
-					words: val.words
-		
-		for own key, val of library.phrases
-			unless progress[key]
-				progress[key] =
-					unique: val.unique
-					weight: val.weight
-					words: val.words
-	def learnWord word
-		state.progress
-	
-	def calcProgress library
-		### TODO
-		Make word refs be generated at library_data.imba at static level, not here.
-		###
-		let progress_res = {}
-		let temp_refs = {}
-		
-		for own col_key, collection of library.collections
-			progress[col_key].weight_learned = 0
-			progress[col_key].unique_learned = 0
-			for own word, bool of state.user_learned
-				if collection.words[word]
-					progress[col_key].weight_learned += collection.words[word].weight
-					progress[col_key].unique_learned++
-			progress[col_key].unique_progress = Math.round((progress[col_key].unique_learned / progress[col_key].unique) * 100)
-			progress[col_key].weight_progress = Math.round((progress[col_key].weight_learned / progress[col_key].weight) * 100)
-		
-		for own les_key, lesson of library.lessons
-			progress[les_key].weight_learned = 0
-			progress[les_key].unique_learned = 0
-			for own word, bool of state.user_learned
-				if lesson.words[word]
-					progress[les_key].weight_learned += lesson.words[word].weight
-					progress[les_key].unique_learned++
-			progress[les_key].unique_progress = Math.round((progress[les_key].unique_learned / progress[les_key].unique) * 100)
-			progress[les_key].weight_progress = Math.round((progress[les_key].weight_learned / progress[les_key].weight) * 100)
-					
-		for own phr_key, phrase of library.phrases
-			progress[phr_key].weight_learned = 0
-			progress[phr_key].unique_learned = 0
-			for own word, bool of state.user_learned
-				if phrase.words[word]
-					progress[phr_key].weight_learned += phrase.words[word].weight
-					progress[phr_key].unique_learned++
-			progress[phr_key].unique_progress = Math.round((progress[phr_key].unique_learned / progress[phr_key].unique) * 100)
-			progress[phr_key].weight_progress = Math.round((progress[phr_key].weight_learned / progress[phr_key].weight) * 100)
-		return progress
-	def countKeys obj
-		Object.keys(obj).length
-	def calcPercent learned, total
-		Math.round(learned / total * 100)
 
-global.PROG = new Progress library
-# LOG PROGRESS
 # LAYOUT[epic=LAYOUT, seq=19] App
 tag app-dashboard
 	css d:hflex
@@ -345,7 +263,6 @@ tag app-dashboard
 	def build 
 		api.init!
 		# state.learning_data_flat = api.calcAllProgressFlat!
-		# LOG library
 		api.save!
 
 	def render
@@ -702,7 +619,7 @@ tag CoursesPage
 					gtr: repeat(1,1fr) # row num, size
 					max-width: 800px
 					gap:1sp
-				for own _cid, collection of library.collections
+				for own _cid, collection of LIBRARY.collections
 					<CourseCard.stretchy-card collection=collection route-to="/learn/{_cid}/1/1/0">
 		# <self.layout-card-flex-grid>
 
@@ -765,10 +682,8 @@ tag CourseCard
 		return arr.length
 	def render
 		let col_item = state.progress_flat[collection.key]
-		LOG col_item
 		<self.card> 
-			<h1> 'test'
-			<img src=images["{collection.key}"]>
+			<img src=IMAGES["{collection.key}"]>
 			<[d:hbs jc:space-between]>
 				<h1.title[fs:2xl ff:sans-serif fw:bold ]> collection.name
 				<span.pill[as:end]> "🇰🇭 khmer"
@@ -805,10 +720,10 @@ tag LessonContent
 	def routed params
 		rt = params
 	def render
-		phrase = library.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
+		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
 		<self>
 			if phrase
-				<img$image src=images["{phrase.key}"] .image>
+				<img$image src=IMAGES["{phrase.key}"] .image>
 				<MeaningCard phrase=phrase>
 				<WordNav.card @click.commit route="/learn/:cid/:lid/:pid/:wid">
 				# <PhoneticsCard phrase=phrase>
@@ -830,7 +745,7 @@ tag PhoneticsCard
 						<span> obj..ipa or obj..vida or obj..vida_auto or word
 					else
 						<span> "n/a"
-						<> ERROR word, "no phonetics available"
+						<> EE word, "no phonetics available"
 			else
 				for word in phrase.phrase
 					let obj = dictionary[word]
@@ -838,14 +753,14 @@ tag PhoneticsCard
 						<span> obj..vida or obj..vida_auto or obj..ipa or word
 					unless obj..vida or obj..vida_auto or obj..ipa or word
 						<span> "n/a"
-						<> ERROR word, "no phonetics available"
+						<> EE word, "no phonetics available"
 
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
 	# NOTE: relies on state.khmer_writing = true/false
 	def routed params
 		rt = params
-		phrase = library.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
+		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
 		state.active_word = phrase.kh_array[rt.wid]
 	css self
 		d:hflex g:.4sp flex-wrap:wrap
@@ -961,8 +876,7 @@ tag WordNav
 
 	def nextPhrase
 		let current_phrase_i = rt.pid
-		let last_phrase_i = library.phrases["{rt.cid}-{rt.lid}-{rt.pid}"].of
-		LOG 'next phrase', last_phrase_i, current_phrase_i
+		let last_phrase_i = LIBRARY.phrases["{rt.cid}-{rt.lid}-{rt.pid}"].of
 		let is_last_phrase = last_phrase_i == current_phrase_i
 		if is_last_phrase
 			nextLesson!
@@ -972,8 +886,7 @@ tag WordNav
 			
 	def nextLesson
 		let current_lesson_i = rt.lid
-		let last_lesson_i = library.collections[rt.cid].of
-		LOG current_lesson_i, last_lesson_i
+		let last_lesson_i = LIBRARY.collections[rt.cid].of
 		let is_last_lesson = last_lesson_i == current_lesson_i
 		if is_last_lesson
 			LOG '🎉 This is the last lesson for this collection!'
@@ -998,17 +911,16 @@ tag WordNav
 			goTo rt.cid, rt.lid, rt.pid, prev_word_i
 		api.save!
 	def prevPhraseLastWord
-		let curr_phrase = library.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
+		let curr_phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
 		if curr_phrase.isFirst
 			prevLessonLastPhraseLastWord!
 		else
-			let prev_phrase = library.phrases[[rt.cid,rt.lid,dec(rt.pid)].join('-')]
+			let prev_phrase = LIBRARY.phrases[[rt.cid,rt.lid,dec(rt.pid)].join('-')]
 			let last_word_i = prev_phrase.kh_array.length - 1
-			LOG prev_phrase, last_word_i
 			goTo rt.cid, rt.lid, dec(rt.pid), last_word_i
 			
 	def prevPhraseFirstWord		
-		let current_phrase = library.phrases["{rt.cid}-{rt.lid}-{rt.pid}"]
+		let current_phrase = LIBRARY.phrases["{rt.cid}-{rt.lid}-{rt.pid}"]
 		if current_phrase.isFirst
 			prevLessonLastPhrase!
 		else
@@ -1028,7 +940,6 @@ tag WordNav
 			prev_lesson.last_phrase_i = prev_lesson.phrase_keys.length
 			let prev_phrase = state.learning_data_flat.phrases[prev_lesson.last_phrase_key]
 			prev_lesson.last_word_i = prev_phrase.phrase.length - 1
-			LOG prev_lesson
 			goTo rt.cid, prev_lesson.li, prev_lesson.last_phrase_i, prev_lesson.last_word_i
 		
 	# NOTE: router simplifier
@@ -1404,9 +1315,8 @@ tag LessonNav
 		rt = params
 	def render
 		<self>
-			let routed_collection = library.collections[rt.cid]
-			for own l_key, _lesson of library.lessons
-				# <> LOG rt.lid, _lesson.lid
+			let routed_collection = LIBRARY.collections[rt.cid]
+			for own l_key, _lesson of LIBRARY.lessons
 				<LessonNavItem 
 					.active=(state.rt.lid == _lesson.lid) 
 					route-to="/learn/{_lesson.cid}/{_lesson.lid}/1/0" 
@@ -1473,7 +1383,7 @@ tag PhraseNav
 		rt = params
 	def render
 		<self>
-			let phrases_num = library.lessons[[rt.cid,rt.lid].join('-')].phrases
+			let phrases_num = LIBRARY.lessons[[rt.cid,rt.lid].join('-')].phrases
 			for _pid in [1 .. phrases_num]
 				let phrase = state.progress_flat[[rt.cid,rt.lid,_pid].join('-')]
 				<.number-toggle route-to="/learn/{rt.cid}/{rt.lid}/{_pid}/0">

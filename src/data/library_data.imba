@@ -76,7 +76,6 @@ class NewLibraryFromCollections
 				}
 			new_col.weight = addWeights(new_col.words, 'col')
 			new_lib.collections[col_key] = new_col
-			WARN new_col.weight
 			new_lib.weight += new_col.weight
 			new_lib.words = joinWordWeights(new_lib.words, new_col.words)
 		return new_lib
@@ -115,12 +114,8 @@ class NewLibraryFromCollections
 			if value.weight isa 'number'
 				word_weights += value.weight
 			else
-				WARN "error adding weights at {src} because value is not word.weight is not a number"
+				LOG "error adding weights at {src} because value is not word.weight is not a number"
 		return word_weights
-
-# let new_lib = new NewLibraryFromCollections(collections_data.collections)
-# LOG 'lib', new_lib
-
 
 # Updated on 2025-05-02
 export let library_data = {
