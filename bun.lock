@@ -12,7 +12,7 @@
         "@types/bun": "latest",
         "bimba-cli": "latest",
         "bun-types": "latest",
-        "imba": "latest",
+        "imba": "^2.0.0-alpha.245",
       },
       "peerDependencies": {
         "typescript": "^5.8.3",

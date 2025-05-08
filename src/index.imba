@@ -1,20 +1,8 @@
-import 'imba/preflight.css'
-import '../ENV.imba'
-import './services/_index.imba'
+
+import './global.imba'
 import * as PH from 'imba-phosphor-icons'
 # import {ClientIDB} from './lib/instantdb-imba/index.imba'
 import './app-dashboard.imba'
-
-
-
-global css @root
-	$icon-size: 28px
-	div.row d:flex gap:1em
-	div.col d:vflex gap:1em
-	input c:gray9 px:10px rd:5px fs:16px flg:1 bxs:xs, inner py:5px h:$icon-size
-	button c:gray9 bg:gray1 @hover:yellow3 rd:5px fs:16px h:$icon-size px:1em d:hcc
-		&.icon p:0px size: $icon-size
-	div.card max-width:600px bg:white rd:xl shadow:lg, md p:2em d:vflex jc:space-between ta:left gap:1em
 
 tag App
 	css d:vtc

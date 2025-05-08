@@ -10,10 +10,7 @@ import {library_data} from './data/library_data.imba' # DELETE once dynamic libr
 
 
 # import {state.learning_data} from './data'
-import './elements/index.imba'
-import './components/index.imba'
-import './icons/index.imba'
-import './styles.imba'
+
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 const fuzzy = new Fuzzy
 const STATEKEY = 'app-state-20221119'
@@ -683,7 +680,7 @@ tag CourseCard
 	def render
 		let col_item = state.progress_flat[collection.key]
 		<self.card> 
-			<img src=IMAGES["{collection.key}"]>
+			<img src=IMAGES[collection.img]>
 			<[d:hbs jc:space-between]>
 				<h1.title[fs:2xl ff:sans-serif fw:bold ]> collection.name
 				<span.pill[as:end]> "🇰🇭 khmer"
@@ -723,7 +720,7 @@ tag LessonContent
 		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
 		<self>
 			if phrase
-				<img$image src=IMAGES["{phrase.key}"] .image>
+				<img$image src=IMAGES[phrase.img] .image>
 				<MeaningCard phrase=phrase>
 				<WordNav.card @click.commit route="/learn/:cid/:lid/:pid/:wid">
 				# <PhoneticsCard phrase=phrase>
