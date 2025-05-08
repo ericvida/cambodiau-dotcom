@@ -4,7 +4,7 @@ import fitty from 'fitty' # for fitting text in WordCard
 import {clusters} from './data/clusters.imba' 
 import {dictionary} from './data/dictionary.imba'
 # import {collections_data} from './data/collections_data.imba' # DELETE once dynamic library below is implemented
-import {library_data} from './data/library_data.imba' # DELETE once dynamic library below is implemented
+# import {library_data} from './data/LIBRARY.imba' # DELETE once dynamic library below is implemented
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 
 
@@ -94,75 +94,93 @@ class Api
 			return false
 	def calcAllProgressFlat
 		### TODO
-		Make word refs be generated at library_data.imba at static level, not here.
+		Make word refs be generated at LIBRARY.imba at static level, not here.
 		###
-		let progress_data = {}
+		let library_progress_res = {}
 		let temp_refs = {}
-		for own phrase_key, phrase of library_data.phrases
-			
-			# NOTE: Init Progress data
-			progress_data[phrase_key] = {words_learned: 0, words_total: library_data.phrases[phrase_key].weight, words_progress: 0}
-			
-			# NOTE: Init lesson data once]
-			if !progress_data["{phrase.c}-{phrase.l}"]
-				progress_data["{phrase.c}-{phrase.l}"] = {words_learned: 0, words_total: library_data.lessons["{phrase.c}-{phrase.l}"].weight, words_progress: 0}
-			
-			# NOTE: Init Progress data once
-			if !progress_data[phrase.c]
-				progress_data[phrase.c] = {words_learned: 0, words_total: library_data.collections[phrase.c].weight, words_progress: 0}
-			
-			for own word, val of phrase.words
-				
-				# NOTE: Add unique words to reference lists
-				if temp_refs[word] isa Array
-					temp_refs[word].push phrase_key
-				else
-					temp_refs[word] = [phrase_key]
+		if LIBRARY
+			if LIBRARY..phrases
+				for own phrase_key, phrase of LIBRARY.phrases
 					
-				# NOTE: If word is learned add weight to progress data
-				if hasLearned(word)
-					progress_data[phrase_key].words_learned += val.weight | 0
-					progress_data["{phrase.c}-{phrase.l}"].words_learned += val.weight | 0
-					progress_data[phrase.c].words_learned += val.weight | 0
-				
-				# NOTE: count unique words in phrase
-				progress_data[phrase_key].words_unique = countKeys(phrase.words)
-				
-				# NOTE: count unique words in lesson once
-				if !progress_data["{phrase.c}-{phrase.l}"].words_unique
-					progress_data["{phrase.c}-{phrase.l}"].words_unique = countKeys(library_data.lessons["{phrase.c}-{phrase.l}"].words)
-				
-				# NOTE: count unique words in collection once
-				if !progress_data[phrase.c].words_unique
-					progress_data[phrase.c].words_unique = countKeys(library_data.collections[phrase.c].words)
-		
-		for own key, value of temp_refs
-			library_data.words[key].refs = value
-		
-		# NOTE: calculate progress for each colelction, lesson, phrase from data
-		for own key, value of progress_data
-			let learned = progress_data[key].words_learned
-			let weight = progress_data[key].words_total
-			progress_data[key].words_progress = calcPercent(learned, weight)
-		
-		for own key, value of library_data.collections
-			value.words_learned = progress_data[key].words_learned
-			value.words_progress = progress_data[key].words_progress
-			value.words_total = progress_data[key].words_total
-			value.words_unique = progress_data[key].words_unique
-		
-		for own key, value of library_data.lessons
-			value.words_learned = progress_data[key].words_learned
-			value.words_progress = progress_data[key].words_progress
-			value.words_total = progress_data[key].words_total
-			value.words_unique = progress_data[key].words_unique
-		
-		for own key, value of library_data.phrases
-			value.words_learned = progress_data[key].words_learned
-			value.words_progress = progress_data[key].words_progress
-			value.words_total = progress_data[key].words_total
-			value.words_unique = progress_data[key].words_unique
-		
+					# NOTE: Init Progress data
+					library_progress_res[phrase_key] = {
+						words_learned: 0, 
+						words_total: LIBRARY.phrases[phrase_key].weight, 
+						words_progress: 0}
+					
+					let col_key = String(phrase.cid)
+					let les_key = [phrase.cid,phrase.lid].join('-')
+					let phr_key = phrase_key
+					# NOTE: Init lesson data once]
+					if !library_progress_res[les_key]
+						library_progress_res[les_key] = {
+							words_learned: 0
+							words_total: LIBRARY.lessons[les_key].weight
+							words_progress: 0
+							}
+					
+					# NOTE: Init Progress data once
+					if !library_progress_res[col_key]
+						library_progress_res[col_key] = {
+							words_learned: 0
+							words_total: LIBRARY.collections[col_key].weight
+							words_progress: 0
+							}
+					
+					if phrase..words
+						for own word, val of phrase.words
+							
+							# NOTE: Add unique words to reference lists
+							if temp_refs[word] isa Array
+								temp_refs[word].push phr_key
+							else
+								temp_refs[word] = [phr_key]
+								
+							# NOTE: If word is learned add weight to progress data
+							if hasLearned(word)
+								library_progress_res[col_key].words_learned += val.weight | 0
+								library_progress_res[les_key].words_learned += val.weight | 0
+								library_progress_res[phr_key].words_learned += val.weight | 0
+							
+							# NOTE: count unique words in phrase
+							library_progress_res[phr_key].words_unique = countKeys(phrase.words)
+							
+							# NOTE: count unique words in lesson once
+							if !library_progress_res[les_key].words_unique
+								library_progress_res[les_key].words_unique = countKeys(LIBRARY.lessons[les_key].words)
+							
+							# NOTE: count unique words in collection once
+							if !library_progress_res[col_key].words_unique
+								library_progress_res[col_key].words_unique = countKeys(LIBRARY.collections[col_key].words)
+			
+			else # no LIBRARY.phrases
+				for own phr_key, value of LIBRARY.phrases
+					value.words_learned = library_progress_res[phr_key].words_learned
+					value.words_progress = library_progress_res[phr_key].words_progress
+					value.words_total = library_progress_res[phr_key].words_total
+					value.words_unique = library_progress_res[phr_key].words_unique
+			
+			if Object.keys(temp_refs).length > 0
+				for own key, value of temp_refs
+					LIBRARY.words[key].refs = value
+			else
+				WW 'no words found in Api.calcAllProgressFlat()'
+			
+			# NOTE: calculate progress for each colelction, lesson, phrase from data
+			for own key, value of library_progress_res
+				let learned = library_progress_res[key].words_learned
+				let weight = library_progress_res[key].words_total
+				library_progress_res[key].words_progress = calcPercent(learned, weight)
+			
+			if LIBRARY..collections
+				for own key, value of LIBRARY.collections
+					value.words_learned = library_progress_res[key].words_learned
+					value.words_progress = library_progress_res[key].words_progress
+					value.words_total = library_progress_res[key].words_total
+					value.words_unique = library_progress_res[key].words_unique
+		else
+			WW 'no library fround in Api.calcAllProgressFlat()'
+
 		return library_data
 		
 	def countKeys obj
@@ -343,7 +361,7 @@ tag TopNavigation
 			<a route-to="/courses">
 				<div> "Learn"
 			<a route-to="/dictionary">
-				<div> "app-dictionary"
+				<div> "Dictionary"
 			<a route-to="/phonetics">
 				<div> "Phonetics"
 			<a route-to="/info">

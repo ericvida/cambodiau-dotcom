@@ -10,14 +10,12 @@ global.EE = console.error
 import {audio} from './global/_raw_data/audio_references.imba'
 global.AUDIO = audio
 
-import {bible_collection} from "./global/_raw_data/bible_collection.imba"
-global.COLLECTION_ARRAY = [bible_collection]
-
 import {image_references} from './global/_raw_data/image_references.imba'
 global.IMAGES = image_references
 
+import {bible_collection} from "./global/_raw_data/bible_collection.imba"
 import {LibraryProcessor} from './global/LibraryProcessor.imba'
-global.LIBRARY = new LibraryProcessor COLLECTION_ARRAY
+global.LIBRARY = new LibraryProcessor [bible_collection]
 
 import {ProgressProcessor} from './global/ProgressProcessor.imba'
 global.PROG = new ProgressProcessor LIBRARY
