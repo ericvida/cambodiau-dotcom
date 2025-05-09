@@ -265,7 +265,9 @@ export class Store
 				# Use the existing profile ID without trying to link it again (which would cause a unique constraint error)
 				console.log("Using existing profile ID:", state.profileId)
 				batch.push(
-					tx.profile[state.profileId].update(profileUpdate)
+					tx.profile[state.profileId].update(profileUpdate).link(
+						{$users: state.user.id}
+					)
 				)
 			else
 				# Create a new profile and link it to the user if we don't have an existing profileId
