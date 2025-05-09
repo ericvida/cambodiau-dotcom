@@ -1,86 +1,108 @@
+
+
 export class ProgressProcessor
 	def constructor _library
-		initProgressProps _library
-		DATA.initLocal! # NOTE: loads state in local storage before calculating progress
-		calcProgress! _library
-		return
+		# Initialize progress properties
+		initProgressProps(_library)
+		
+		# Calculate progress using the new store
+		calcProgress(_library)
 		
 	def initProgressProps _library
+		# Initialize library properties
 		this.library = {}
-		this.library.unique = _library.unique
-		this.library.weight = _library.weight
-		this.library.words = _library.words
+		this.library.unique = _library..unique || 0
+		this.library.weight = _library..weight || 0
+		this.library.words = _library..words || {}
 		this.library.unique_learned = 0
 		this.library.weight_learned = 0
 		this.library.unique_progress = 0
 		this.library.weight_progress = 0
 		
-		for own key, val of _library.collections
-			unless this[key]
-				this[key] =
-					unique: val.unique
-					weight: val.weight
-					words: val.words
+		# Initialize collections properties
+		if _library..collections
+			for own key, val of _library.collections
+				unless this[key]
+					this[key] = {
+						unique: val..unique || 0,
+						weight: val..weight || 0,
+						words: val..words || {},
+						unique_learned: 0,
+						weight_learned: 0,
+						unique_progress: 0,
+						weight_progress: 0
+					}
 		
-		for own key, val of _library.lessons
-			unless this[key]
-				this[key] =
-					unique: val.unique
-					weight: val.weight
-					words: val.words
+		# Initialize lessons properties
+		if _library..lessons
+			for own key, val of _library.lessons
+				unless this[key]
+					this[key] = {
+						unique: val..unique || 0,
+						weight: val..weight || 0,
+						words: val..words || {},
+						unique_learned: 0,
+						weight_learned: 0,
+						unique_progress: 0,
+						weight_progress: 0
+					}
 		
-		for own key, val of _library.phrases
-			unless this[key]
-				this[key] =
-					unique: val.unique
-					weight: val.weight
-					words: val.words
+		# Initialize phrases properties
+		if _library..phrases
+			for own key, val of _library.phrases
+				unless this[key]
+					this[key] = {
+						unique: val..unique || 0,
+						weight: val..weight || 0,
+						words: val..words || {},
+						unique_learned: 0,
+						weight_learned: 0,
+						unique_progress: 0,
+						weight_progress: 0
+					}
 					
 	def calcProgress _library
-		this.library.weight_learned = 0
-		this.library.unique_learned = 0
+		# Use Store's updateProgress method, then update this object with the result
+		const progressData = STORE.updateProgress(_library)
 		
+		# Update library properties
+		this.library.weight_learned = progressData..library..weight_learned || 0
+		this.library.unique_learned = progressData..library..unique_learned || 0
+		this.library.unique_progress = progressData..library..unique_progress || 0
+		this.library.weight_progress = progressData..library..weight_progress || 0
 		
-		if _library.collections
-		for own key, val of _library.collections
-			for own word, bool of DATA.local.user_learned
-				if val.words[word]
-					this.library.weight_learned += val.words[word].weight
-					this.library.unique_learned++
-		this.library.unique_progress = Math.round((this.library.unique_learned / this.library.unique) * 100)
-		this.library.weight_progress = Math.round((this.library.weight_learned / this.library.weight) * 100)
+		# Update collections properties
+		if _library..collections
+			for own col_key, _collection of _library.collections
+				if progressData[col_key]
+					this[col_key].weight_learned = progressData[col_key].weight_learned || 0
+					this[col_key].unique_learned = progressData[col_key].unique_learned || 0
+					this[col_key].unique_progress = progressData[col_key].unique_progress || 0
+					this[col_key].weight_progress = progressData[col_key].weight_progress || 0
 		
-		for own col_key, collection of _library.collections
-			this[col_key].weight_learned = 0
-			this[col_key].unique_learned = 0
-			for own word, bool of DATA.local.user_learned
-				if collection.words[word]
-					this[col_key].weight_learned += collection.words[word].weight
-					this[col_key].unique_learned++
-			this[col_key].unique_progress = Math.round((this[col_key].unique_learned / this[col_key].unique) * 100)
-			this[col_key].weight_progress = Math.round((this[col_key].weight_learned / this[col_key].weight) * 100)
+		# Update lessons properties
+		if _library..lessons
+			for own les_key, _lesson of _library.lessons
+				if progressData[les_key]
+					this[les_key].weight_learned = progressData[les_key].weight_learned || 0
+					this[les_key].unique_learned = progressData[les_key].unique_learned || 0
+					this[les_key].unique_progress = progressData[les_key].unique_progress || 0
+					this[les_key].weight_progress = progressData[les_key].weight_progress || 0
 		
-		for own les_key, lesson of _library.lessons
-			this[les_key].weight_learned = 0
-			this[les_key].unique_learned = 0
-			for own word, bool of DATA.local.user_learned
-				if lesson.words[word]
-					this[les_key].weight_learned += lesson.words[word].weight
-					this[les_key].unique_learned++
-			this[les_key].unique_progress = Math.round((this[les_key].unique_learned / this[les_key].unique) * 100)
-			this[les_key].weight_progress = Math.round((this[les_key].weight_learned / this[les_key].weight) * 100)
-			
-		for own phr_key, phrase of _library.phrases
-			this[phr_key].weight_learned = 0
-			this[phr_key].unique_learned = 0
-			for own word, bool of DATA.local.user_learned
-				if phrase.words[word]
-					this[phr_key].weight_learned += phrase.words[word].weight
-					this[phr_key].unique_learned++
-			this[phr_key].unique_progress = Math.round((this[phr_key].unique_learned / this[phr_key].unique) * 100)
-			this[phr_key].weight_progress = Math.round((this[phr_key].weight_learned / this[phr_key].weight) * 100)
+		# Update phrases properties
+		if _library..phrases
+			for own phr_key, _phrase of _library.phrases
+				if progressData[phr_key]
+					this[phr_key].weight_learned = progressData[phr_key].weight_learned || 0
+					this[phr_key].unique_learned = progressData[phr_key].unique_learned || 0
+					this[phr_key].unique_progress = progressData[phr_key].unique_progress || 0
+					this[phr_key].weight_progress = progressData[phr_key].weight_progress || 0
+		
 		return this
+	
+	# Helper functions
 	def countKeys obj
-		Object.keys(obj).length
+		return obj ? Object.keys(obj).length : 0
+		
 	def calcPercent learned, total
-		Math.round(learned / total * 100)
+		return total > 0 ? Math.round(learned / total * 100) : 0

@@ -8,12 +8,16 @@ global.LL = console.log
 global.WW = console.warn
 global.EE = console.error
 
+# Initialize Store first, before any other components
+
 
 import {audio} from './global/_raw_data/audio_references.imba'
 global.AUDIO = audio
 
 import {image_references} from './global/_raw_data/image_references.imba'
 global.IMAGES = image_references
+
+import './global/Store.imba' # Initializes and sets global.STORE
 
 import {DataAPI} from './global/DataAPI.imba'
 global.DATA = new DataAPI

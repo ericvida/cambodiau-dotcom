@@ -5,7 +5,7 @@ import {clusters} from './data/clusters.imba'
 import {dictionary} from './data/dictionary.imba'
 # import {collections_data} from './data/collections_data.imba' # DELETE once dynamic library below is implemented
 # import {library_data} from './data/LIBRARY.imba' # DELETE once dynamic library below is implemented
-# sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
+# sealang-link: http://sealang.net/api/api.pl?query=ก&service=dictionary
 
 ### NOTE
 This static state is necessary to prevent errors if progress
@@ -14,18 +14,14 @@ is calculated in the constructor of the progress class.
 
 class Api
 	def toggleLearned word
-		if DATA.local.user_learned.hasOwnProperty(word)
-			delete DATA.local.user_learned[word]
-		else
-			DATA.local.user_learned[word] = yes
+		STORE.toggleLearnedWord(word)
+		# After toggling the word, ensure local state is updated
+		DATA.syncFromStore!
 		PROGRESS.calcProgress LIBRARY
 		imba.commit!
-		save!
+		
 	def hasLearned word
-		if DATA.local.user_learned.hasOwnProperty(word)
-			return true
-		else
-			return false
+		return STORE.hasLearnedWord(word)
 	def calcAllProgressFlat
 		### TODO
 		Make word refs be generated at LIBRARY.imba at static level, not here.
@@ -49,7 +45,7 @@ class Api
 					if !library_progress_res[les_key]
 						library_progress_res[les_key] = {
 							words_learned: 0
-							words_total: LIBRARY.lessons[les_key].weight
+							words_total: LIBRARY.lessons[les_key]..weight || 0
 							words_progress: 0
 							}
 					
@@ -57,7 +53,7 @@ class Api
 					if !library_progress_res[col_key]
 						library_progress_res[col_key] = {
 							words_learned: 0
-							words_total: LIBRARY.collections[col_key].weight
+							words_total: LIBRARY.collections[col_key]..weight || 0
 							words_progress: 0
 							}
 					
@@ -72,31 +68,32 @@ class Api
 								
 							# NOTE: If word is learned add weight to progress data
 							if hasLearned(word)
-								library_progress_res[col_key].words_learned += val.weight | 0
-								library_progress_res[les_key].words_learned += val.weight | 0
-								library_progress_res[phr_key].words_learned += val.weight | 0
+								library_progress_res[col_key].words_learned += val.weight || 0
+								library_progress_res[les_key].words_learned += val.weight || 0
+								library_progress_res[phr_key].words_learned += val.weight || 0
 							
 							# NOTE: count unique words in phrase
 							library_progress_res[phr_key].words_unique = countKeys(phrase.words)
 							
 							# NOTE: count unique words in lesson once
 							if !library_progress_res[les_key].words_unique
-								library_progress_res[les_key].words_unique = countKeys(LIBRARY.lessons[les_key].words)
+								library_progress_res[les_key].words_unique = countKeys(LIBRARY.lessons[les_key]..words || {})
 							
 							# NOTE: count unique words in collection once
 							if !library_progress_res[col_key].words_unique
-								library_progress_res[col_key].words_unique = countKeys(LIBRARY.collections[col_key].words)
+								library_progress_res[col_key].words_unique = countKeys(LIBRARY.collections[col_key]..words || {})
 			
 			else # no LIBRARY.phrases
-				for own phr_key, value of LIBRARY.phrases
-					value.words_learned = library_progress_res[phr_key].words_learned
-					value.words_progress = library_progress_res[phr_key].words_progress
-					value.words_total = library_progress_res[phr_key].words_total
-					value.words_unique = library_progress_res[phr_key].words_unique
+				for own phr_key, value of LIBRARY.phrases || {}
+					value.words_learned = library_progress_res[phr_key]..words_learned || 0
+					value.words_progress = library_progress_res[phr_key]..words_progress || 0
+					value.words_total = library_progress_res[phr_key]..words_total || 0
+					value.words_unique = library_progress_res[phr_key]..words_unique || 0
 			
 			if Object.keys(temp_refs).length > 0
 				for own key, value of temp_refs
-					LIBRARY.words[key].refs = value
+					if LIBRARY.words[key]
+						LIBRARY.words[key].refs = value
 			else
 				WW 'no words found in Api.calcAllProgressFlat()'
 			
@@ -118,35 +115,42 @@ class Api
 		return library_progress_res
 		
 	def countKeys obj
-		Object.keys(obj).length
+		return obj ? Object.keys(obj).length : 0
 	def calcPercent learned, total
-		Math.round(learned / total * 100)
+		return (learned && total) ? Math.round(learned / total * 100) : 0
 	
 	# API[epic=API, seq=7] SAVE
 	def save
-		imba.locals.state = state
+		# Use Store's persistState method instead
+		STORE.persistState!
 	
 	# API[epic=API, seq=7] LOAD
 	def load
-		state = imba.locals.state if imba.locals.state
+		# Use Store's data directly
+		DATA.syncFromStore!
 
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
-		DATA.local.ipa = !DATA.local.ipa
-		save!
-		
+		STORE.toggleIpa!
+		DATA.syncFromStore!
 		
 	# API[epic=FrontEnd, seq=8] AUTH
 	def toggleAuth
-		DATA.local.auth = !DATA.local.auth
-		save!
+		# Use the Store for authentication state
+		if STORE.get('login?') == yes
+			STORE.logout!
+		else
+			# Show login screen
+			STORE.set('login?', no)
+		DATA.syncFromStore!
+		
 	# API[epic=FrontEnd, seq=9] DARKMODE
 	def toggleDark
-		DATA.local.dark = !DATA.local.dark
-		if DATA.local.dark
+		const isDark = STORE.toggleDarkMode!
+		if isDark
 		then setDarkmode!
 		else unsetDarkmode!
-		save!
+		DATA.syncFromStore!
 	def setDarkmode
 		let root = document.getElementsByTagName('html')[0]
 		root.flags.add('mod-darkmode')
@@ -155,15 +159,15 @@ class Api
 		root.flags.remove('mod-darkmode')
 	# API[epic=FrontEnd, seq=10] LOGIN
 	def logIn
-		if DATA.local.auth is no
-			DATA.local.auth = yes
-		save!
+		# Use Store for authentication
+		STORE.set('login?', yes)
+		DATA.syncFromStore!
 			
 	# API[epic=FrontEnd, seq=11] LOGOUT
 	def logOut
-		if DATA.local.auth is yes
-			DATA.local.auth = no
-		save!
+		# Use Store for logout
+		STORE.logout!
+		DATA.syncFromStore!
 
 	def search needle, haystack
 		let haystackLength = haystack.length # tlen
@@ -215,7 +219,7 @@ tag app-dashboard
 				@hotkey("shift+i|v")=APP.toggleIpa!
 				@hotkey("shift+c+l")=APP.clear!
 				@hotkey("shift+a")=APP.toggleAuth! # TODO: delete in production
-				@hotkey('enter|s')=APP.toggleLearned(DATA.local.active_word)
+				@hotkey('enter|s')=APP.toggleLearned(STORE.get('active_word'))
 			>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
@@ -377,15 +381,15 @@ tag app-dictionary
 			<.row[order:0] @click=APP.toggleIpa!>
 				<span> "khmer"
 				<span> 
-					if DATA.local.ipa then "ipa" else "vida"
+					if STORE.get('ipa') then "ipa" else "vida"
 				<span> "google"
 			for own word, info of dictionary
 				if FUZZY.search(query, word) | FUZZY.search(query, info..vida) | FUZZY.search(query, info..google) | FUZZY.search(query, info..ipa)
-					<div.row .learned=(DATA.local.user_learned.hasOwnProperty(word)) @click=(DATA.local.active_word = word)>
+					<div.row .learned=(STORE.hasLearnedWord(word)) @click=(STORE.set('active_word', word), DATA.syncFromStore!)>
 						# if info..rank then <span.mono> info..rank else <span.err> '-'
 						<a href="http://sealang.net/api/api.pl?query={word}&service=dictionary" target="_blank"> 
 							<span.khmer> "{word}"
-						if DATA.local.ipa
+						if STORE.get('ipa')
 							if info..ipa then <span.mono> info..ipa else <span.err> 'ipa coming soon'
 						else
 							if (info..vida)
@@ -494,7 +498,8 @@ tag PhoneticVowels
 			@hover
 				bg:hue4 @darkmode:hue6
 	def activeWord word
-		DATA.local.active_word = char[word][2]
+		STORE.set('active_word', char[word][2])
+		DATA.syncFromStore!
 		APP.save!
 	
 	def render
@@ -502,8 +507,8 @@ tag PhoneticVowels
 			<nav>
 				<button @click=APP.toggleIpa!> 
 					"Phonetic System: "
-					if DATA.local.ipa then "IPA" else "Vida"
-			if DATA.local.ipa is true
+					if STORE.get('ipa') then "IPA" else "Vida"
+			if STORE.get('ipa') === true
 				ipa = 1
 			else
 				ipa = 0
@@ -625,13 +630,14 @@ tag CourseCard
 tag right-bar
 	def routed params
 		rt = params
-		DATA.local.rt = rt
+		STORE.set('rt', rt)
 		APP.save!
 	def render
 		<self>
-			if DATA.local.active_word
+			const activeWord = STORE.get('active_word')
+			if activeWord
 				<WordCard.card>
-				if dictionary[DATA.local.active_word]..google
+				if dictionary[activeWord]..google
 					<DefinitionCard.card>
 				<SpellingCard.card>
 			<ShortcutCard.card>
@@ -685,11 +691,12 @@ tag PhoneticsCard
 
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
-	# NOTE: relies on DATA.local.khmer_writing = true/false
+	# NOTE: now uses STORE directly instead of DATA.local
 	def routed params
 		rt = params
 		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
-		DATA.local.active_word = phrase.kh_array[rt.wid]
+		STORE.set('active_word', phrase.kh_array[rt.wid])
+		DATA.syncFromStore!
 	css self
 		d:hflex g:.4sp flex-wrap:wrap
 	css .word-wrapper
@@ -742,8 +749,8 @@ tag WordNav
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			# TODO: make a toggle to switch khmer to ipa and display khmer if ipa not available
-			<ToggleSwitch .active=!DATA.local.khmer_writing @click.toggleKhmer [align-self:end]> 
-				if !DATA.local.khmer_writing
+			<ToggleSwitch .active=!STORE.get('khmer_writing', true) @click.toggleKhmer [align-self:end]> 
+				if !STORE.get('khmer_writing', true)
 					"phonetics"
 				else
 					<span [ff:mono]> "khmer"
@@ -757,9 +764,9 @@ tag WordNav
 					let no_phonetics = false
 					let display_word = word
 					if in_dict 
-						if DATA.local.khmer_writing
+						if STORE.get('khmer_writing', true)
 							display_word = word
-						elif DATA.local.ipa
+						elif STORE.get('ipa')
 							if !!ipa
 								display_word = ipa
 						else
@@ -771,18 +778,19 @@ tag WordNav
 								no_phonetics = true
 								display_word
 					<.word 
-						.active=(word is DATA.local.active_word) 
+						.active=(word is STORE.get('active_word')) 
 						route-to="/learn/{phrase.cid}/{phrase.lid}/{phrase.pid}/{word_index}" 
-						.known=DATA.local.user_learned.hasOwnProperty(word) 
+						.known=STORE.hasLearnedWord(word) 
 						.not_in_dict=!in_dict
 						.no_phonetics=no_phonetics
 						@dblclick.playWord($word_audio, word) 
 						@mousedown.pressAndHold(word, 1s)
 						@mouseup.stopTimer
-						.khmer=DATA.local.khmer_writing
+						.khmer=STORE.get('khmer_writing', true)
 						> display_word
 	def toggleKhmer
-		DATA.local.khmer_writing = !DATA.local.khmer_writing
+		STORE.set('khmer_writing', !STORE.get('khmer_writing', true))
+		DATA.syncFromStore!
 		APP.save!
 	# Goes to the next word in the phrase
 	def nextWord phrase
@@ -798,7 +806,7 @@ tag WordNav
 			nextPhrase!
 		else
 			let next_word_i = inc(rt.wid)
-			DATA.local.active_word = phrase.kh_array[next_word_i]
+			STORE.set('active_word', phrase.kh_array[next_word_i])
 			goTo rt.cid, rt.lid, rt.pid, next_word_i
 		APP.save!
 
@@ -839,7 +847,7 @@ tag WordNav
 			prevPhraseLastWord!
 		else
 			let prev_wid = dec(rt.wid)
-			DATA.local.active_word = phrase.kh_array[prev_wid]
+			STORE.set('active_word', phrase.kh_array[prev_wid])
 			goTo rt.cid, rt.lid, rt.pid, prev_wid
 		APP.save!
 	def prevPhraseLastWord
@@ -927,7 +935,7 @@ tag WordNav
 		return res
 
 	def handleHold word
-		APP.toggleLearned(DATA.local.active_word)
+		APP.toggleLearned(STORE.get('active_word'))
 		stopTimer!
 		resetTimer!
 		imba.commit!
@@ -936,7 +944,8 @@ tag WordNav
 	elapsed = 0 # NOTE: used
 	
 	def pressAndHold word, duration
-		DATA.local.active_word = word
+		STORE.set('active_word', word)
+		DATA.syncFromStore!
 		#interval = setInterval(&, step) do
 			if elapsed >= duration 
 			then (handleHold!)
@@ -999,13 +1008,15 @@ tag WordCard
 		fitty($fit, fit_settings)
 	def render
 		<self>
-			let vida = dictionary[DATA.local.active_word]..vida
-			let vida_auto = dictionary[DATA.local.active_word]..vida_auto
-			let ipa = dictionary[DATA.local.active_word]..ipa
-			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={DATA.local.active_word}&service=dictionary" target="_blank"> 
-				DATA.local.active_word
+			const activeWord = STORE.get('active_word', '')
+			let vida = dictionary[activeWord]..vida
+			let vida_auto = dictionary[activeWord]..vida_auto
+			let ipa = dictionary[activeWord]..ipa
+			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={activeWord}&service=dictionary" target="_blank"> 
+				activeWord
 			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=APP.toggleIpa!>
-				if DATA.local.ipa
+				const useIpa = STORE.get('ipa', false)
+				if useIpa
 					<span[fs:xs c:gray5]> "ipa"
 					if ipa
 						<div.phonetic> ipa
@@ -1019,8 +1030,8 @@ tag WordCard
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "unavailable"
-			<ToggleSwitch .active=DATA.local.user_learned.hasOwnProperty(DATA.local.active_word) @click=APP.toggleLearned(DATA.local.active_word)> "learned"
-			if AUDIO.hasOwnProperty(DATA.local.active_word)
+			<ToggleSwitch .active=STORE.hasLearnedWord(activeWord) @click=APP.toggleLearned(activeWord)> "learned"
+			if AUDIO.hasOwnProperty(activeWord)
 				<AudioPlayer>
 
 tag ToggleSwitch
@@ -1058,7 +1069,7 @@ tag AudioPlayer
 		if manual
 			word = manual
 		else
-			word = DATA.local.active_word
+			word = STORE.get('active_word', '')
 		<audio$track @ended.commit src=AUDIO[word] type="audio/mpeg" preload="auto">
 		
 		<.button-wrapper[d:hflex ai:center]>
@@ -1078,14 +1089,15 @@ tag AudioPlayer
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
 	<self>
-		let word_object = dictionary[DATA.local.active_word]
-		if word_object.def isnt false
+		const activeWord = STORE.get('active_word', '')
+		const word_object = dictionary[activeWord]
+		if word_object..def !== false
 			<h2> "Definition"
-			for item in word_object.def
-				if item.includes('=')
+			for item in word_object..def || []
+				if item..includes('=')
 					let line = item.split('=')
 					let use = line[0]
-					let translations = line[1].split('|')
+					let translations = line[1]..split('|') || []
 					<ol [list-style:decimal pl:1sp]>
 						for item, item_i in translations
 							if item_i is 0
@@ -1093,7 +1105,7 @@ tag DefinitionCard
 							<li.def [fs:xs]> item
 		else
 			<h2> "Google Definition"
-			for defi in dictionary[DATA.local.active_word].google.split('|')
+			for defi in word_object..google..split('|') || []
 				<p> defi
 
 # CARD[epic=CARD, seq=32] ShortcutCard
@@ -1241,7 +1253,8 @@ tag SpellingCard
 				kh_leg + kh_aang + kh_eaq + kh_bantok_piir + kh_treisap + kh_s_stress +	kh_c_stress + kh_v + kh_c +	'.', 'g'
 			
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
-			let testword = DATA.local.active_word
+			const activeWord = STORE.get('active_word', '')
+			let testword = activeWord
 			let groups = testword.match regtest
 			for item in groups
 				let cluster = clusters[item]
@@ -1275,7 +1288,7 @@ tag lesson-nav
 			let routed_collection = LIBRARY.collections[rt.cid]
 			for own l_key, _lesson of LIBRARY.lessons
 				<lesson-nav-item 
-					.active=(DATA.local.rt.lid == _lesson.lid) 
+					.active=(rt.lid == _lesson.lid) 
 					route-to="/learn/{_lesson.cid}/{_lesson.lid}/1/0" 
 					rt=rt
 					lesson=_lesson

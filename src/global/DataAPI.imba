@@ -1,119 +1,167 @@
-import {init, tx, id} from '@instantdb/core'
+import {tx, id} from '@instantdb/core'
 
 export class DataAPI
 	prop local = {}
-	prop auth = {}
-	prop instant = {}
-	def resetLocal
-		local.updated_at = 0
-		local.cid = 0
-		local.lid = 0
-		local.pid = 0
-		local.wid = 0
-		local.active_word = 'ជា'
-		local.user_learned = {}
-		local.progress = {}
-		local.pa = 'vida'
-		local.ipa = no
-		local.dark = no
-		local.lesson_nav = yes
-		local.phrase_nav = yes
-		local.right_bar = yes
-		local.user # NOTE user contains: app_id, created_at, email, id, refresh_token
-		local.login? # NOTE: null = waiting, yes, no
-		local.sentCode? # NOTE: yes, no
-		local.error 
-		local.loading
-		local.email_input
-
+	
 	def constructor
-		initLocal!
-		initInstant!
+		# Load initial data from the store
+		syncFromStore!
+		
+	def syncFromStore
+		# Synchronize local state from the centralized store"""
+		local = {
+			updated_at: STORE.get('updated_at', 0),
+			cid: STORE.get('cid', 0),
+			lid: STORE.get('lid', 0),
+			pid: STORE.get('pid', 0),
+			wid: STORE.get('wid', 0),
+			active_word: STORE.get('active_word', 'ជា'),
+			user_learned: STORE.get('user_learned', {}),
+			progress: STORE.get('progress', {library: {weight_learned: 0}}),
+			pa: STORE.get('pa', 'vida'),
+			ipa: STORE.get('ipa', false),
+			dark: STORE.get('dark', false),
+			lesson_nav: STORE.get('lesson_nav', true),
+			phrase_nav: STORE.get('phrase_nav', true),
+			right_bar: STORE.get('right_bar', true),
+			khmer_writing: STORE.get('khmer_writing', true),
+			user: STORE.get('user', null),
+			login?: STORE.get('login?', null),
+			sentCode?: STORE.get('sentCode?', null),
+			error: STORE.get('error', null),
+			loading: STORE.get('loading', false),
+			email_input: STORE.get('email_input', '')
+		}
+		
+	def updateStore key, value
+		# Update a key in the store and sync back to local state"""
+		STORE.set(key, value)
+		syncFromStore!
 	
+	def resetLocal
+		# Reset local data to defaults and propagate to the store"""
+		STORE.resetState!
+		syncFromStore!
+		
 	def initLocal
-		unless local.progress
-			local.progress = {
-				library: {weight_learned: 0}
-			}
-		if imba.locals[LOCAL_DB_NAME]
-			let ldb_updated_at = imba.locals[LOCAL_DB_NAME]
-			local = imba.locals[LOCAL_DB_NAME]
-		else
-			resetLocal!
-			local.updated_at = Date.now()
-	
+		# Initialize local data from store"""
+		syncFromStore!
+		
 	def initInstant
-		instant = init({ appId: INSTANT_APP_ID});
+		# No-op: InstantDB is now managed by the Store"""
+		# InstantDB is now managed by the Store
+		pass
 	
 	def subscribeAuth
-		instant.subscribeAuth do(auth)
-			if auth.error
-				console.error 'Error during authentication'
-			elif auth.user
-				local.user = auth.user
-				local.login? = yes
-				imba.commit!
-				if local.user
-					const query = 
-						tasks: 
-							$:
-								where: 
-									"$users.id": local.user.id
-					const unsub = instant.subscribeQuery query, do(resp)
-						if resp.error
-							console.error('Uh oh!', resp.error.message)
-						elif resp.data
-							if resp.data.tasks
-								local.tasks = resp.data.tasks or [] 
-								imba.commit!
-							else
-								console.warn('Unexpected response structure:', resp)
-						else
-							console.warn('Unexpected response:', resp)
-				else
-					console.warn('User is not logged in. Skipping query.')
-			else
-				local.login? = true
-				local.user = no
-				imba.commit!
+		# No-op: Auth subscription is now managed by the Store"""
+		# Auth subscription is now managed by the Store
+		pass
 	
 	def sendMagicCode
+		# Send magic code via the Store"""
 		if !local.email_input
 			console.error('Email is required to send a magic code.')
 			return
-		console.log local.email_input, 'clicked login'
-		await instant.auth.sendMagicCode({ email: local.email_input })
-		local.sentCode? = true
-		imba.commit!
-	
+		
+		STORE.set('email_input', local.email_input)
+		STORE.sendMagicCode!
+		
+		# Update local state from store
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+		
 	def logout
-		console.log 'clicked logout'
-		await instant.auth.signOut()
-		local.user = no
-		# FIXME -  after logout the email_input value is false, must be fixed.
-		local.email_input = ''
-		imba.commit!
+		# Log out via the Store"""
+		STORE.logout!
+			.then(do()
+				syncFromStore!
+				if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+					imba.commit!
+			)
+			.catch(do(error)
+				console.error('Logout failed:', error)
+			)
 	
 	def loginWithCode magic_code
-		if !local.email_input or !magic_code
+		# Log in with magic code via the Store"""
+		if !local.email_input || !magic_code
 			console.error('Both email and code are required to sign in.')
 			return
-		await instant.auth.signInWithMagicCode({ email: local.email_input, code: magic_code })
-		local.email_input = false
-		local.sentCode? = false
+		
+		STORE.set('email_input', local.email_input)
+		STORE.loginWithCode(magic_code)
+			.then(do()
+				syncFromStore!
+				if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+					imba.commit!
+			)
+			.catch(do(error)
+				console.error('Login failed:', error)
+			)
 	
 	def persistProgress progress
-		let profileID = "26b9500e-dcaf-4867-bded-1edd4304c988"
-		if !!profileID
-			await instant.transact([
-				tx.profile[profileID].update({
-					progress: progress
-					createdAt: Date.now()
-				}).link({$users: local.user.id}) # link the task to the logged in user
-			])
-		else
-			await instant.transact [
-				tx.profile[id()].update({
-					progress: progress
-				})
-			]
+		# Deprecated: Use STORE.updateProgress instead"""
+		console.warn('persistProgress is deprecated, use STORE.updateProgress instead')
+		return
+	
+	# Add compatibility methods that delegate to the Store
+	
+	def toggleLearned word
+		# Toggle whether a word is learned via the Store"""
+		STORE.toggleLearnedWord(word)
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+	
+	def hasLearned word
+		# Check if a word is learned via the Store"""
+		return STORE.hasLearnedWord(word)
+	
+	def toggleDark
+		# Toggle dark mode via the Store"""
+		STORE.toggleDarkMode!
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+	
+	def toggleIpa
+		# Toggle IPA mode via the Store"""
+		STORE.toggleIpa!
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+	
+	def toggleLessonNav
+		# Toggle lesson navigation visibility via the Store"""
+		STORE.toggleLessonNav!
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+	
+	def togglePhraseNav
+		# Toggle phrase navigation visibility via the Store"""
+		STORE.togglePhraseNav!
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+	
+	def toggleRightBar
+		# Toggle right sidebar visibility via the Store"""
+		STORE.toggleRightBar!
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+	
+	def setActiveWord word
+		# Set the active word via the Store"""
+		STORE.set('active_word', word)
+		syncFromStore!
+		if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
+			imba.commit!
+	
+	def save
+		# Save changes to the Store"""
+		# Store automatically persists changes,
+		# but we should refresh our local cache
+		syncFromStore!

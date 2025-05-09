@@ -3,23 +3,27 @@ import './app-dashboard.imba'
 tag App
 	css d:vtc
 	magic_code = ''
-	@observable email_input = if DATA..local..email_input then DATA.local.email_input else ''
+	@observable email_input = STORE.get('email_input', '')
+	
 	@autorun def persistEmailInput
-		if DATA..local.email_input != email_input
-			DATA.local.email_input = email_input
+		if STORE.get('email_input') != email_input
+			STORE.set('email_input', email_input)
+			DATA.syncFromStore!
+			
 	def mount
-		DATA.initLocal!
+		# The Store is initialized in its constructor
+		# Just sync the data and progress
+		DATA.syncFromStore!
 		PROGRESS.calcProgress LIBRARY
-		DATA.subscribeAuth!
 	<self>
 		css bg:gray1 d:flex gap:2em
-		# <div.card>
-		unless DATA..local..user
+		
+		unless STORE.get('user')
 			<div.col>
 				if INSTANT_APP_ID is 'REPLACE_WITH_YOUR_PUBLIC_APP_ID'
-					<p> 'Please set your InstantDB App ID on line 1 in src/index.imba'
+					<p> 'Please set your InstantDB App ID on line 1 in ENV.imba'
 				else
-					if DATA..local..sentCode?
+					if STORE.get('sentCode?')
 						<p> "Check your email for the magic code."
 						<div.row>
 							<input type="text" bind=magic_code placeholder="Enter magic code">
@@ -32,7 +36,7 @@ tag App
 		
 		else # When user is logged in
 			# <div>
-			# 	<p> "Crush it {DATA.local.user.email.split('@').shift!}!"
-			# 	<button @click=(DATA.logout!, email_input = '')> "logout"
+			# 	<p> "Crush it {STORE.get('user.email', '').split('@').shift!}!"
+			# 	<button @click=(STORE.logout!, email_input = '')> "logout"
 			<app-dashboard>
 imba.mount <App>
