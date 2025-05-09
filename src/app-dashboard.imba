@@ -7,7 +7,6 @@ import {dictionary} from './data/dictionary.imba'
 # import {library_data} from './data/LIBRARY.imba' # DELETE once dynamic library below is implemented
 # sealang-link: http://sealang.net/api/api.pl?query=ក&service=dictionary
 
-
 ### NOTE
 This static state is necessary to prevent errors if progress
 is calculated in the constructor of the progress class.
@@ -24,7 +23,6 @@ let state = {
 	word: 0
 	admin: true
 	active_word: 'ជា'
-	learning_data: [{}]
 	user_learned: {}
 	learned_usage: 0
 	khmer_writing: true
@@ -49,7 +47,6 @@ class Api
 				word: 0
 				admin: true
 				active_word: 'ជា'
-				learning_data: [{}]
 				user_learned: {}
 				learned_usage: 0
 				khmer_writing: true
@@ -85,7 +82,8 @@ class Api
 			delete state.user_learned[word]
 		else
 			state.user_learned[word] = yes
-		state.learning_data_flat = calcAllProgressFlat!
+		PROGRESS.calcProgress LIBRARY
+		imba.commit!
 		save!
 	def hasLearned word
 		if state.user_learned.hasOwnProperty(word)
@@ -98,6 +96,7 @@ class Api
 		###
 		let library_progress_res = {}
 		let temp_refs = {}
+		LL LIBRARY
 		if LIBRARY
 			if LIBRARY..phrases
 				for own phrase_key, phrase of LIBRARY.phrases
@@ -181,7 +180,7 @@ class Api
 		else
 			WW 'no library fround in Api.calcAllProgressFlat()'
 
-		return library_data
+		return library_progress_res
 		
 	def countKeys obj
 		Object.keys(obj).length
@@ -256,7 +255,7 @@ class Api
 			return false
 		return true
 
-let api = new Api
+global.APP = new Api
 
 
 # LAYOUT[epic=LAYOUT, seq=19] App
@@ -269,18 +268,19 @@ tag app-dashboard
 		&.open
 			ml:0px
 	def build 
-		api.init!
-		# state.learning_data_flat = api.calcAllProgressFlat!
-		api.save!
+		APP.init!
+		PROGRESS.calcProgress LIBRARY
+		imba.commit!
+		APP.save!
 
 	def render
 		<self>
 			<global 
-				@hotkey("shift+d")=api.toggleDark!
-				@hotkey("shift+i|v")=api.toggleIpa!
-				@hotkey("shift+c+l")=api.clear!
-				@hotkey("shift+a")=api.toggleAuth! # TODO: delete in production
-				@hotkey('enter|s')=api.toggleLearned(state.active_word)
+				@hotkey("shift+d")=APP.toggleDark!
+				@hotkey("shift+i|v")=APP.toggleIpa!
+				@hotkey("shift+c+l")=APP.clear!
+				@hotkey("shift+a")=APP.toggleAuth! # TODO: delete in production
+				@hotkey('enter|s')=APP.toggleLearned(state.active_word)
 			>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
@@ -348,13 +348,6 @@ tag TopNavigation
 		c:gray7	@darkmode:gray2
 		d:vcc
 		px:1sp rd:md
-	def toggleLeftNav
-		state.left = !state.left
-		api.save!
-		imba.commit!
-	def logOut
-		api.logOut!
-		imba.commit!
 	def render
 		<self>
 			<cambodiau-logo route-to="/" [width:200px mr:auto cursor:pointer]>
@@ -366,7 +359,6 @@ tag TopNavigation
 				<div> "Phonetics"
 			<a route-to="/info">
 				<div> "Info"
-			# <a route-to="/info">
 			<a.button [d:hcc h:auto gap:0.6sp bg:white bg:sky0 @hover:sky1] href="https://t.me/+E5Y-uCV0oHQ5NWJl" target="_blank">
 				<TelegramIcon [size:.5topbar solid red]> 
 				<div> "Community"
@@ -389,11 +381,11 @@ tag app-dictionary-page
 					rd:md
 				<div.wrapper[py:1sp mb:1sp ta:center w:100% d:vflex]>
 					<h2> "You have learned "
-					<p[m:0]> "You have learned {PROG.unique_progress}% of the unique words in your courses. ({PROG.unique_learned} of {PROG.unique})"
-					<p[m:0]> "You have learned {PROG.weight_progress}% of the words repeated in your courses. ({PROG.weight_learned} of {PROG.weight})"
+					<p[m:0]> "You have learned {PROGRESS.library.unique_progress}% of the unique words in your courses. ({PROGRESS.library.unique_learned} of {PROGRESS.library.unique})"
+					<p[m:0]> "You have learned {PROGRESS.library.weight_progress}% of the words repeated in your courses. ({PROGRESS.library.weight_learned} of {PROGRESS.library.weight})"
 					let dict_length = Object.keys(dictionary).length
-					let dict_percent = Math.floor((PROG.unique_learned / dict_length) * 1000) / 10
-					<p[m:0]> "You have learned {dict_percent}% of all words in this dictionary. ({PROG.unique_learned} of {dict_length})"
+					let dict_percent = Math.floor((PROGRESS.library.unique_learned / dict_length) * 1000) / 10
+					<p[m:0]> "You have learned {dict_percent}% of all words in this dictionary. ({PROGRESS.library.unique_learned} of {dict_length})"
 			<.page-wrapper>
 				<app-dictionary>
 				<WordCard.card[w:200px h:260px]>
@@ -447,7 +439,7 @@ tag app-dictionary
 			<.searchbar[order:0]>
 				<h1>
 				<input type="text" bind=query placeholder="search khmer | vida | ipa | definition">
-			<.row[order:0] @click=api.toggleIpa!>
+			<.row[order:0] @click=APP.toggleIpa!>
 				<span> "khmer"
 				<span> 
 					if state.ipa then "ipa" else "vida"
@@ -568,12 +560,12 @@ tag PhoneticVowels
 				bg:hue4 @darkmode:hue6
 	def activeWord word
 		state.active_word = char[word][2]
-		api.save!
+		APP.save!
 	
 	def render
 		<self>
 			<nav>
-				<button @click=api.toggleIpa!> 
+				<button @click=APP.toggleIpa!> 
 					"Phonetic System: "
 					if state.ipa then "IPA" else "Vida"
 			if state.ipa is true
@@ -627,10 +619,10 @@ tag CoursesPage
 tag LearningPage
 	def render
 		<self>
-			<div> <LessonNav.ln route="/learn/:cid/:lid/:pid/:wid">
-			<div> <PhraseNav.pn route="/learn/:cid/:lid/:pid/:wid">
-			<div> <LessonContent.lc route="/learn/:cid/:lid/:pid/:wid">
-			<div> <RightBar.rb route="/learn/:cid/:lid/:pid/:wid">
+			<div> <lesson-nav.ln route="/learn/:cid/:lid/:pid/:wid">
+			<div> <phrase-nav.pn route="/learn/:cid/:lid/:pid/:wid">
+			<div> <lesson-content.lc route="/learn/:cid/:lid/:pid/:wid">
+			<div> <right-bar.rb route="/learn/:cid/:lid/:pid/:wid">
 	css self
 		d:hflex
 		py:1sp
@@ -691,15 +683,15 @@ tag CourseCard
 			<.description> "{collection.info}"
 				<p[fs:xs c:cool4]> "You have learned {col_item.weight_learned}/{col_item.weight} words ({col_item.unique_learned}/{col_item.unique} unique)"
 			<.progress[d:hcc gap:1sp]> 
-				<ElementProgressBar .color=#context.active progress=col_item.weight_progress>
+				<ElemProgressBar .color=#context.active progress=col_item.weight_progress>
 				<span> "{col_item.weight_progress}%"
 			
 		
-tag RightBar
+tag right-bar
 	def routed params
 		rt = params
 		state.rt = rt
-		api.save!
+		APP.save!
 	def render
 		<self>
 			if state.active_word
@@ -711,8 +703,8 @@ tag RightBar
 
 
 
-# LAYOUT[epic=LAYOUT, seq=23] LessonContent
-tag LessonContent
+# LAYOUT[epic=LAYOUT, seq=23] lesson-content
+tag lesson-content
 	prop phrase
 	css .image 
 		rd:1rd
@@ -856,7 +848,7 @@ tag WordNav
 						> display_word
 	def toggleKhmer
 		state.khmer_writing = !state.khmer_writing
-		api.save!
+		APP.save!
 	# Goes to the next word in the phrase
 	def nextWord phrase
 		### NOTE
@@ -864,33 +856,37 @@ tag WordNav
 		route to the next word. If it is the last word of the phrase,
 		go to the first word of the next phrase.
 		###
-		let current_word_i = rt.wid
+		let current_wid = rt.wid
 		let last_word_i = phrase.kh_array.length - 1
-		let is_last_word = last_word_i == current_word_i
+		let is_last_word = last_word_i == current_wid
 		if is_last_word
 			nextPhrase!
 		else
 			let next_word_i = inc(rt.wid)
 			state.active_word = phrase.kh_array[next_word_i]
 			goTo rt.cid, rt.lid, rt.pid, next_word_i
-		api.save!
+		APP.save!
 
 	def nextPhrase
-		let current_phrase_i = rt.pid
-		let last_phrase_i = LIBRARY.phrases["{rt.cid}-{rt.lid}-{rt.pid}"].of
-		let is_last_phrase = last_phrase_i == current_phrase_i
+		let current_phrase_key = [rt.cid,rt.lid,rt.pid].join('-')
+		let current_pid = rt.pid
+		let phrases_in_lesson = LIBRARY.phrases[current_phrase_key].of
+		let is_last_phrase = phrases_in_lesson == current_pid
 		if is_last_phrase
 			nextLesson!
 		else
-			let next_phrase_i = inc(rt.pid)
-			goTo rt.cid, rt.lid, next_phrase_i
+			let next_pid = inc(rt.pid)
+			goTo rt.cid, rt.lid, next_pid
 			
 	def nextLesson
-		let current_lesson_i = rt.lid
-		let last_lesson_i = LIBRARY.collections[rt.cid].of
-		let is_last_lesson = last_lesson_i == current_lesson_i
-		if is_last_lesson
-			LOG '🎉 This is the last lesson for this collection!'
+		let current_lesson_key = [rt.cid,rt.lid].join('-')
+		let current_lid = rt.lid
+		let current_cid = rt.cid
+		let final_lid = LIBRARY.lessons[current_lesson_key].of
+		let final_cid = LIBRARY.collections[current_cid].of
+		let final_lesson? = final_lid == current_lid
+		if final_lesson?
+			LL '🎉 This is the last lesson for this collection!'
 		else
 			router.go("/learn/{rt.cid}/{inc(rt.lid)}/1/0")
 	
@@ -901,47 +897,75 @@ tag WordNav
 		route to the next word. If it is the last word of the phrase,
 		go to the first word of the next phrase.
 		###
-		let current_word_i = rt.wid
-		let first_word_i = 0 # NOTE: words are zero index
-		let is_first_word = first_word_i == current_word_i
-		if is_first_word
+		let current_wid = rt.wid
+		let first_wid = 0 # NOTE: words are zero index
+		let first_word? = first_wid == current_wid
+		if first_word?
 			prevPhraseLastWord!
 		else
-			let prev_word_i = dec(rt.wid)
-			state.active_word = phrase.kh_array[prev_word_i]
-			goTo rt.cid, rt.lid, rt.pid, prev_word_i
-		api.save!
+			let prev_wid = dec(rt.wid)
+			state.active_word = phrase.kh_array[prev_wid]
+			goTo rt.cid, rt.lid, rt.pid, prev_wid
+		APP.save!
 	def prevPhraseLastWord
-		let curr_phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
+		let current_phrase_key = [rt.cid,rt.lid,rt.pid].join('-')
+		let prev_pid = dec(rt.pid)
+		let prev_phrase_key = [rt.cid,rt.lid,prev_pid].join('-')
+		let curr_phrase = LIBRARY.phrases[current_phrase_key]
 		if curr_phrase.isFirst
 			prevLessonLastPhraseLastWord!
 		else
-			let prev_phrase = LIBRARY.phrases[[rt.cid,rt.lid,dec(rt.pid)].join('-')]
-			let last_word_i = prev_phrase.kh_array.length - 1
-			goTo rt.cid, rt.lid, dec(rt.pid), last_word_i
+			let prev_phrase = LIBRARY.phrases[prev_phrase_key]
+			let prev_phrase_final_wid = prev_phrase.kh_array.length - 1
+			goTo rt.cid, rt.lid, prev_pid, prev_phrase_final_wid
 			
 	def prevPhraseFirstWord		
-		let current_phrase = LIBRARY.phrases["{rt.cid}-{rt.lid}-{rt.pid}"]
-		if current_phrase.isFirst
-			prevLessonLastPhrase!
-		else
-			# let prev_phrase = state.learning_data_flat.phrases["{rt.cid}-{rt.lid}-{dec(rt.pid)}"]
+		let current_phrase_key = [rt.cid,rt.lid,rt.pid].join('-')
+		let current_phrase = LIBRARY.phrases[current_phrase_key]
+		if rt.lid > 1 and rt.pid > 1
+			let prev_phrase_key = [rt.cid,rt.lid,dec(rt.pid)].join('-')
+			let prev_phrase = LIBRARY.phrases[prev_phrase_key]
 			goTo rt.cid, rt.lid, dec(rt.pid), 0
-			
-	def prevLessonLastPhraseLastWord
+		elif rt.lid > 1 and rt.pid == 1
+			let prev_lesson_key = [rt.cid,dec(rt.lid)].join('-')
+			let prev_lesson = LIBRARY.lessons[prev_lesson_key]
+			goTo rt.cid, prev_lesson.li, prev_lesson.first_phrase_i, 0
+		elif rt.lid == 1 and rt.pid == 1
+			LL '🏁 this is the first lesson of the collection'
+		elif current_phrase.isFirst
+			prevLessonLastPhraseFirstWord!
+		else
+			goTo rt.cid, rt.lid, dec(rt.pid), 0
+	def prevLessonLastPhraseFirstWord
 		# NOTE: Current Lesson
-		let cl = state.learning_data_flat.lessons["{rt.cid}-{rt.lid}"]
-		if cl.isfirst
-			LOG '🏁 this is the first lesson of the collection'
+		let current_lesson_key = [rt.cid,rt.lid].join('-')
+		let current_lesson = LIBRARY.lessons[current_lesson_key]
+		if current_lesson.isFirst
+			LL '🏁 this is the first lesson of the collection'
 		else
 			# NOTE: PreviousLesson
-			let prev_lesson = state.learning_data_flat.lessons["{rt.cid}-{dec(rt.lid)}"]
+			let prev_lesson_key = [rt.cid,dec(rt.lid)].join('-')
+			let prev_lesson = LIBRARY.lessons[prev_lesson_key]
+			LL prev_lesson
+			goTo rt.cid, prev_lesson.li, prev_lesson.first_phrase_i, 0
+	# NOTE: Goes to the previous phrase in the lesson
+	def prevLessonLastPhraseLastWord
+		# NOTE: Current Lesson
+		let current_lesson_key = [rt.cid,rt.lid].join('-')
+		let current_lesson = LIBRARY.lessons[current_lesson_key]
+		if current_lesson.isFirst
+			LL '🏁 this is the first lesson of the collection'
+		else
+			# NOTE: PreviousLesson
+			let prev_lesson_key = [rt.cid,dec(rt.lid)].join('-')
+			let prev_lesson = LIBRARY.lessons[prev_lesson_key]
+			LL prev_lesson
 			# NOTE: Prev Lesson, last phrase index
 			prev_lesson.last_phrase_key = prev_lesson.phrase_keys[-1]
-			prev_lesson.last_phrase_i = prev_lesson.phrase_keys.length
-			let prev_phrase = state.learning_data_flat.phrases[prev_lesson.last_phrase_key]
+			prev_lesson.phrases_in_lesson = prev_lesson.phrase_keys.length
+			let prev_phrase = LIBRARY.phrases[prev_lesson.last_phrase_key]
 			prev_lesson.last_word_i = prev_phrase.phrase.length - 1
-			goTo rt.cid, prev_lesson.li, prev_lesson.last_phrase_i, prev_lesson.last_word_i
+			goTo rt.cid, prev_lesson.li, prev_lesson.phrases_in_lesson, prev_lesson.last_word_i
 		
 	# NOTE: router simplifier
 	def goTo c, l, p, w
@@ -970,7 +994,7 @@ tag WordNav
 		return res
 
 	def handleHold word
-		api.toggleLearned(state.active_word)
+		APP.toggleLearned(state.active_word)
 		stopTimer!
 		resetTimer!
 		imba.commit!
@@ -1047,7 +1071,7 @@ tag WordCard
 			let ipa = dictionary[state.active_word]..ipa
 			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={state.active_word}&service=dictionary" target="_blank"> 
 				state.active_word
-			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=api.toggleIpa!>
+			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=APP.toggleIpa!>
 				if state.ipa
 					<span[fs:xs c:gray5]> "ipa"
 					if ipa
@@ -1062,7 +1086,7 @@ tag WordCard
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "unavailable"
-			<ToggleSwitch .active=state.user_learned.hasOwnProperty(state.active_word) @click=api.toggleLearned(state.active_word)> "learned"
+			<ToggleSwitch .active=state.user_learned.hasOwnProperty(state.active_word) @click=APP.toggleLearned(state.active_word)> "learned"
 			if AUDIO.hasOwnProperty(state.active_word)
 				<AudioPlayer>
 
@@ -1097,7 +1121,6 @@ tag ToggleSwitch
 
 tag AudioPlayer
 	<self>
-		# if state.collection > 0
 		let word = ""
 		if manual
 			word = manual
@@ -1299,8 +1322,8 @@ tag SpellingCard
 						else
 							<span> "({cluster..vida[1]})"
 
-# TAG[epic=NAV, seq=34] LessonNav
-tag LessonNav
+# TAG[epic=NAV, seq=34] lesson-nav
+tag lesson-nav
 	css self
 		d:vflex g:1sp
 	css .title-card 
@@ -1318,15 +1341,15 @@ tag LessonNav
 		<self>
 			let routed_collection = LIBRARY.collections[rt.cid]
 			for own l_key, _lesson of LIBRARY.lessons
-				<LessonNavItem 
+				<lesson-nav-item 
 					.active=(state.rt.lid == _lesson.lid) 
 					route-to="/learn/{_lesson.cid}/{_lesson.lid}/1/0" 
 					rt=rt
 					lesson=_lesson
 					>
 
-# TAG[epic=NAV, seq=35] LessonNavItem
-tag LessonNavItem
+# TAG[epic=NAV, seq=35] lesson-nav-item
+tag lesson-nav-item
 	prop lesson
 	prop rt
 	css self
@@ -1338,34 +1361,18 @@ tag LessonNavItem
 		bg:white/50 @darkmode:gray8/20
 		@hover
 			bg:white @darkmode:gray8/50
-	css ElementProgressBar 
-			$bg:gray3
-			$fg:gray7
-		@hover
-			bg:gray1
-			ElementProgressBar
-				$fg:indigo4
-		@darkmode
-			bg:gray9/50
-			c:gray3
-			ElementProgressBar
-				$bg:gray8
-				$fg:gray6
-			&.hover, @hover
-				bg:gray9
-				ElementProgressBar
-					$bg:gray8
-					$fg:indigo4
+	
 	def render
 		<self[w:100% ].lesson-button .chapter_active=no>
-			<.chapter-text[d:hflex jc:space-between ai:end]>
-				<.chapter-name> lesson.title.en
+			<.lesson-text[d:vflex jc:space-between ai:start]>
+				<.lesson-name> [lesson.lid,lesson.title.en].join('. ')
+				<.lesson-subtitle[fs:xxs]> lesson.subtitle.en
 			let progress = state.progress_flat[lesson.key]
-			<.chapter-number[opacity:80% fs:xs ff:monospace]> "{progress.weight_learned}/{progress.weight} words"
-			<ElementProgressBar .color progress=progress.weight_progress>
+			<.lesson-number[opacity:80% fs:xs ff:monospace]> "{progress.weight_learned}/{progress.weight} words"
+			<ElemProgressBar .color progress=progress.weight_progress>
 
-# TAG[epic=NAV, seq=36] PhraseNav
-tag PhraseNav
+# TAG[epic=NAV, seq=36] phrase-nav
+tag phrase-nav
 	css self
 		c:gray9
 		w:1phrasebar
@@ -1388,7 +1395,7 @@ tag PhraseNav
 			for _pid in [1 .. phrases_num]
 				let phrase = state.progress_flat[[rt.cid,rt.lid,_pid].join('-')]
 				<.number-toggle route-to="/learn/{rt.cid}/{rt.lid}/{_pid}/0">
-					<ElementProgressRing 
+					<el-progress-ring 
 						.active=(rt.pid == _pid) # NOTE: if route matches phrase id.
 						progress=phrase.weight_progress
 						size=30> _pid
@@ -1404,7 +1411,7 @@ tag TelegramIcon
 
 	
 # ELEMENT[epic=ELEMENT, seq=41] Progress Bar
-tag ElementProgressBar
+tag ElemProgressBar
 	css w:100%
 		$bg:gray2
 		$fg:hue4
@@ -1429,7 +1436,7 @@ tag icon
 	css svg size:20px d:inline-block stroke:hue4
 
 # ELEMENT[epic=ELEMENT, seq=47] Progress Ring
-tag ElementProgressRing
+tag el-progress-ring
 	### SAMPLE TAG
 	<ProgressRing[$progress-color: purple5 $progress-bg: purple1 
 		$center-color: white $text-color: purple5 $stroke-percent: 80%] 
@@ -1440,17 +1447,21 @@ tag ElementProgressRing
 	prop size = 100
 	css ta:center
 		$progress-color: hue2 @darkmode:hue7
-		$progress-bg: gray1 @darkmode:gray8
 		$text-color: gray5 @darkmode:gray4
-		$center-color: gray1 @darkmode:gray8
+		$progress-bg: gray0 @darkmode:gray8
+		$center-color: gray0 @darkmode:gray8
 		&.active
 			$progress-color: hue4 @darkmode:hue6
-			$progress-bg: hue2 @darkmode:hue7
-			$center-color: hue2 @darkmode:hue8
+			$progress-bg: hue1 @darkmode:hue7
+			$center-color: hue1 @darkmode:hue8
+			@hover
+				$progress-color: hue4 @darkmode:hue5
+				$progress-bg: hue2 @darkmode:gray7
+				$center-color: hue2 @darkmode: gray7
 		@hover
-			$progress-bg:gray2 @darkmode:gray7
 			$progress-color: hue3 @darkmode:hue5
-			$center-color:gray2 @darkmode: gray7
+			$progress-bg: white @darkmode:gray7
+			$center-color: white @darkmode: gray7
 		$stroke-percent: 70%
 		pos:absolute
 	css &.disabled o:30%

@@ -2,22 +2,23 @@ export class ProgressProcessor
 	prop progress = {}
 	def constructor _library
 		initProgressProps _library
-		checkLocal! # NOTE: loads state in local storage before calculating progress
+		getLocal! # NOTE: loads state in local storage before calculating progress
 		state.progress_flat = calcProgress _library
-		return progress
-	
-	def checkLocal 
+		LL state.progress_flat
+		return 
+	def getLocal 
 		if imba.locals.state
+			LL imba.locals.state
 			state = imba.locals.state
-	
 	def initProgressProps _library
-		progress.unique = _library.unique
-		progress.weight = _library.weight
-		progress.words = _library.words
-		progress.unique_learned = 0
-		progress.weight_learned = 0
-		progress.unique_progress = 0
-		progress.weight_progress = 0
+		progress.library = {}
+		progress.library.unique = _library.unique
+		progress.library.weight = _library.weight
+		progress.library.words = _library.words
+		progress.library.unique_learned = 0
+		progress.library.weight_learned = 0
+		progress.library.unique_progress = 0
+		progress.library.weight_progress = 0
 		
 		for own key, val of _library.collections
 			unless progress[key]
@@ -39,23 +40,20 @@ export class ProgressProcessor
 					unique: val.unique
 					weight: val.weight
 					words: val.words
-	def learnWord word
-		state.progress
-	
-	
+					
 	def calcProgress _library
-		progress.weight_learned = 0
-		progress.unique_learned = 0
+		progress.library.weight_learned = 0
+		progress.library.unique_learned = 0
 		
 		
 		if _library.collections
 		for own key, val of _library.collections
 			for own word, bool of state.user_learned
 				if val.words[word]
-					progress.weight_learned += val.words[word].weight
-					progress.unique_learned++
-		progress.unique_progress = Math.round((progress.unique_learned / progress.unique) * 100)
-		progress.weight_progress = Math.round((progress.weight_learned / progress.weight) * 100)
+					progress.library.weight_learned += val.words[word].weight
+					progress.library.unique_learned++
+		progress.library.unique_progress = Math.round((progress.library.unique_learned / progress.library.unique) * 100)
+		progress.library.weight_progress = Math.round((progress.library.weight_learned / progress.library.weight) * 100)
 		
 		for own col_key, collection of _library.collections
 			progress[col_key].weight_learned = 0

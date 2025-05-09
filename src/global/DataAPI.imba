@@ -1,14 +1,16 @@
 import {init, tx, id} from '@instantdb/core'
+
 export class DataAPI
 	prop local = {}
 	prop instant = {}
+	
 	def constructor
 		initLocal!
 		initInstant!
+	
 	def initLocal
 		local = imba.locals(LOCAL_DB_NAME)
 		local.user
-		local.tasks
 		local.login? # null = waiting, yes, no
 		local.sentCode? # yes, no
 		local.error
