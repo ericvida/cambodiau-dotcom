@@ -160,6 +160,10 @@ export class Store
 		try
 			const userId = state.user.id
 			const query = 
+				profile:
+					$:
+						where:
+							"$users.id": userId
 				tasks: 
 					$:
 						where: 
@@ -259,12 +263,14 @@ export class Store
 			# Check if we already have a profile ID stored
 			if state.profileId
 				# Use the existing profile ID without trying to link it again (which would cause a unique constraint error)
+				console.log("Using existing profile ID:", state.profileId)
 				batch.push(
 					tx.profile[state.profileId].update(profileUpdate)
 				)
 			else
 				# Create a new profile and link it to the user if we don't have an existing profileId
 				const profileId = id!
+				console.log("Creating new profile ID:", profileId, "for user:", state.user.id)
 				batch.push(
 					tx.profile[profileId].update({
 						...profileUpdate,
@@ -328,21 +334,16 @@ export class Store
 		if !state.email_input
 			console.error('Email is required to send a magic code.')
 			return Promise.reject('Email is required')
-		
 		console.log('Sending magic code to:', state.email_input)
-		
-		return instant.auth.sendMagicCode({ email: state.email_input })
-			.then(do
-				state.sentCode? = true
-				imba.commit!
-				persistState!
-				return true
-			)
-			.catch(do(error)
-				console.error('Error sending magic code:', error)
-				state.error = error.message || 'Failed to send magic code'
-				return Promise.reject(error)
-			)
+		state.sentCode? = true
+		imba.commit!
+		persistState!
+		try
+			instant.auth.sendMagicCode({ email: state.email_input })
+		catch error
+			console.error('Error sending magic code:', error)
+			state.error = error.message || 'Failed to send magic code'
+			return Promise.reject(error)
 	
 	def loginWithCode code
 		# Login with a magic code"""
@@ -371,6 +372,7 @@ export class Store
 			.then(do
 				state.user = null
 				state.email_input = ''
+				state.profileId = null  # Clear profile ID on logout
 				persistState!
 				return true
 			)

@@ -23,7 +23,7 @@ tag App
 				if INSTANT_APP_ID is 'REPLACE_WITH_YOUR_PUBLIC_APP_ID'
 					<p> 'Please set your InstantDB App ID on line 1 in ENV.imba'
 				else
-					if STORE.get('sentCode?')
+					if STORE..state..sentCode?
 						<p> "Check your email for the magic code."
 						<div.row>
 							<input type="text" bind=magic_code placeholder="Enter magic code">
