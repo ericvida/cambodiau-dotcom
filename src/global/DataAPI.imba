@@ -3,7 +3,28 @@ import {init, tx, id} from '@instantdb/core'
 export class DataAPI
 	prop local = {}
 	prop instant = {}
-	
+	def resetLocal
+		local.cid = 0
+		local.lid = 0
+		local.pid = 0
+		local.wid = 0
+		local.active_word = 'ជា'
+		local.user_learned = {}
+		local.progress_flat = {}
+		local.pa = 'vida'
+		local.ipa = no
+		local.dark = no
+		local.lesson_nav = yes
+		local.phrase_nav = yes
+		local.right_bar = yes
+		
+	def getLocal 
+		if imba.locals.state
+			local = imba.locals.state
+		else
+			WW 'No local state found'
+			resetLocal!
+		LL local
 	def constructor
 		initLocal!
 		initInstant!

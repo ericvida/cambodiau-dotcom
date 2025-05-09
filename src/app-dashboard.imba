@@ -52,7 +52,7 @@ class Api
 				khmer_writing: true
 				progress_flat: {}
 			}
-		if state.dark
+		if DATA.local.dark
 			setDarkmode!
 		save!
 
@@ -78,15 +78,15 @@ class Api
 		save!
 
 	def toggleLearned word
-		if state.user_learned.hasOwnProperty(word)
-			delete state.user_learned[word]
+		if DATA.local.user_learned.hasOwnProperty(word)
+			delete DATA.local.user_learned[word]
 		else
-			state.user_learned[word] = yes
+			DATA.local.user_learned[word] = yes
 		PROGRESS.calcProgress LIBRARY
 		imba.commit!
 		save!
 	def hasLearned word
-		if state.user_learned.hasOwnProperty(word)
+		if DATA.local.user_learned.hasOwnProperty(word)
 			return true
 		else
 			return false
@@ -197,18 +197,18 @@ class Api
 
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
-		state.ipa = !state.ipa
+		DATA.local.ipa = !DATA.local.ipa
 		save!
 		
 		
 	# API[epic=FrontEnd, seq=8] AUTH
 	def toggleAuth
-		state.auth = !state.auth
+		DATA.local.auth = !DATA.local.auth
 		save!
 	# API[epic=FrontEnd, seq=9] DARKMODE
 	def toggleDark
-		state.dark = !state.dark
-		if state.dark
+		DATA.local.dark = !DATA.local.dark
+		if DATA.local.dark
 		then setDarkmode!
 		else unsetDarkmode!
 		save!
@@ -220,14 +220,14 @@ class Api
 		root.flags.remove('mod-darkmode')
 	# API[epic=FrontEnd, seq=10] LOGIN
 	def logIn
-		if state.auth is no
-			state.auth = yes
+		if DATA.local.auth is no
+			DATA.local.auth = yes
 		save!
 			
 	# API[epic=FrontEnd, seq=11] LOGOUT
 	def logOut
-		if state.auth is yes
-			state.auth = no
+		if DATA.local.auth is yes
+			DATA.local.auth = no
 		save!
 
 	def search needle, haystack
@@ -280,7 +280,7 @@ tag app-dashboard
 				@hotkey("shift+i|v")=APP.toggleIpa!
 				@hotkey("shift+c+l")=APP.clear!
 				@hotkey("shift+a")=APP.toggleAuth! # TODO: delete in production
-				@hotkey('enter|s')=APP.toggleLearned(state.active_word)
+				@hotkey('enter|s')=APP.toggleLearned(DATA.local.active_word)
 			>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
@@ -442,15 +442,15 @@ tag app-dictionary
 			<.row[order:0] @click=APP.toggleIpa!>
 				<span> "khmer"
 				<span> 
-					if state.ipa then "ipa" else "vida"
+					if DATA.local.ipa then "ipa" else "vida"
 				<span> "google"
 			for own word, info of dictionary
 				if FUZZY.search(query, word) | FUZZY.search(query, info..vida) | FUZZY.search(query, info..google) | FUZZY.search(query, info..ipa)
-					<div.row .learned=(state.user_learned.hasOwnProperty(word)) @click=(state.active_word = word)>
+					<div.row .learned=(DATA.local.user_learned.hasOwnProperty(word)) @click=(DATA.local.active_word = word)>
 						# if info..rank then <span.mono> info..rank else <span.err> '-'
 						<a href="http://sealang.net/api/api.pl?query={word}&service=dictionary" target="_blank"> 
 							<span.khmer> "{word}"
-						if state.ipa
+						if DATA.local.ipa
 							if info..ipa then <span.mono> info..ipa else <span.err> 'ipa coming soon'
 						else
 							if (info..vida)
@@ -559,7 +559,7 @@ tag PhoneticVowels
 			@hover
 				bg:hue4 @darkmode:hue6
 	def activeWord word
-		state.active_word = char[word][2]
+		DATA.local.active_word = char[word][2]
 		APP.save!
 	
 	def render
@@ -567,8 +567,8 @@ tag PhoneticVowels
 			<nav>
 				<button @click=APP.toggleIpa!> 
 					"Phonetic System: "
-					if state.ipa then "IPA" else "Vida"
-			if state.ipa is true
+					if DATA.local.ipa then "IPA" else "Vida"
+			if DATA.local.ipa is true
 				ipa = 1
 			else
 				ipa = 0
@@ -670,11 +670,11 @@ tag CourseCard
 		cursor:pointer
 	def calcUniqueLearned unique
 		let arr = []
-		for own key, value of state.user_learned
+		for own key, value of DATA.local.user_learned
 			arr.push Object.keys(unique).includes(key)
 		return arr.length
 	def render
-		let col_item = state.progress_flat[collection.key]
+		let col_item = DATA.local.progress_flat[collection.key]
 		<self.card> 
 			<img src=IMAGES[collection.img]>
 			<[d:hbs jc:space-between]>
@@ -690,13 +690,13 @@ tag CourseCard
 tag right-bar
 	def routed params
 		rt = params
-		state.rt = rt
+		DATA.local.rt = rt
 		APP.save!
 	def render
 		<self>
-			if state.active_word
+			if DATA.local.active_word
 				<WordCard.card>
-				if dictionary[state.active_word]..google
+				if dictionary[DATA.local.active_word]..google
 					<DefinitionCard.card>
 				<SpellingCard.card>
 			<ShortcutCard.card>
@@ -731,7 +731,7 @@ tag PhoneticsCard
 	<self.card>
 		<h2> "Phonetics"
 		<p.phonetics>
-			if state.ipa
+			if DATA.local.ipa
 				for word in phrase.phrase
 					let obj = dictionary[word]
 					if obj..ipa or obj..vida or obj..vida_auto or word
@@ -750,11 +750,11 @@ tag PhoneticsCard
 
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
-	# NOTE: relies on state.khmer_writing = true/false
+	# NOTE: relies on DATA.local.khmer_writing = true/false
 	def routed params
 		rt = params
 		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
-		state.active_word = phrase.kh_array[rt.wid]
+		DATA.local.active_word = phrase.kh_array[rt.wid]
 	css self
 		d:hflex g:.4sp flex-wrap:wrap
 	css .word-wrapper
@@ -796,7 +796,7 @@ tag WordNav
 				bxs:0px 0px 0px 4px amber2 inset @darkmode:0px 0px 0px 4px amber2/10 inset
 
 	def render
-		# @click=(state.active_word = khccmer_word)
+		# @click=(DATA.local.active_word = khccmer_word)
 		<self>
 			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
 			<global 
@@ -807,8 +807,8 @@ tag WordNav
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			# TODO: make a toggle to switch khmer to ipa and display khmer if ipa not available
-			<ToggleSwitch .active=!state.khmer_writing @click.toggleKhmer [align-self:end]> 
-				if !state.khmer_writing
+			<ToggleSwitch .active=!DATA.local.khmer_writing @click.toggleKhmer [align-self:end]> 
+				if !DATA.local.khmer_writing
 					"phonetics"
 				else
 					<span [ff:mono]> "khmer"
@@ -822,9 +822,9 @@ tag WordNav
 					let no_phonetics = false
 					let display_word = word
 					if in_dict 
-						if state.khmer_writing
+						if DATA.local.khmer_writing
 							display_word = word
-						elif state.ipa
+						elif DATA.local.ipa
 							if !!ipa
 								display_word = ipa
 						else
@@ -836,18 +836,18 @@ tag WordNav
 								no_phonetics = true
 								display_word
 					<.word 
-						.active=(word is state.active_word) 
+						.active=(word is DATA.local.active_word) 
 						route-to="/learn/{phrase.cid}/{phrase.lid}/{phrase.pid}/{word_index}" 
-						.known=state.user_learned.hasOwnProperty(word) 
+						.known=DATA.local.user_learned.hasOwnProperty(word) 
 						.not_in_dict=!in_dict
 						.no_phonetics=no_phonetics
 						@dblclick.playWord($word_audio, word) 
 						@mousedown.pressAndHold(word, 1s)
 						@mouseup.stopTimer
-						.khmer=state.khmer_writing
+						.khmer=DATA.local.khmer_writing
 						> display_word
 	def toggleKhmer
-		state.khmer_writing = !state.khmer_writing
+		DATA.local.khmer_writing = !DATA.local.khmer_writing
 		APP.save!
 	# Goes to the next word in the phrase
 	def nextWord phrase
@@ -863,7 +863,7 @@ tag WordNav
 			nextPhrase!
 		else
 			let next_word_i = inc(rt.wid)
-			state.active_word = phrase.kh_array[next_word_i]
+			DATA.local.active_word = phrase.kh_array[next_word_i]
 			goTo rt.cid, rt.lid, rt.pid, next_word_i
 		APP.save!
 
@@ -904,7 +904,7 @@ tag WordNav
 			prevPhraseLastWord!
 		else
 			let prev_wid = dec(rt.wid)
-			state.active_word = phrase.kh_array[prev_wid]
+			DATA.local.active_word = phrase.kh_array[prev_wid]
 			goTo rt.cid, rt.lid, rt.pid, prev_wid
 		APP.save!
 	def prevPhraseLastWord
@@ -994,7 +994,7 @@ tag WordNav
 		return res
 
 	def handleHold word
-		APP.toggleLearned(state.active_word)
+		APP.toggleLearned(DATA.local.active_word)
 		stopTimer!
 		resetTimer!
 		imba.commit!
@@ -1003,7 +1003,7 @@ tag WordNav
 	elapsed = 0 # NOTE: used
 	
 	def pressAndHold word, duration
-		state.active_word = word
+		DATA.local.active_word = word
 		#interval = setInterval(&, step) do
 			if elapsed >= duration 
 			then (handleHold!)
@@ -1066,13 +1066,13 @@ tag WordCard
 		fitty($fit, fit_settings)
 	def render
 		<self>
-			let vida = dictionary[state.active_word]..vida
-			let vida_auto = dictionary[state.active_word]..vida_auto
-			let ipa = dictionary[state.active_word]..ipa
-			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={state.active_word}&service=dictionary" target="_blank"> 
-				state.active_word
+			let vida = dictionary[DATA.local.active_word]..vida
+			let vida_auto = dictionary[DATA.local.active_word]..vida_auto
+			let ipa = dictionary[DATA.local.active_word]..ipa
+			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={DATA.local.active_word}&service=dictionary" target="_blank"> 
+				DATA.local.active_word
 			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=APP.toggleIpa!>
-				if state.ipa
+				if DATA.local.ipa
 					<span[fs:xs c:gray5]> "ipa"
 					if ipa
 						<div.phonetic> ipa
@@ -1086,8 +1086,8 @@ tag WordCard
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "unavailable"
-			<ToggleSwitch .active=state.user_learned.hasOwnProperty(state.active_word) @click=APP.toggleLearned(state.active_word)> "learned"
-			if AUDIO.hasOwnProperty(state.active_word)
+			<ToggleSwitch .active=DATA.local.user_learned.hasOwnProperty(DATA.local.active_word) @click=APP.toggleLearned(DATA.local.active_word)> "learned"
+			if AUDIO.hasOwnProperty(DATA.local.active_word)
 				<AudioPlayer>
 
 tag ToggleSwitch
@@ -1125,7 +1125,7 @@ tag AudioPlayer
 		if manual
 			word = manual
 		else
-			word = state.active_word
+			word = DATA.local.active_word
 		<audio$track @ended.commit src=AUDIO[word] type="audio/mpeg" preload="auto">
 		
 		<.button-wrapper[d:hflex ai:center]>
@@ -1145,7 +1145,7 @@ tag AudioPlayer
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
 	<self>
-		let word_object = dictionary[state.active_word]
+		let word_object = dictionary[DATA.local.active_word]
 		if word_object.def isnt false
 			<h2> "Definition"
 			for item in word_object.def
@@ -1160,7 +1160,7 @@ tag DefinitionCard
 							<li.def [fs:xs]> item
 		else
 			<h2> "Google Definition"
-			for defi in dictionary[state.active_word].google.split('|')
+			for defi in dictionary[DATA.local.active_word].google.split('|')
 				<p> defi
 
 # CARD[epic=CARD, seq=32] ShortcutCard
@@ -1308,7 +1308,7 @@ tag SpellingCard
 				kh_leg + kh_aang + kh_eaq + kh_bantok_piir + kh_treisap + kh_s_stress +	kh_c_stress + kh_v + kh_c +	'.', 'g'
 			
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
-			let testword = state.active_word
+			let testword = DATA.local.active_word
 			let groups = testword.match regtest
 			for item in groups
 				let cluster = clusters[item]
@@ -1342,7 +1342,7 @@ tag lesson-nav
 			let routed_collection = LIBRARY.collections[rt.cid]
 			for own l_key, _lesson of LIBRARY.lessons
 				<lesson-nav-item 
-					.active=(state.rt.lid == _lesson.lid) 
+					.active=(DATA.local.rt.lid == _lesson.lid) 
 					route-to="/learn/{_lesson.cid}/{_lesson.lid}/1/0" 
 					rt=rt
 					lesson=_lesson
@@ -1367,7 +1367,7 @@ tag lesson-nav-item
 			<.lesson-text[d:vflex jc:space-between ai:start]>
 				<.lesson-name> [lesson.lid,lesson.title.en].join('. ')
 				<.lesson-subtitle[fs:xxs]> lesson.subtitle.en
-			let progress = state.progress_flat[lesson.key]
+			let progress = DATA.local.progress_flat[lesson.key]
 			<.lesson-number[opacity:80% fs:xs ff:monospace]> "{progress.weight_learned}/{progress.weight} words"
 			<ElemProgressBar .color progress=progress.weight_progress>
 
@@ -1391,9 +1391,10 @@ tag phrase-nav
 		rt = params
 	def render
 		<self>
-			let phrases_num = LIBRARY.lessons[[rt.cid,rt.lid].join('-')].phrases
+			let lesson_key = [rt.cid,rt.lid].join('-')
+			let phrases_num = LIBRARY.lessons[lesson_key].phrases
 			for _pid in [1 .. phrases_num]
-				let phrase = state.progress_flat[[rt.cid,rt.lid,_pid].join('-')]
+				let phrase = DATA.local.progress_flat[[rt.cid,rt.lid,_pid].join('-')]
 				<.number-toggle route-to="/learn/{rt.cid}/{rt.lid}/{_pid}/0">
 					<el-progress-ring 
 						.active=(rt.pid == _pid) # NOTE: if route matches phrase id.

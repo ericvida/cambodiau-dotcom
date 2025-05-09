@@ -15,6 +15,9 @@ global.AUDIO = audio
 import {image_references} from './global/_raw_data/image_references.imba'
 global.IMAGES = image_references
 
+import {DataAPI} from './global/DataAPI.imba'
+global.DATA = new DataAPI
+
 import {State} from './global/State.imba'
 global.STATE = new State
 
@@ -25,8 +28,6 @@ global.LIBRARY = new LibraryProcessor [bible_collection]
 import {ProgressProcessor} from './global/ProgressProcessor.imba'
 global.PROGRESS = new ProgressProcessor LIBRARY
 
-import {DataAPI} from './global/DataAPI.imba'
-global.DATA = new DataAPI
 
 import Fuzzy from './global/FuzzySearch.imba' # for fitting text in WordCard
 global.FUZZY = new Fuzzy
