@@ -8,6 +8,8 @@ tag App
 		if DATA..local.email_input != email_input
 			DATA.local.email_input = email_input
 	def mount
+		DATA.initLocal!
+		PROGRESS.calcProgress LIBRARY
 		DATA.subscribeAuth!
 	<self>
 		css bg:gray1 d:flex gap:2em

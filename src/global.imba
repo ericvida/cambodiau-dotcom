@@ -18,9 +18,6 @@ global.IMAGES = image_references
 import {DataAPI} from './global/DataAPI.imba'
 global.DATA = new DataAPI
 
-import {State} from './global/State.imba'
-global.STATE = new State
-
 import {bible_collection} from "./global/_raw_data/bible_collection.imba"
 import {LibraryProcessor} from './global/LibraryProcessor.imba'
 global.LIBRARY = new LibraryProcessor [bible_collection]

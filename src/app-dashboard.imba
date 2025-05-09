@@ -11,72 +11,8 @@ import {dictionary} from './data/dictionary.imba'
 This static state is necessary to prevent errors if progress
 is calculated in the constructor of the progress class.
 ###
-let state = {
-	auth: yes
-	dark: yes
-	left: yes
-	right: yes
-	ipa: no
-	collection: 0
-	lesson: 0
-	phrase: 0
-	word: 0
-	admin: true
-	active_word: 'ជា'
-	user_learned: {}
-	learned_usage: 0
-	khmer_writing: true
-	progress_flat: {
-	}
-}
 
 class Api
-	def init
-		if imba.locals.state
-			state = imba.locals.state
-		else
-			state = {
-				auth: yes
-				dark: yes
-				left: yes
-				right: yes
-				ipa: no
-				collection: 0
-				lesson: 0
-				phrase: 0
-				word: 0
-				admin: true
-				active_word: 'ជា'
-				user_learned: {}
-				learned_usage: 0
-				khmer_writing: true
-				progress_flat: {}
-			}
-		if DATA.local.dark
-			setDarkmode!
-		save!
-
-	def clear
-		state = {
-			auth: yes
-			dark: yes
-			left: yes
-			right: yes
-			ipa: no
-			collection: 0
-			lesson: 0
-			phrase: 0
-			word: 0
-			admin: true
-			active_word: 'ជា'
-			learning_data: [{}]
-			user_learned: {}
-			learned_usage: 0
-			khmer_writing: true
-			progress_flat: {}
-		}
-		save!
-
 	def toggleLearned word
 		if DATA.local.user_learned.hasOwnProperty(word)
 			delete DATA.local.user_learned[word]
@@ -96,7 +32,6 @@ class Api
 		###
 		let library_progress_res = {}
 		let temp_refs = {}
-		LL LIBRARY
 		if LIBRARY
 			if LIBRARY..phrases
 				for own phrase_key, phrase of LIBRARY.phrases
@@ -268,7 +203,7 @@ tag app-dashboard
 		&.open
 			ml:0px
 	def build 
-		APP.init!
+		DATA.initLocal!
 		PROGRESS.calcProgress LIBRARY
 		imba.commit!
 		APP.save!
@@ -674,18 +609,18 @@ tag CourseCard
 			arr.push Object.keys(unique).includes(key)
 		return arr.length
 	def render
-		let col_item = DATA.local.progress_flat[collection.key]
+		let col_item = PROGRESS[collection.key]
 		<self.card> 
 			<img src=IMAGES[collection.img]>
 			<[d:hbs jc:space-between]>
 				<h1.title[fs:2xl ff:sans-serif fw:bold ]> collection.name
 				<span.pill[as:end]> "🇰🇭 khmer"
 			<.description> "{collection.info}"
-				<p[fs:xs c:cool4]> "You have learned {col_item.weight_learned}/{col_item.weight} words ({col_item.unique_learned}/{col_item.unique} unique)"
+				<p[fs:xs c:cool4]> "You have learned {col_item.weight_learned or 0}/{col_item.weight or 0} words ({col_item.unique_learned or 0}/{col_item.unique or 0} unique)"
 			<.progress[d:hcc gap:1sp]> 
-				<ElemProgressBar .color=#context.active progress=col_item.weight_progress>
+				<ElemProgressBar .color=#context.active progress=(col_item.weight_progress or 0)>
 				<span> "{col_item.weight_progress}%"
-			
+
 		
 tag right-bar
 	def routed params
@@ -946,7 +881,6 @@ tag WordNav
 			# NOTE: PreviousLesson
 			let prev_lesson_key = [rt.cid,dec(rt.lid)].join('-')
 			let prev_lesson = LIBRARY.lessons[prev_lesson_key]
-			LL prev_lesson
 			goTo rt.cid, prev_lesson.li, prev_lesson.first_phrase_i, 0
 	# NOTE: Goes to the previous phrase in the lesson
 	def prevLessonLastPhraseLastWord
@@ -959,7 +893,6 @@ tag WordNav
 			# NOTE: PreviousLesson
 			let prev_lesson_key = [rt.cid,dec(rt.lid)].join('-')
 			let prev_lesson = LIBRARY.lessons[prev_lesson_key]
-			LL prev_lesson
 			# NOTE: Prev Lesson, last phrase index
 			prev_lesson.last_phrase_key = prev_lesson.phrase_keys[-1]
 			prev_lesson.phrases_in_lesson = prev_lesson.phrase_keys.length
@@ -1367,7 +1300,7 @@ tag lesson-nav-item
 			<.lesson-text[d:vflex jc:space-between ai:start]>
 				<.lesson-name> [lesson.lid,lesson.title.en].join('. ')
 				<.lesson-subtitle[fs:xxs]> lesson.subtitle.en
-			let progress = DATA.local.progress_flat[lesson.key]
+			let progress = PROGRESS[lesson.key]
 			<.lesson-number[opacity:80% fs:xs ff:monospace]> "{progress.weight_learned}/{progress.weight} words"
 			<ElemProgressBar .color progress=progress.weight_progress>
 
@@ -1394,8 +1327,10 @@ tag phrase-nav
 			let lesson_key = [rt.cid,rt.lid].join('-')
 			let phrases_num = LIBRARY.lessons[lesson_key].phrases
 			for _pid in [1 .. phrases_num]
-				let phrase = DATA.local.progress_flat[[rt.cid,rt.lid,_pid].join('-')]
-				<.number-toggle route-to="/learn/{rt.cid}/{rt.lid}/{_pid}/0">
+				let phrase_key = [rt.cid,rt.lid,_pid].join('-')
+				let phrase_route = [rt.cid,rt.lid,_pid].join('/')
+				let phrase = PROGRESS[phrase_key]
+				<.number-toggle route-to="/learn/{phrase_route}/0">
 					<el-progress-ring 
 						.active=(rt.pid == _pid) # NOTE: if route matches phrase id.
 						progress=phrase.weight_progress

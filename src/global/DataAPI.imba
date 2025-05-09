@@ -2,41 +2,45 @@ import {init, tx, id} from '@instantdb/core'
 
 export class DataAPI
 	prop local = {}
+	prop auth = {}
 	prop instant = {}
 	def resetLocal
+		local.updated_at = 0
 		local.cid = 0
 		local.lid = 0
 		local.pid = 0
 		local.wid = 0
 		local.active_word = 'ជា'
 		local.user_learned = {}
-		local.progress_flat = {}
+		local.progress = {}
 		local.pa = 'vida'
 		local.ipa = no
 		local.dark = no
 		local.lesson_nav = yes
 		local.phrase_nav = yes
 		local.right_bar = yes
-		
-	def getLocal 
-		if imba.locals.state
-			local = imba.locals.state
-		else
-			WW 'No local state found'
-			resetLocal!
-		LL local
+		local.user # NOTE user contains: app_id, created_at, email, id, refresh_token
+		local.login? # NOTE: null = waiting, yes, no
+		local.sentCode? # NOTE: yes, no
+		local.error 
+		local.loading
+		local.email_input
+
 	def constructor
 		initLocal!
 		initInstant!
 	
 	def initLocal
-		local = imba.locals(LOCAL_DB_NAME)
-		local.user
-		local.login? # null = waiting, yes, no
-		local.sentCode? # yes, no
-		local.error
-		local.loading
-		local.email_input
+		unless local.progress
+			local.progress = {
+				library: {weight_learned: 0}
+			}
+		if imba.locals[LOCAL_DB_NAME]
+			let ldb_updated_at = imba.locals[LOCAL_DB_NAME]
+			local = imba.locals[LOCAL_DB_NAME]
+		else
+			resetLocal!
+			local.updated_at = Date.now()
 	
 	def initInstant
 		instant = init({ appId: INSTANT_APP_ID});
