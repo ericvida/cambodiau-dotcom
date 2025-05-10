@@ -253,10 +253,9 @@ tag app-dashboard
 							fs:xs
 							gap:.20sp
 						css a c:hue7 @darkmode:hue4
-						<span> "Currently in Development. Give feedback via ->"
+						<span> "Built by Eric Vida. Join our Telegram Community."
 						# <a href="https://discord.gg/HkwUHrqv" target="_blank"> "Discord"
-						# <span> " or "
-						<a href="https://t.me/+GFitY1neUaQxMzQ1" target="_blank"> "Telegram"
+						<a href="https://t.me/+E5Y-uCV0oHQ5NWJl" target="_blank"> "Telegram Community"
 
 # TAG[epic=PAGE, seq=1] landing-page
 tag landing-page
@@ -694,9 +693,14 @@ tag WordNav
 	# NOTE: now uses STORE directly instead of DATA.local
 	def routed params
 		rt = params
+		# Update the global route state to keep navigation in sync
+		STORE.set('rt', rt)
 		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
 		STORE.set('active_word', phrase.kh_array[rt.wid])
 		DATA.syncFromStore!
+		# Update UI components that depend on route state
+		imba.commit()
+		APP.save!
 	css self
 		d:hflex g:.4sp flex-wrap:wrap
 	css .word-wrapper
@@ -910,6 +914,11 @@ tag WordNav
 		
 	# NOTE: router simplifier
 	def goTo c, l, p, w
+		# Update the route state before navigation
+		let rt = {cid: c, lid: l, pid: p || 1, wid: w || 0}
+		STORE.set('rt', rt)
+		
+		# Then navigate
 		if w
 			router.go("/learn/{c}/{l}/{p}/{w}")
 		elif p
@@ -918,6 +927,9 @@ tag WordNav
 			router.go("/learn/{c}/{l}/1/0")
 		elif c
 			router.go("/learn/{c}/1/1/0")
+		
+		# Manually trigger commit to ensure all components update
+		imba.commit()
 		
 	def playWord player, filename
 		if !!AUDIO[filename]
@@ -1276,21 +1288,43 @@ tag lesson-nav
 		bg:white @darkmode:gray9
 		rd:md
 		p:1sp
-	css .active bg:white
 	css .icon-title
 		d:hflex
 	css .usage_word_count
 		fs:xxs ff:mono c:gray6
+	prop currentLid = 0
+	
+	def setup
+		# Subscribe to router events
+		window.addEventListener('router:change') do
+			updateActiveLid()
+		
+	def updateActiveLid
+		currentLid = Number(STORE.state.rt..lid || rt..lid || 0)
+		imba.commit()
+	
 	def routed params
 		rt = params
+		# Make sure we update the global route state
+		STORE.set('rt', rt)
+		LL 'lesson nav', STORE.state.rt.lid
+		updateActiveLid()
+		APP.save!
+	
+	def isActive lid
+		let res = currentLid == lid
+		if res is true
+			LL lid, res
+		return res
+	
 	def render
 		<self>
-			let routed_collection = LIBRARY.collections[rt.cid]
+			let routed_collection = LIBRARY.collections[STORE.state.rt..cid || rt..cid]
 			for own l_key, _lesson of LIBRARY.lessons
+				# Use both local rt and STORE.state.rt to make it more resilient
 				<lesson-nav-item 
-					.active=(rt.lid == _lesson.lid) 
+					.active=isActive(_lesson.lid)
 					route-to="/learn/{_lesson.cid}/{_lesson.lid}/1/0" 
-					rt=rt
 					lesson=_lesson
 					>
 
@@ -1307,9 +1341,13 @@ tag lesson-nav-item
 		bg:white/50 @darkmode:gray8/20
 		@hover
 			bg:white @darkmode:gray8/50
-	
+		&.active
+			bg:hue0 bxs:outline hue2
+			.lesson-name fw:bold
+				c:hue7
+			c:hue5
 	def render
-		<self[w:100% ].lesson-button .chapter_active=no>
+		<self[w:100% ].lesson-button>
 			<.lesson-text[d:vflex jc:space-between ai:start]>
 				<.lesson-name> [lesson.lid,lesson.title.en].join('. ')
 				<.lesson-subtitle[fs:xxs]> lesson.subtitle.en
@@ -1335,6 +1373,11 @@ tag phrase-nav
 		cursor:pointer
 	def routed params
 		rt = params
+		# Update the global route state to keep navigation in sync
+		STORE.set('rt', rt)
+		# Tell all lesson-nav instances to update their active state
+		imba.commit!
+		APP.save!
 	def render
 		<self>
 			let lesson_key = [rt.cid,rt.lid].join('-')
