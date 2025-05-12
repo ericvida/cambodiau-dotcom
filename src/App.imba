@@ -12,9 +12,24 @@ tag App
 			
 	def mount
 		# The Store is initialized in its constructor
-		# Just sync the data and progress
+		# Sync the data from store
 		DATA.syncFromStore!
-		PROGRESS.calcProgress LIBRARY
+		
+		# Calculate initial progress
+		PROGRESS.calcProgress(LIBRARY)
+		
+		# If user is logged in, force a profile sync to ensure latest data
+		if STORE.get('user')
+			NOTE.gray("User logged in on app mount, ensuring data is fresh")
+			STORE.forceProfileSync().then(do(result)
+					NOTE.gray("App mount profile sync complete:", result)
+					# Make sure to sync data again after profile sync
+					DATA.syncFromStore!
+					# Recalculate progress with fresh data
+					PROGRESS.calcProgress(LIBRARY)
+				).catch(do(error)
+					console.error("App mount profile sync failed:", error)
+				)
 	<self>
 		css bg:gray1 d:flex gap:2em
 		

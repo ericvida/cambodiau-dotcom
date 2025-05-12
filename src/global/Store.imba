@@ -1,4 +1,5 @@
 import {init, tx, id} from '@instantdb/core'
+
 ### Store.imba
 # A centralized data store to manage application state and handle synchronization
 # between local storage and InstantDB
@@ -56,7 +57,7 @@ def safeAccess obj, path, defaultValue = null
 	let result = obj
 	
 	for key in keys
-		if result === null || result === undefined || !result.hasOwnProperty(key)
+		if (result === null) || (result === undefined) || !result.hasOwnProperty(key)
 			return defaultValue
 		result = result[key]
 	
@@ -87,8 +88,8 @@ export class Store
 	
 	# Constructor
 	def constructor
-		console.log("Initializing Store...")
-		throttledSync = throttle(self.syncWithInstantDB.bind(self), 5000) # Throttle to every 5 seconds
+		# NOTE.gray("Initializing Store...")
+		throttledSync = throttle(self.syncWithInstantDB.bind(self), 7500) # Throttle to every 7.5 seconds for better transaction handling
 		initState!
 		initInstantDB!
 		subscribeToAuthChanges!
@@ -98,23 +99,48 @@ export class Store
 	# ========================
 	
 	def initState
-		# Initialize the state from local storage or defaults"""
+		# Initialize the state with defaults, then UI preferences from local storage if available
+		resetState!
+		
 		try
 			if imba.locals[LOCAL_DB_NAME]
-				# Load from local storage
+				# Only restore UI preferences from local storage initially
+				# User data will be overwritten by InstantDB when available
 				const savedState = imba.locals[LOCAL_DB_NAME]
-				state = deepCopy(savedState)
-				console.log("Loaded state from local storage")
 				
-				# Initialize app with default values if needed
-				console.log("Loaded state from local storage")
+				# List of UI preferences to restore from local storage
+				const uiPreferences = ['dark', 'ipa', 'lesson_nav', 'phrase_nav', 'right_bar', 'writing_system']
+				
+				# Restore only UI preferences
+				for pref in uiPreferences
+					if savedState[pref] != undefined
+						state[pref] = savedState[pref]
+				
+				# If user is logged in from a previous session, temporarily restore progress
+				# This will create a smoother experience until we get data from InstantDB
+				if savedState.user..id
+					NOTE.gray("Found saved user session, temporarily restoring progress")
+					
+					# These will be overridden once we get data from InstantDB
+					if savedState.profileId
+						state.profileId = savedState.profileId
+					
+					# Temporarily keep local progress data until remote is loaded
+					if savedState.user_words
+						state.user_words = deepCopy(savedState.user_words)
+						
+					if savedState.progress_khmer
+						state.progress_khmer = deepCopy(savedState.progress_khmer)
+						
+					if savedState.progress_phonetic
+						state.progress_phonetic = deepCopy(savedState.progress_phonetic)
+				
+				NOTE.gray("Restored UI preferences from local storage")
 			else
-				# Use defaults
-				resetState!
-				console.log("Initialized state with defaults")
+				NOTE.gray("No local storage data found, using defaults")
 		catch error
 			console.error("Error initializing state:", error)
-			resetState!
+			# No need to reset state again as we already did that
 	
 	def resetState
 		# Reset the state to default values"""
@@ -126,7 +152,7 @@ export class Store
 		# Initialize the InstantDB connection"""
 		try
 			instant = init({ appId: INSTANT_APP_ID })
-			console.log("InstantDB initialized")
+			NOTE.gray("InstantDB initialized")
 		catch error
 			console.error("Error initializing InstantDB:", error)
 	
@@ -142,9 +168,27 @@ export class Store
 					console.error('Error during authentication:', auth.error)
 					state.error = auth.error.message
 				elif auth.user
+					const isNewLogin = !state.user || state.user.id !== auth.user.id
 					state.user = auth.user
 					state.login? = yes
+					
+					# Always subscribe to user data
 					subscribeToUserData!
+					
+					# Always force a profile sync on both new login and browser refresh
+					# This ensures we have the latest data in both scenarios
+					NOTE.gray("User authenticated, forcing profile sync")
+					forceProfileSync().then(do(result)
+							NOTE.gray("Profile sync complete:", result)
+							
+							# Critical: calculate progress after sync to update the UI
+							if global.PROGRESS && global.LIBRARY
+								NOTE.gray("Recalculating progress after profile sync")
+								global.PROGRESS.calcProgress(global.LIBRARY)
+								imba.commit!
+						).catch(do(error)
+							console.error("Profile sync failed:", error)
+						)
 				else
 					state.login? = no
 					state.user = null
@@ -162,28 +206,58 @@ export class Store
 			
 		try
 			const userId = state.user.id
+			NOTE.gray('Subscribing to user data for user:', userId)
+			
 			const query = 
 				profile:
 					$:
 						where:
-							"$users.id": userId
-				tasks: 
-					$:
-						where: 
 							"$users.id": userId
 							
 			const unsub = instant.subscribeQuery query, do(resp)
 				if resp.error
 					console.error('Error in user data subscription:', resp.error.message)
 					state.error = resp.error.message
-				elif resp.data..tasks
-					state.tasks = resp.data.tasks || []
-					syncFromRemote(resp.data)
-					imba.commit!
+				elif resp.data
+					# Always prioritize remote data first
+					NOTE.green("Received remote data: {Object.keys(resp.data)}")
+					# Process profile data - this is critical for multi-browser sync
+					if resp.data.profile
+						LL 'subscribeToUserData', resp.data.profile[0].user_words
+						const profiles = Object.values(resp.data.profile || {})
+						
+						if profiles.length > 0
+							# Found existing profile, use the first one
+							NOTE.gray('Found existing profile for user')
+							# Store the profile ID to prevent creating duplicates
+							state.profileId = profiles[0].id
+							
+							# Apply remote data - this ensures we always have the latest
+							syncFromRemote(resp.data)
+							
+							# Critical: Update UI and recalculate progress after sync
+							if global.PROGRESS && global.LIBRARY
+								NOTE.gray("Recalculating progress after real-time update")
+								global.PROGRESS.calcProgress(global.LIBRARY)
+								
+							imba.commit!
+						else
+							# No profile found, we'll create one on first sync
+							NOTE.gray('No existing profile found for user, will create on first sync')
+							# Reset profile ID to ensure we create a new one
+							state.profileId = null
+							
+							# Immediate sync to create profile if we have any data
+							if (Object.keys(state.user_words || {}).length > 0) or (state.progress_khmer..library..weight_learned > 0) or (state.progress_phonetic..library..weight_learned > 0)
+								NOTE.gray('Found local data, syncing to create profile')
+								# Force a sync to create the profile
+								queueForSync('writing_system', state.writing_system)
+								syncWithInstantDB!
+					
+					# Save to local storage as a backup
+					persistState!
 				else
 					console.warn('Unexpected response structure:', resp)
-					
-				persistState!
 		catch error
 			console.error("Error subscribing to user data:", error)
 	
@@ -236,87 +310,267 @@ export class Store
 		throttledSync!
 	
 	def syncWithInstantDB
-		# Sync local changes to InstantDB"""
+		# Sync local changes to InstantDB using optimized merging and batching"""
 		if !state.user..id || isSyncing || syncQueue.length === 0
 			return
 			
 		isSyncing = true
-		const batch = []
 		const timestamp = Date.now!
 		
 		try
-			# Group all changes into a single transaction
-			let profileUpdate = {
-				updated_progress_at: timestamp
+			# Organize changes by category to optimize transaction size
+			const updates = {
+				metadata: {
+					updated_progress_at: timestamp,
+					writing_system: state.writing_system
+				},
+				user_words: {},
+				progress_khmer: {},
+				progress_phonetic: {}
 			}
 			
 			# List of properties that should NOT be synced to InstantDB
 			const localOnlyProps = ['active_word', 'cid', 'lid', 'pid', 'wid']
+			let hasMetadataChanges = false
+			let hasUserWordChanges = false
+			let hasKhmerProgressChanges = false
+			let hasPhoneticProgressChanges = false
 			
-			for own key, item of syncQueue
-				# Extract the leaf property name from the path
+			# Process sync queue and categorize changes
+			for item in syncQueue
 				const pathParts = item.path.split('.')
-				const leafProperty = pathParts[pathParts.length - 1]
+				const rootProperty = pathParts[0]
 				
-				# Only add properties that should be synced
-				if !localOnlyProps.includes(leafProperty)
-					profileUpdate[leafProperty] = item.value
+				# Skip local-only properties
+				if localOnlyProps.includes(rootProperty)
+					continue
+				
+				# Handle different types of data differently for optimal syncing
+				if rootProperty === 'user_words'
+					hasUserWordChanges = true
+					# Just flag it - we'll sync the whole object since it's usually small
+				elif rootProperty === 'progress_khmer'
+					hasKhmerProgressChanges = true
+					# We'll build specific merge paths later
+				elif rootProperty === 'progress_phonetic'
+					hasPhoneticProgressChanges = true
+					# We'll build specific merge paths later
+				else
+					# Handle metadata and other simple properties
+					hasMetadataChanges = true
+					updates.metadata[rootProperty] = item.value
 			
-			# Process user_words specially - this is important to sync
-			if state.user_words
-				profileUpdate.user_words = state.user_words
-				
-			# Sync both progress objects separately
-			if state.progress_khmer
-				profileUpdate.progress_khmer = state.progress_khmer
-				
-			if state.progress_phonetic
-				profileUpdate.progress_phonetic = state.progress_phonetic
-				
-			# Always sync writing_system as it affects progress tracking
-			profileUpdate.writing_system = state.writing_system
-			
-			# Check if we already have a profile ID stored
-			if state.profileId
-				# Use the existing profile ID without trying to link it again (which would cause a unique constraint error)
-				console.log("Using existing profile ID:", state.profileId)
-				batch.push(
-					tx.profile[state.profileId].update(profileUpdate).link(
-						{$users: state.user.id}
+			if !state.profileId
+				# Check if the user already has a profile before creating a new one
+				const checkProfile = new Promise do(resolve, reject)
+					const userId = state.user.id
+					# Query for user profile directly to check if it exists
+					instant.subscribeQuery({profile:{$:{where:{"$users.id": userId }}}},
+						do(resp)
+							if resp.error
+								console.error("Error checking for existing profile:", resp.error)
+								reject(resp.error)
+							else
+								const profiles = Object.values(resp.data.profile || {})
+								if profiles.length > 0
+									# Found existing profile
+									resolve({exists: true, profile: profiles[0]})
+								else
+									# No profile found
+									resolve({exists: false})
 					)
+				
+				# Process the profile check result
+				checkProfile.then(do(result)
+					if result.exists
+						# Use the existing profile
+						NOTE.gray("Found existing profile for user, using it instead of creating a new one")
+						state.profileId = result.profile.id
+						# Continue with the sync in the next cycle
+						isSyncing = false
+						syncWithInstantDB!
+					else
+						# Create a new profile since none exists
+						const profileId = id!
+						NOTE.gray("Creating new profile ID:", profileId, "for user:", state.user.id)
+						
+						# For new profiles, we send everything at once
+						const fullProfile = {
+							...updates.metadata,
+							id: profileId,
+							created_at: timestamp
+						}
+						
+						# Add user words and progress data if available
+						if state.user_words
+							fullProfile.user_words = state.user_words
+						if state.progress_khmer
+							fullProfile.progress_khmer = state.progress_khmer
+						if state.progress_phonetic
+							fullProfile.progress_phonetic = state.progress_phonetic
+							
+						# Create the profile in a single transaction
+						instant.transact(
+							tx.profile[profileId].update(fullProfile).link({$users: state.user.id})
+						).then(do(_result)
+							state.profileId = profileId
+							state.last_sync_at = timestamp
+							syncQueue = []
+							persistState!
+							NOTE.gray("Successfully created profile in InstantDB")
+						).catch(do(error)
+							console.error("Error creating profile in InstantDB:", error)
+							
+							# Check for the unique constraint violation error
+							if typeof error === 'object' && error.message && error.message.includes("$users is a unique attribute")
+								NOTE.gray("Detected unique constraint violation - user already has a profile. Attempting to recover...")
+								# Try to find the existing profile
+								forceProfileSync().then(do(result)
+									if result.success
+										NOTE.gray("Successfully recovered by finding existing profile")
+									else
+										console.warn("Could not find existing profile after constraint error")
+								).catch(do(recoverError)
+									console.error("Recovery attempt after constraint error failed:", recoverError)
+								)
+						).finally(do
+							isSyncing = false
+						)
+				).catch(do(error)
+					console.error("Error checking for existing profile:", error)
+					isSyncing = false
 				)
-			else
-				# Create a new profile and link it to the user if we don't have an existing profileId
-				const profileId = id!
-				console.log("Creating new profile ID:", profileId, "for user:", state.user.id)
-				batch.push(
-					tx.profile[profileId].update({
-						...profileUpdate,
-						id: profileId,
-						created_at: timestamp # Add creation timestamp for new profiles
-					}).link({$users: state.user.id})
-				)
-				# Store the new profile ID for future updates
-				state.profileId = profileId
+				
+				return
 			
-			# Execute the batch
-			instant.transact(batch).then(do(_result)
-				state.last_sync_at = timestamp
-				syncQueue = []
-				persistState!
-				console.log("Successfully synced with InstantDB")
-			).catch(do(error)
-				console.error("Error syncing with InstantDB:", error)
-			).finally(do
+			# If we have an existing profile, use batched transactions with merges
+			const batchSize = 10 # Adjust based on payload sizes
+			const batches = []
+			let currentBatch = []
+			
+			# 1. Metadata changes - these are usually small and can be processed together
+			if hasMetadataChanges
+				currentBatch.push(tx.profile[state.profileId].merge(updates.metadata))
+				
+				# Add this batch if it's full
+				if currentBatch.length >= batchSize
+					batches.push([...currentBatch])
+					currentBatch = []
+			
+			# 2. User words changes - usually smaller than progress data
+			if hasUserWordChanges && state.user_words
+				currentBatch.push(tx.profile[state.profileId].merge({user_words: state.user_words}))
+				
+				# Add this batch if it's full
+				if currentBatch.length >= batchSize
+					batches.push([...currentBatch])
+					currentBatch = []
+			
+			# 3. Progress data - use targeted updates when possible to reduce payload size
+			if hasKhmerProgressChanges && state.progress_khmer
+				# For writing system toggle, we only need basic progress stats
+				# not the full progress object which could be very large
+				if updates.metadata.writing_system === 'khmer'
+					# Just update the library-level stats for the UI
+					const khmerStats = { 
+						library: state.progress_khmer.library || {} 
+					}
+					currentBatch.push(tx.profile[state.profileId].merge({progress_khmer: khmerStats}))
+				else
+					# If other progress changes, sync the full object
+					currentBatch.push(tx.profile[state.profileId].merge({progress_khmer: state.progress_khmer}))
+			
+			if hasPhoneticProgressChanges && state.progress_phonetic
+				# Similar approach for phonetic progress
+				if updates.metadata.writing_system === 'phonetic'
+					# Just update the library-level stats for the UI
+					const phoneticStats = { 
+						library: state.progress_phonetic.library || {} 
+					}
+					currentBatch.push(tx.profile[state.profileId].merge({progress_phonetic: phoneticStats}))
+				else
+					# If other progress changes, sync the full object
+					currentBatch.push(tx.profile[state.profileId].merge({progress_phonetic: state.progress_phonetic}))
+				
+			# Add any remaining changes to the batches
+			if currentBatch.length > 0
+				batches.push(currentBatch)
+			
+			# No changes to process
+			if batches.length === 0
 				isSyncing = false
-			)
+				return
+				
+			# Process batches with retry logic
+			const maxRetries = 3
+			let retryCount = 0
+			let currentBatchIndex = 0
+			
+			const processBatch = do
+				if currentBatchIndex >= batches.length
+					# All batches processed successfully
+					state.last_sync_at = timestamp
+					syncQueue = []
+					persistState!
+					NOTE.gray("Successfully synced all batches with InstantDB")
+					isSyncing = false
+					return
+					
+				NOTE.gray("Processing batch " + (currentBatchIndex + 1) + " of " + batches.length)
+				
+				instant.transact(batches[currentBatchIndex]).then( do(_result)
+						# Move to next batch
+						currentBatchIndex++
+						retryCount = 0  # Reset retry counter for next batch
+						processBatch!  # Process next batch
+					).catch do(error)
+						console.error("Error processing batch:", error)
+						
+						# Check for unique constraint violation
+						if (error..message || "").includes("$users is a unique attribute")
+							NOTE.gray("Detected unique constraint violation during batch processing. Attempting to recover...")
+							# Try to find the existing profile
+							forceProfileSync().then(do(result)
+								if result.success
+									NOTE.gray("Successfully recovered by finding existing profile")
+									# Resume processing from the next batch
+									currentBatchIndex++
+									retryCount = 0
+									processBatch!
+								else
+									console.warn("Could not find existing profile after constraint error")
+									isSyncing = false
+							).catch(do(recoverError)
+								console.error("Recovery attempt after constraint error failed:", recoverError)
+								isSyncing = false
+							)
+						# Check for timeout errors - using a simpler condition
+						elif retryCount < maxRetries && (error..message || "").includes('timeout')
+							retryCount++
+							NOTE.gray("Batch timed out. Retrying... (Attempt " + retryCount + " of " + maxRetries + ")")
+							# Try again with exponential backoff
+							setTimeout(&, 1000 * (retryCount * 2)) do
+								processBatch!
+						else
+							# Skip this batch after max retries or non-timeout errors
+							console.error("Failed to process batch after " + retryCount + " retries, skipping...")
+							currentBatchIndex++
+							retryCount = 0
+							processBatch!  # Try next batch
+			
+			# Start processing batches
+			processBatch!
 		catch error
 			console.error("Error preparing sync with InstantDB:", error)
 			isSyncing = false
+			# Display a user-friendly error message if possible
+			const errorMsg = error..message || "An unknown error occurred during synchronization"
+			state.error = errorMsg
 	
 	def syncFromRemote data
-		# Process and apply remote data"""
+		# Process and apply remote data - remote data is the source of truth"""
 		if !data
+			console.warn("Cannot sync from remote: No data provided")
 			return
 			
 		try
@@ -325,32 +579,135 @@ export class Store
 				for own key, profile of Object.values(data.profile)
 					# Only process data for the current user
 					if profile.$users && profile.$users.includes(state.user.id)
+						NOTE.gray("Processing remote profile data for user:", state.user.id)
 						
 						# Store the profile ID for future updates
 						state.profileId = profile.id
 						
-						# Update user words data
+						# Prioritize remote data for user words - REPLACE rather than merge
 						if profile.user_words
-							state.user_words = {...state.user_words, ...profile.user_words}
+							NOTE.gray("Applying remote user_words data:", Object.keys(profile.user_words).length, "words")
+							state.user_words = deepCopy(profile.user_words)
+						else
+							console.warn("No user_words data in profile")
 						
-						# Update progress data for khmer
+						# Prioritize remote data for khmer progress - REPLACE rather than merge
 						if profile.progress_khmer
-							state.progress_khmer = {...state.progress_khmer || {}, ...profile.progress_khmer}
+							NOTE.gray("Applying remote progress_khmer data:", 
+								profile.progress_khmer.library..weight_learned, "weight_learned")
+							state.progress_khmer = deepCopy(profile.progress_khmer)
+						else
+							console.warn("No progress_khmer data in profile")
 							
-						# Update progress data for phonetic
+						# Prioritize remote data for phonetic progress - REPLACE rather than merge
 						if profile.progress_phonetic
-							state.progress_phonetic = {...state.progress_phonetic || {}, ...profile.progress_phonetic}
+							NOTE.gray("Applying remote progress_phonetic data:", 
+								profile.progress_phonetic.library..weight_learned, "weight_learned")
+							state.progress_phonetic = deepCopy(profile.progress_phonetic)
+						else
+							console.warn("No progress_phonetic data in profile")
 						
+						# Get writing system preference from server
+						if profile.writing_system
+							NOTE.gray("Setting writing system from remote:", profile.writing_system)
+							state.writing_system = profile.writing_system
+							
 						# Update last received timestamp
 						state.last_sync_at = profile.updated_progress_at || Date.now!
 						
 						# Store created_at if available
-						if profile.created_at and !state.created_at
+						if profile.created_at
 							state.created_at = profile.created_at
+						
+						NOTE.gray("Remote data applied successfully")
+						
+						# Force a UI update and update display for current writing system
+						if global.PROGRESS && global.LIBRARY
+							NOTE.gray("Updating display for writing system:", state.writing_system)
+							global.PROGRESS.updateDisplayFromSystem(state.writing_system, global.LIBRARY)
+							# Also manually trigger a progress calculation to ensure consistency
+							global.PROGRESS.calcProgress(global.LIBRARY)
+							
+						imba.commit!
+			else
+				console.warn("No profile data found in remote data")
 			
+			# Save changes to local storage as a backup
 			persistState!
 		catch error
 			console.error("Error processing remote data:", error)
+	
+	def forceProfileSync
+		# Force a sync with InstantDB to ensure we have the latest data
+		# This is useful when opening the app in a new browser or on refresh
+		if !state.user..id
+			console.warn("Cannot force sync: No user logged in")
+			return Promise.reject("No user logged in")
+			
+		NOTE.gray("Forcing profile sync to ensure latest data")
+		
+		# Clear sync queue to prevent conflicts
+		syncQueue = []
+		
+		# Create a promise to track completion
+		return new Promise do(resolve, reject)
+			const userId = state.user.id
+			let unsubscriber = null
+			
+			# Query for user profile directly with subscription that we'll clean up after
+			unsubscriber = instant.subscribeQuery({profile:{$:{where:{"$users.id": userId }}}},
+				do(resp)
+					if resp.error
+						console.error("Error fetching profile:", resp.error)
+						# Unsubscribe to prevent memory leaks
+						if unsubscriber
+							unsubscriber()
+						reject(resp.error)
+					elif resp.data
+						const profiles = Object.values(resp.data.profile || {})
+						
+						if profiles.length > 0
+							# Found existing profile
+							NOTE.gray("Found profile in force sync, applying data")
+							# Save the profileId to prevent duplicate profile creation
+							state.profileId = profiles[0].id
+							
+							# Apply the remote data - this is crucial
+							syncFromRemote(resp.data)
+							
+							# Update UI with current writing system
+							if global.PROGRESS && global.LIBRARY
+								NOTE.gray("Updating display from writing system:", state.writing_system)
+								global.PROGRESS.updateDisplayFromSystem(state.writing_system)
+								# Also recalculate progress to ensure everything is up-to-date
+								global.PROGRESS.calcProgress(global.LIBRARY)
+							
+							# Save state to local storage
+							persistState!
+							
+							# Force a UI update
+							imba.commit!
+							
+							# Unsubscribe to prevent memory leaks
+							if unsubscriber
+								unsubscriber()
+							
+							# Resolve with success
+							resolve({ success: true, message: "Profile synced successfully" })
+						else
+							# No profile found, but we still need to clean up
+							NOTE.gray("No profile found during force sync")
+							# Unsubscribe to prevent memory leaks
+							if unsubscriber
+								unsubscriber()
+							resolve({ success: false, message: "No profile found" })
+					else
+						console.warn("Unexpected response structure:", resp)
+						# Unsubscribe to prevent memory leaks
+						if unsubscriber
+							unsubscriber()
+						reject("Unexpected response structure")
+			)
 	
 	# ========================
 	# Authentication methods
@@ -361,7 +718,7 @@ export class Store
 		if !state.email_input
 			console.error('Email is required to send a magic code.')
 			return Promise.reject('Email is required')
-		console.log('Sending magic code to:', state.email_input)
+		NOTE.gray('Sending magic code to:', state.email_input)
 		state.sentCode? = true
 		imba.commit!
 		persistState!
@@ -378,14 +735,12 @@ export class Store
 			console.error('Both email and code are required to sign in.')
 			return Promise.reject('Email and code required')
 		
-		return instant.auth.signInWithMagicCode({ email: state.email_input, code })
-			.then(do
+		return instant.auth.signInWithMagicCode({ email: state.email_input, code }).then(do
 				state.email_input = ''
 				state.sentCode? = false
 				persistState!
 				return true
-			)
-			.catch(do(error)
+			).catch(do(error)
 				console.error('Error logging in with magic code:', error)
 				state.error = error.message || 'Failed to login'
 				return Promise.reject(error)
@@ -393,17 +748,15 @@ export class Store
 	
 	def logout
 		# Log out the current user"""
-		console.log('Logging out user')
+		NOTE.gray('Logging out user')
 		
-		return instant.auth.signOut()
-			.then(do
+		return instant.auth.signOut().then(do
 				state.user = null
 				state.email_input = ''
 				state.profileId = null  # Clear profile ID on logout
 				persistState!
 				return true
-			)
-			.catch(do(error)
+			).catch(do(error)
 				console.error('Error during logout:', error)
 				state.error = error.message || 'Failed to logout'
 				return Promise.reject(error)
@@ -443,14 +796,46 @@ export class Store
 		if !system or (system isnt 'khmer' and system isnt 'phonetic')
 			console.warn('Invalid writing system:', system)
 			return state.writing_system or 'khmer'
+			
+		# Avoid unnecessary updates if system hasn't changed
+		if system == state.writing_system
+			return system
 		
-		set('writing_system', system)
-		return system no
+		# Direct state update to reduce double updates
+		state.writing_system = system
+		
+		# Only persist and queue for sync after both state and UI are updated
+		persistState!
+		
+		# Update UI immediately without waiting for sync
+		if global.PROGRESS
+			global.PROGRESS.updateDisplayFromSystem(system)
+		else
+			console.warn('PROGRESS global not available for UI update')
+		
+		# Queue for sync after UI update is complete
+		if state.user..id
+			queueForSync('writing_system', system)
+			
+		return system
 	
 	def toggleWritingSystem
 		# Toggle between 'khmer' and 'phonetic' writing systems
 		const newSystem = state.writing_system === 'khmer' ? 'phonetic' : 'khmer'
+		
+		NOTE.gray("Toggling writing system from {state.writing_system} to {newSystem}")
 		return setWritingSystem(newSystem)
+	
+	def getCurrentWritingSystem
+		# Get the current writing system with data validation
+		# This also ensures progress display is updated correctly
+		const system = state.writing_system || 'khmer'
+		
+		# Ensure progress data is updated for the current system if needed
+		if global.LIBRARY && global.PROGRESS
+			updateProgress(global.LIBRARY, system)
+		
+		return system
 	
 	# ========================
 	# Learning progress tracking
@@ -468,7 +853,6 @@ export class Store
 		if system !== 'khmer' && system !== 'phonetic'
 			console.warn('Invalid writing system:', system)
 			return
-		
 		const user_words = {...state.user_words || {}}
 		
 		# Initialize the word entry if it doesn't exist
@@ -481,6 +865,8 @@ export class Store
 		# Update state
 		set('user_words', user_words)
 		
+		LL "Store.toggleLearnedWord", state.user_words
+		# LL 'subscribeToUserData', resp.data.profile[0].user_words
 		return user_words[word][system]
 	
 	def hasLearnedWord word, writing_system = null
@@ -495,15 +881,15 @@ export class Store
 		# Check if the word is learned in the specified writing system
 		return state.user_words..[word]..[system] === true
 	
-	def updateProgress library
+	def updateProgress library, writing_system = null
 		# Update learning progress based on library data"""
 		if !library
 			console.warn('Cannot update progress: library data is missing')
 			return
 		
 		try
-			# Get current writing system, with fallback to default
-			const system = state.writing_system || 'khmer'
+			# Use specified writing system or get current one, with fallback to default
+			const system = writing_system || state.writing_system || 'khmer'
 			
 			# Select the appropriate progress object based on writing system
 			const progressKey = system === 'khmer' ? 'progress_khmer' : 'progress_phonetic'
@@ -690,8 +1076,3 @@ export class Store
 	def countKeys obj
 		# Count the number of keys in an object"""
 		return obj ? Object.keys(obj).length : 0
-
-# Create a global singleton instance
-export const STORE = new Store()
-# Also assign to global for access anywhere
-global.STORE = STORE

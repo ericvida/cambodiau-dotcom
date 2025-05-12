@@ -62,18 +62,40 @@ export class ProgressProcessor
 					}
 					
 	def calcProgress _library
-		# Use Store's updateProgress method, then update this object with the result
-		STORE.updateProgress(_library)
+		# Calculate progress for both writing systems
+		if !_library
+			console.warn("Cannot calculate progress: No library data provided")
+			return this
+			
+		NOTE.gray("Calculating progress for both writing systems")
+		STORE.updateProgress(_library, 'khmer')
+		STORE.updateProgress(_library, 'phonetic')
 		
-		# Get the progress data for the current writing system
+		# Update the display with the current writing system's data
 		const system = STORE.get('writing_system', 'khmer')
+		NOTE.gray("Using writing system for display:", system)
+		updateDisplayFromSystem(system, _library)
+		
+		# Force UI update
+		imba.commit!
+		
+		return this
+		
+	def updateDisplayFromSystem system, _library = null
+		# Get the progress data for the specified writing system
 		const progressData = STORE.getProgressForSystem(system)
 		
-		# Update library properties
+		NOTE.gray("Updating display from system:", system, 
+			"Progress data weight learned:", progressData..library..weight_learned)
+		
+		# Update library properties for the specified system
 		this.library.weight_learned = progressData..library..weight_learned || 0
 		this.library.unique_learned = progressData..library..unique_learned || 0
 		this.library.unique_progress = progressData..library..unique_progress || 0
 		this.library.weight_progress = progressData..library..weight_progress || 0
+		
+		# If no library is provided, use the cached data from progressData
+		_library = _library || global.LIBRARY
 		
 		# Update collections properties
 		if _library..collections

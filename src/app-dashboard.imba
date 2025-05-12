@@ -391,13 +391,13 @@ tag app-dictionary
 						if STORE.get('ipa')
 							if info..ipa then <span.mono> info..ipa else <span.err> 'ipa coming soon'
 						else
-							if (info..vida)
-								<span.mono> info..vida
-							elif (info..vida_auto)
-								<span.mono.err> info..vida_auto 
+							if (info?.vida)
+								<span.mono> info?.vida
+							elif (info?.vida_auto)
+								<span.mono.err> info?.vida_auto 
 							else
 								<span.err> 'vida coming soon'
-						if info..google	then <span> info..google else <span.err> '-'
+						if info?.google	then <span> info?.google else <span.err> '-'
 
 
 tag info-page
@@ -615,7 +615,7 @@ tag CourseCard
 			then DATA.local.progress_khmer
 			else DATA.local.progress_phonetic
 		
-		return progress..library..unique_learned || 0
+		return progress?.library?.unique_learned || 0
 	def render
 		let col_item = PROGRESS[collection.key]
 		<self.card> 
@@ -640,7 +640,7 @@ tag right-bar
 			const activeWord = STORE.get('active_word')
 			if activeWord
 				<WordCard.card>
-				if dictionary[activeWord]..google
+				if dictionary[activeWord]?.google
 					<DefinitionCard.card>
 				<SpellingCard.card>
 			<ShortcutCard.card>
@@ -678,16 +678,16 @@ tag PhoneticsCard
 			if DATA.local.ipa
 				for word in phrase.phrase
 					let obj = dictionary[word]
-					if obj..ipa or obj..vida or obj..vida_auto or word
-						<span> obj..ipa or obj..vida or obj..vida_auto or word
+					if obj?.ipa or obj?.vida or obj?.vida_auto or word
+						<span> obj?.ipa or obj?.vida or obj?.vida_auto or word
 					else
 						<span> "n/a"
 						<> EE word, "no phonetics available"
 			else
 				for word in phrase.phrase
 					let obj = dictionary[word]
-					if obj..vida or obj..vida_auto or obj..ipa or word
-						<span> obj..vida or obj..vida_auto or obj..ipa or word
+					if obj?.vida or obj?.vida_auto or obj?.ipa or word
+						<span> obj?.vida or obj?.vida_auto or obj?.ipa or word
 					unless obj..vida or obj..vida_auto or obj..ipa or word
 						<span> "n/a"
 						<> EE word, "no phonetics available"
@@ -756,9 +756,9 @@ tag WordNav
 				@hotkey('f|right')=nextWord(phrase)
 			>
 			<audio$word_audio src="" type="audio/mpeg">
-			# TODO: make a toggle to switch khmer to ipa and display khmer if ipa not available
-			<ToggleSwitch .active=!STORE.get('khmer_writing', true) @click.toggleKhmer [align-self:end]> 
-				if !STORE.get('khmer_writing', true)
+			# Toggle between Khmer and phonetic writing systems
+			<ToggleSwitch .active=(STORE.get('writing_system', 'khmer') === 'phonetic') @click.toggleKhmer [align-self:end]> 
+				if STORE.get('writing_system', 'khmer') === 'phonetic'
 					"phonetics"
 				else
 					<span [ff:mono]> "khmer"
@@ -772,7 +772,7 @@ tag WordNav
 					let no_phonetics = false
 					let display_word = word
 					if in_dict 
-						if STORE.get('khmer_writing', true)
+						if STORE.get('writing_system', 'khmer') === 'khmer'
 							display_word = word
 						elif STORE.get('ipa')
 							if !!ipa
@@ -794,13 +794,17 @@ tag WordNav
 						@dblclick.playWord($word_audio, word) 
 						@mousedown.pressAndHold(word, 1s)
 						@mouseup.stopTimer
-						.khmer=STORE.get('khmer_writing', true)
+						.khmer=(STORE.get('writing_system', 'khmer') === 'khmer')
 						> display_word
 	def toggleKhmer
-		STORE.set('khmer_writing', !STORE.get('khmer_writing', true))
+		# Toggle between Khmer and phonetic writing systems
+		STORE.toggleWritingSystem()
+		
+		# Update local data and save
 		DATA.syncFromStore!
 		APP.save!
 	# Goes to the next word in the phrase
+	
 	def nextWord phrase
 		### NOTE
 		if current word is not the last word in the phrase,
@@ -837,7 +841,7 @@ tag WordNav
 		let final_cid = LIBRARY.collections[current_cid].of
 		let final_lesson? = final_lid == current_lid
 		if final_lesson?
-			LL '🎉 This is the last lesson for this collection!'
+			NOTE.gray '🎉 This is the last lesson for this collection!'
 		else
 			router.go("/learn/{rt.cid}/{inc(rt.lid)}/1/0")
 	
@@ -882,7 +886,7 @@ tag WordNav
 			let prev_lesson = LIBRARY.lessons[prev_lesson_key]
 			goTo rt.cid, prev_lesson.li, prev_lesson.first_phrase_i, 0
 		elif rt.lid == 1 and rt.pid == 1
-			LL '🏁 this is the first lesson of the collection'
+			NOTE.gray '🏁 this is the first lesson of the collection'
 		elif current_phrase.isFirst
 			prevLessonLastPhraseFirstWord!
 		else
@@ -892,7 +896,7 @@ tag WordNav
 		let current_lesson_key = [rt.cid,rt.lid].join('-')
 		let current_lesson = LIBRARY.lessons[current_lesson_key]
 		if current_lesson.isFirst
-			LL '🏁 this is the first lesson of the collection'
+			NOTE.gray '🏁 this is the first lesson of the collection'
 		else
 			# NOTE: PreviousLesson
 			let prev_lesson_key = [rt.cid,dec(rt.lid)].join('-')
@@ -904,7 +908,7 @@ tag WordNav
 		let current_lesson_key = [rt.cid,rt.lid].join('-')
 		let current_lesson = LIBRARY.lessons[current_lesson_key]
 		if current_lesson.isFirst
-			LL '🏁 this is the first lesson of the collection'
+			NOTE.gray '🏁 this is the first lesson of the collection'
 		else
 			# NOTE: PreviousLesson
 			let prev_lesson_key = [rt.cid,dec(rt.lid)].join('-')

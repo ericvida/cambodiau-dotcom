@@ -10,21 +10,24 @@ export class DataAPI
 	def syncFromStore
 		# Synchronize local state from the centralized store"""
 		local = {
-			updated_at: STORE.get('updated_at', 0),
+			updated_at: STORE.get('updated_progress_at', 0),
+			last_sync_at: STORE.get('last_sync_at', 0),
 			cid: STORE.get('cid', 0),
 			lid: STORE.get('lid', 0),
 			pid: STORE.get('pid', 0),
 			wid: STORE.get('wid', 0),
 			active_word: STORE.get('active_word', 'ជា'),
-			progress_khmer: STORE.get('progress_khmer', {library: {weight_learned: 0}}),
-			progress_phonetic: STORE.get('progress_phonetic', {library: {weight_learned: 0}}),
+			# Deep copy important data to avoid reference issues
+			user_words: JSON.parse(JSON.stringify(STORE.get('user_words', {}))),
+			progress_khmer: JSON.parse(JSON.stringify(STORE.get('progress_khmer', {library: {weight_learned: 0}}))),
+			progress_phonetic: JSON.parse(JSON.stringify(STORE.get('progress_phonetic', {library: {weight_learned: 0}}))),
 			pa: STORE.get('pa', 'vida'),
 			ipa: STORE.get('ipa', false),
 			dark: STORE.get('dark', false),
 			lesson_nav: STORE.get('lesson_nav', true),
 			phrase_nav: STORE.get('phrase_nav', true),
 			right_bar: STORE.get('right_bar', true),
-			khmer_writing: STORE.get('khmer_writing', true),
+			writing_system: STORE.get('writing_system', 'khmer'),
 			user: STORE.get('user', null),
 			login?: STORE.get('login?', null),
 			sentCode?: STORE.get('sentCode?', null),
@@ -32,6 +35,10 @@ export class DataAPI
 			loading: STORE.get('loading', false),
 			email_input: STORE.get('email_input', '')
 		}
+		
+		NOTE.gray ("DataAPI synced from store, writing system:", local.writing_system, 
+			"progress:", local.progress_khmer..library..weight_learned, 
+			"user words:", Object.keys(local.user_words || {}).length)
 		
 	def updateStore key, value
 		# Update a key in the store and sync back to local state"""
@@ -84,7 +91,7 @@ export class DataAPI
 			)
 	
 	def loginWithCode magic_code
-		# Log in with magic code via the Store"""
+		# Log in with magic code via the Store, then force profile sync for multi-browser consistency"""
 		if !local.email_input || !magic_code
 			console.error('Both email and code are required to sign in.')
 			return
@@ -92,12 +99,19 @@ export class DataAPI
 		STORE.set('email_input', local.email_input)
 		STORE.loginWithCode(magic_code)
 			.then(do()
+				NOTE.gray("Login successful, forcing profile sync to ensure data consistency")
+				# Force a sync with InstantDB to ensure we have the latest data
+				# This is especially important when using different browsers
+				return STORE.forceProfileSync!
+			)
+			.then(do(result)
+				NOTE.gray("Profile sync result:", result)
 				syncFromStore!
 				if typeof window !== 'undefined' && typeof imba !== 'undefined' && imba.commit
 					imba.commit!
 			)
 			.catch(do(error)
-				console.error('Login failed:', error)
+				console.error('Login or sync failed:', error)
 			)
 	
 	def persistProgress progress
