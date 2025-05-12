@@ -1,19 +1,4 @@
 
-#   switch (color) {
-#          case 'success':  
-#               color = 'Green'
-#               break
-#          case 'info':     
-#                  color = 'Blue'  
-#               break;
-#          case 'error':   
-#               color = 'Red'   
-#               break;
-#          case 'warning':  
-#               color = 'Orange' 
-#               break;
-#          default: 
-#               color = color
 class Note
 	enabled = true
 	def log message
@@ -58,16 +43,16 @@ global.LL = console.log
 global.WW = console.warn
 global.EE = console.error
 
-import {Store} from './global/Store.imba' # Initializes and sets global.STORE
-import {DataAPI} from './global/DataAPI.imba'
+import {StateManager} from './global/StateManager.imba' # Initializes and sets global.STATE_MANAGER
+import {UiManager} from './global/UiManager.imba'
 import {bible_collection} from "./global/_raw_data/bible_collection.imba"
 import {LibraryProcessor} from './global/LibraryProcessor.imba'
 import {ProgressProcessor} from './global/ProgressProcessor.imba'
 
 global.AUDIO = audio
 global.IMAGES = image_references
-global.STORE = new Store
-global.DATA = new DataAPI
+global.STATE_MANAGER = new StateManager
+global.UI = new UiManager
 global.LIBRARY = new LibraryProcessor [bible_collection]
 global.PROGRESS = new ProgressProcessor LIBRARY
 global.FUZZY = new Fuzzy

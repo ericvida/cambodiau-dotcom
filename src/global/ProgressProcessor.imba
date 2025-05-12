@@ -68,11 +68,11 @@ export class ProgressProcessor
 			return this
 			
 		NOTE.gray("Calculating progress for both writing systems")
-		STORE.updateProgress(_library, 'khmer')
-		STORE.updateProgress(_library, 'phonetic')
+		STATE_MANAGER.updateProgress(_library, 'khmer')
+		STATE_MANAGER.updateProgress(_library, 'phonetic')
 		
 		# Update the display with the current writing system's data
-		const system = STORE.get('writing_system', 'khmer')
+		const system = STATE_MANAGER.get('writing_system', 'khmer')
 		NOTE.gray("Using writing system for display:", system)
 		updateDisplayFromSystem(system, _library)
 		
@@ -83,7 +83,7 @@ export class ProgressProcessor
 		
 	def updateDisplayFromSystem system, _library = null
 		# Get the progress data for the specified writing system
-		const progressData = STORE.getProgressForSystem(system)
+		const progressData = STATE_MANAGER.getProgressForSystem(system)
 		
 		NOTE.gray("Updating display from system:", system, 
 			"Progress data weight learned:", progressData..library..weight_learned)

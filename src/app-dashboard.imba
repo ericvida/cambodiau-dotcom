@@ -14,14 +14,14 @@ is calculated in the constructor of the progress class.
 
 class Api
 	def toggleLearned word
-		STORE.toggleLearnedWord(word)
-		# After toggling the word, ensure local state is updated
-		DATA.syncFromStore!
+		STATE_MANAGER.toggleLearnedWord(word)
 		PROGRESS.calcProgress LIBRARY
+		# After toggling the word, ensure local state is updated
+		# UI.syncFromStore!
 		imba.commit!
 		
 	def hasLearned word
-		return STORE.hasLearnedWord(word)
+		return STATE_MANAGER.hasLearnedWord(word)
 	def calcAllProgressFlat
 		### TODO
 		Make word refs be generated at LIBRARY.imba at static level, not here.
@@ -121,36 +121,36 @@ class Api
 	
 	# API[epic=API, seq=7] SAVE
 	def save
-		# Use Store's persistState method instead
-		STORE.persistState!
+		# Use Store's saveToLocalStorage method instead
+		STATE_MANAGER.saveToLocalStorage!
 	
 	# API[epic=API, seq=7] LOAD
 	def load
 		# Use Store's data directly
-		DATA.syncFromStore!
+		UI.syncFromStore!
 
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
-		STORE.toggleIpa!
-		DATA.syncFromStore!
+		STATE_MANAGER.toggleIpa!
+		UI.syncFromStore!
 		
 	# API[epic=FrontEnd, seq=8] AUTH
 	def toggleAuth
 		# Use the Store for authentication state
-		if STORE.get('login?') == yes
-			STORE.logout!
+		if STATE_MANAGER.get('login?') == yes
+			STATE_MANAGER.logout!
 		else
 			# Show login screen
-			STORE.set('login?', no)
-		DATA.syncFromStore!
+			STATE_MANAGER.set('login?', no)
+		UI.syncFromStore!
 		
 	# API[epic=FrontEnd, seq=9] DARKMODE
 	def toggleDark
-		const isDark = STORE.toggleDarkMode!
+		const isDark = STATE_MANAGER.toggleDarkMode!
 		if isDark
 		then setDarkmode!
 		else unsetDarkmode!
-		DATA.syncFromStore!
+		UI.syncFromStore!
 	def setDarkmode
 		let root = document.getElementsByTagName('html')[0]
 		root.flags.add('mod-darkmode')
@@ -160,14 +160,14 @@ class Api
 	# API[epic=FrontEnd, seq=10] LOGIN
 	def logIn
 		# Use Store for authentication
-		STORE.set('login?', yes)
-		DATA.syncFromStore!
+		STATE_MANAGER.set('login?', yes)
+		UI.syncFromStore!
 			
 	# API[epic=FrontEnd, seq=11] LOGOUT
 	def logOut
 		# Use Store for logout
-		STORE.logout!
-		DATA.syncFromStore!
+		STATE_MANAGER.logout!
+		UI.syncFromStore!
 
 	def search needle, haystack
 		let haystackLength = haystack.length # tlen
@@ -207,11 +207,10 @@ tag app-dashboard
 		&.open
 			ml:0px
 	def build 
-		DATA.initLocal!
+		UI.initLocal!
 		PROGRESS.calcProgress LIBRARY
 		imba.commit!
 		APP.save!
-
 	def render
 		<self>
 			<global 
@@ -219,7 +218,7 @@ tag app-dashboard
 				@hotkey("shift+i|v")=APP.toggleIpa!
 				@hotkey("shift+c+l")=APP.clear!
 				@hotkey("shift+a")=APP.toggleAuth! # TODO: delete in production
-				@hotkey('enter|s')=APP.toggleLearned(STORE.get('active_word'))
+				@hotkey('enter|s')=APP.toggleLearned(STATE_MANAGER.get('active_word'))
 			>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
@@ -380,15 +379,15 @@ tag app-dictionary
 			<.row[order:0] @click=APP.toggleIpa!>
 				<span> "khmer"
 				<span> 
-					if STORE.get('ipa') then "ipa" else "vida"
+					if STATE_MANAGER.get('ipa') then "ipa" else "vida"
 				<span> "google"
 			for own word, info of dictionary
 				if FUZZY.search(query, word) | FUZZY.search(query, info..vida) | FUZZY.search(query, info..google) | FUZZY.search(query, info..ipa)
-					<div.row .learned=(STORE.hasLearnedWord(word)) @click=(STORE.set('active_word', word), DATA.syncFromStore!)>
+					<div.row .learned=(STATE_MANAGER.hasLearnedWord(word)) @click=(STATE_MANAGER.set('active_word', word), UI.syncFromStore!)>
 						# if info..rank then <span.mono> info..rank else <span.err> '-'
 						<a href="http://sealang.net/api/api.pl?query={word}&service=dictionary" target="_blank"> 
 							<span.khmer> "{word}"
-						if STORE.get('ipa')
+						if STATE_MANAGER.get('ipa')
 							if info..ipa then <span.mono> info..ipa else <span.err> 'ipa coming soon'
 						else
 							if (info?.vida)
@@ -497,8 +496,8 @@ tag PhoneticVowels
 			@hover
 				bg:hue4 @darkmode:hue6
 	def activeWord word
-		STORE.set('active_word', char[word][2])
-		DATA.syncFromStore!
+		STATE_MANAGER.set('active_word', char[word][2])
+		UI.syncFromStore!
 		APP.save!
 	
 	def render
@@ -506,8 +505,8 @@ tag PhoneticVowels
 			<nav>
 				<button @click=APP.toggleIpa!> 
 					"Phonetic System: "
-					if STORE.get('ipa') then "IPA" else "Vida"
-			if STORE.get('ipa') === true
+					if STATE_MANAGER.get('ipa') then "IPA" else "Vida"
+			if STATE_MANAGER.get('ipa') === true
 				ipa = 1
 			else
 				ipa = 0
@@ -609,11 +608,11 @@ tag CourseCard
 		cursor:pointer
 	def calcUniqueLearned unique
 		# Use the progress system to calculate unique learned words
-		const system = STORE.get('writing_system', 'khmer')
+		const system = STATE_MANAGER.get('writing_system', 'khmer')
 		const progress = 
 			if system === 'khmer' 
-			then DATA.local.progress_khmer
-			else DATA.local.progress_phonetic
+			then UI.local.progress_khmer
+			else UI.local.progress_phonetic
 		
 		return progress?.library?.unique_learned || 0
 	def render
@@ -633,11 +632,11 @@ tag CourseCard
 tag right-bar
 	def routed params
 		rt = params
-		STORE.set('rt', rt)
+		STATE_MANAGER.set('rt', rt)
 		APP.save!
 	def render
 		<self>
-			const activeWord = STORE.get('active_word')
+			const activeWord = STATE_MANAGER.get('active_word')
 			if activeWord
 				<WordCard.card>
 				if dictionary[activeWord]?.google
@@ -675,7 +674,7 @@ tag PhoneticsCard
 	<self.card>
 		<h2> "Phonetics"
 		<p.phonetics>
-			if DATA.local.ipa
+			if UI.local.ipa
 				for word in phrase.phrase
 					let obj = dictionary[word]
 					if obj?.ipa or obj?.vida or obj?.vida_auto or word
@@ -694,14 +693,14 @@ tag PhoneticsCard
 
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
-	# NOTE: now uses STORE directly instead of DATA.local
+	# NOTE: now uses STATE_MANAGER directly instead of UI.local
 	def routed params
 		rt = params
 		# Update the global route state to keep navigation in sync
-		STORE.set('rt', rt)
+		STATE_MANAGER.set('rt', rt)
 		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
-		STORE.set('active_word', phrase.kh_array[rt.wid])
-		DATA.syncFromStore!
+		STATE_MANAGER.set('active_word', phrase.kh_array[rt.wid])
+		UI.syncFromStore!
 		# Update UI components that depend on route state
 		imba.commit()
 		APP.save!
@@ -746,7 +745,7 @@ tag WordNav
 				bxs:0px 0px 0px 4px amber2 inset @darkmode:0px 0px 0px 4px amber2/10 inset
 
 	def render
-		# @click=(DATA.local.active_word = khccmer_word)
+		# @click=(UI.local.active_word = khccmer_word)
 		<self>
 			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
 			<global 
@@ -757,8 +756,8 @@ tag WordNav
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			# Toggle between Khmer and phonetic writing systems
-			<ToggleSwitch .active=(STORE.get('writing_system', 'khmer') === 'phonetic') @click.toggleKhmer [align-self:end]> 
-				if STORE.get('writing_system', 'khmer') === 'phonetic'
+			<ToggleSwitch .active=(STATE_MANAGER.get('writing_system', 'khmer') === 'phonetic') @click.toggleKhmer [align-self:end]> 
+				if STATE_MANAGER.get('writing_system', 'khmer') === 'phonetic'
 					"phonetics"
 				else
 					<span [ff:mono]> "khmer"
@@ -772,9 +771,9 @@ tag WordNav
 					let no_phonetics = false
 					let display_word = word
 					if in_dict 
-						if STORE.get('writing_system', 'khmer') === 'khmer'
+						if STATE_MANAGER.get('writing_system', 'khmer') === 'khmer'
 							display_word = word
-						elif STORE.get('ipa')
+						elif STATE_MANAGER.get('ipa')
 							if !!ipa
 								display_word = ipa
 						else
@@ -786,22 +785,22 @@ tag WordNav
 								no_phonetics = true
 								display_word
 					<.word 
-						.active=(word is STORE.get('active_word')) 
+						.active=(word is STATE_MANAGER.get('active_word')) 
 						route-to="/learn/{phrase.cid}/{phrase.lid}/{phrase.pid}/{word_index}" 
-						.known=STORE.hasLearnedWord(word) 
+						.known=STATE_MANAGER.hasLearnedWord(word) 
 						.not_in_dict=!in_dict
 						.no_phonetics=no_phonetics
 						@dblclick.playWord($word_audio, word) 
 						@mousedown.pressAndHold(word, 1s)
 						@mouseup.stopTimer
-						.khmer=(STORE.get('writing_system', 'khmer') === 'khmer')
+						.khmer=(STATE_MANAGER.get('writing_system', 'khmer') === 'khmer')
 						> display_word
 	def toggleKhmer
 		# Toggle between Khmer and phonetic writing systems
-		STORE.toggleWritingSystem()
+		STATE_MANAGER.toggleWritingSystem()
 		
 		# Update local data and save
-		DATA.syncFromStore!
+		UI.syncFromStore!
 		APP.save!
 	# Goes to the next word in the phrase
 	
@@ -818,7 +817,7 @@ tag WordNav
 			nextPhrase!
 		else
 			let next_word_i = inc(rt.wid)
-			STORE.set('active_word', phrase.kh_array[next_word_i])
+			STATE_MANAGER.set('active_word', phrase.kh_array[next_word_i])
 			goTo rt.cid, rt.lid, rt.pid, next_word_i
 		APP.save!
 
@@ -859,7 +858,7 @@ tag WordNav
 			prevPhraseLastWord!
 		else
 			let prev_wid = dec(rt.wid)
-			STORE.set('active_word', phrase.kh_array[prev_wid])
+			STATE_MANAGER.set('active_word', phrase.kh_array[prev_wid])
 			goTo rt.cid, rt.lid, rt.pid, prev_wid
 		APP.save!
 	def prevPhraseLastWord
@@ -924,7 +923,7 @@ tag WordNav
 	def goTo c, l, p, w
 		# Update the route state before navigation
 		let rt = {cid: c, lid: l, pid: p || 1, wid: w || 0}
-		STORE.set('rt', rt)
+		STATE_MANAGER.set('rt', rt)
 		
 		# Then navigate
 		if w
@@ -955,7 +954,7 @@ tag WordNav
 		return res
 
 	def handleHold word
-		APP.toggleLearned(STORE.get('active_word'))
+		APP.toggleLearned(STATE_MANAGER.get('active_word'))
 		stopTimer!
 		resetTimer!
 		imba.commit!
@@ -964,8 +963,8 @@ tag WordNav
 	elapsed = 0 # NOTE: used
 	
 	def pressAndHold word, duration
-		STORE.set('active_word', word)
-		DATA.syncFromStore!
+		STATE_MANAGER.set('active_word', word)
+		UI.syncFromStore!
 		#interval = setInterval(&, step) do
 			if elapsed >= duration 
 			then (handleHold!)
@@ -1028,14 +1027,14 @@ tag WordCard
 		fitty($fit, fit_settings)
 	def render
 		<self>
-			const activeWord = STORE.get('active_word', '')
+			const activeWord = STATE_MANAGER.get('active_word', '')
 			let vida = dictionary[activeWord]..vida
 			let vida_auto = dictionary[activeWord]..vida_auto
 			let ipa = dictionary[activeWord]..ipa
 			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={activeWord}&service=dictionary" target="_blank"> 
 				activeWord
 			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=APP.toggleIpa!>
-				const useIpa = STORE.get('ipa', false)
+				const useIpa = STATE_MANAGER.get('ipa', false)
 				if useIpa
 					<span[fs:xs c:gray5]> "ipa"
 					if ipa
@@ -1050,7 +1049,7 @@ tag WordCard
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "unavailable"
-			<ToggleSwitch .active=STORE.hasLearnedWord(activeWord) @click=APP.toggleLearned(activeWord)> "learned"
+			<ToggleSwitch .active=STATE_MANAGER.hasLearnedWord(activeWord) @click=APP.toggleLearned(activeWord)> "learned"
 			if AUDIO.hasOwnProperty(activeWord)
 				<AudioPlayer>
 
@@ -1089,7 +1088,7 @@ tag AudioPlayer
 		if manual
 			word = manual
 		else
-			word = STORE.get('active_word', '')
+			word = STATE_MANAGER.get('active_word', '')
 		<audio$track @ended.commit src=AUDIO[word] type="audio/mpeg" preload="auto">
 		
 		<.button-wrapper[d:hflex ai:center]>
@@ -1109,7 +1108,7 @@ tag AudioPlayer
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
 	<self>
-		const activeWord = STORE.get('active_word', '')
+		const activeWord = STATE_MANAGER.get('active_word', '')
 		const word_object = dictionary[activeWord]
 		if word_object..def !== false
 			<h2> "Definition"
@@ -1273,7 +1272,7 @@ tag SpellingCard
 				kh_leg + kh_aang + kh_eaq + kh_bantok_piir + kh_treisap + kh_s_stress +	kh_c_stress + kh_v + kh_c +	'.', 'g'
 			
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
-			const activeWord = STORE.get('active_word', '')
+			const activeWord = STATE_MANAGER.get('active_word', '')
 			let testword = activeWord
 			let groups = testword.match regtest
 			for item in groups
@@ -1308,13 +1307,13 @@ tag lesson-nav
 			updateActiveLid()
 		
 	def updateActiveLid
-		currentLid = Number(STORE.state.rt..lid || rt..lid || 0)
+		currentLid = Number(STATE_MANAGER.state.rt..lid || rt..lid || 0)
 		imba.commit()
 	
 	def routed params
 		rt = params
 		# Make sure we update the global route state
-		STORE.set('rt', rt)
+		STATE_MANAGER.set('rt', rt)
 		updateActiveLid()
 		APP.save!
 	
@@ -1325,9 +1324,9 @@ tag lesson-nav
 	
 	def render
 		<self>
-			let routed_collection = LIBRARY.collections[STORE.state.rt..cid || rt..cid]
+			let routed_collection = LIBRARY.collections[STATE_MANAGER.state.rt..cid || rt..cid]
 			for own l_key, _lesson of LIBRARY.lessons
-				# Use both local rt and STORE.state.rt to make it more resilient
+				# Use both local rt and STATE_MANAGER.state.rt to make it more resilient
 				<lesson-nav-item 
 					.active=isActive(_lesson.lid)
 					route-to="/learn/{_lesson.cid}/{_lesson.lid}/1/0" 
@@ -1380,7 +1379,7 @@ tag phrase-nav
 	def routed params
 		rt = params
 		# Update the global route state to keep navigation in sync
-		STORE.set('rt', rt)
+		STATE_MANAGER.set('rt', rt)
 		# Tell all lesson-nav instances to update their active state
 		imba.commit!
 		APP.save!
