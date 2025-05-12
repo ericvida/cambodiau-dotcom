@@ -14,6 +14,10 @@ const _schema = i.schema({
     $users: i.entity({
       email: i.string().unique().indexed().optional(),
     }),
+    collections: i.entity({
+      name: i.string().unique().indexed(),
+      json: i.json().optional(),
+    })
     profile: i.entity({
       active_word: i.string().optional(),
       createdAt: i.number().optional(),
@@ -26,6 +30,18 @@ const _schema = i.schema({
     test: i.entity({}),
   },
   links: {
+    collections$users: {
+      forward: {
+        on: "collection",
+        has: "many"
+        label: "$users"
+      },
+      reverse: {
+        on: "$users",
+        has: "many",
+        label: "collections",
+      }
+    }
     profile$users: {
       forward: {
         on: "profile",
