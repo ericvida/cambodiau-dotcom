@@ -608,10 +608,14 @@ tag CourseCard
 			bg:hue5 @darkmode:hue5
 		cursor:pointer
 	def calcUniqueLearned unique
-		let arr = []
-		for own key, value of DATA.local.user_learned
-			arr.push Object.keys(unique).includes(key)
-		return arr.length
+		# Use the progress system to calculate unique learned words
+		const system = STORE.get('writing_system', 'khmer')
+		const progress = 
+			if system === 'khmer' 
+			then DATA.local.progress_khmer
+			else DATA.local.progress_phonetic
+		
+		return progress..library..unique_learned || 0
 	def render
 		let col_item = PROGRESS[collection.key]
 		<self.card> 
@@ -1307,15 +1311,13 @@ tag lesson-nav
 		rt = params
 		# Make sure we update the global route state
 		STORE.set('rt', rt)
-		LL 'lesson nav', STORE.state.rt.lid
 		updateActiveLid()
 		APP.save!
 	
 	def isActive lid
 		let res = currentLid == lid
 		if res is true
-			LL lid, res
-		return res
+			return res
 	
 	def render
 		<self>

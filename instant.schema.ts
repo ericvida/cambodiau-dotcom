@@ -17,23 +17,22 @@ const _schema = i.schema({
     collections: i.entity({
       name: i.string().unique().indexed(),
       json: i.json().optional(),
-    })
+    }),
     profile: i.entity({
-      active_word: i.string().optional(),
-      createdAt: i.number().optional(),
-      khmer_writing: i.boolean().optional(),
-      progress: i.json().optional(),
-      rt: i.json().optional(),
-      updated_at: i.number().optional(),
-      user_learned: i.json().optional(),
+      created_at: i.number().optional(),
+      writing_system: i.string().optional(),
+      progress_khmer: i.json().optional(),
+      progress_phonetic: i.json().optional(),
+      updated_progress_at: i.number().optional(),
+      user_words: i.json().optional(),
     }),
     test: i.entity({}),
   },
   links: {
     collections$users: {
       forward: {
-        on: "collection",
-        has: "many"
+        on: "collections",
+        has: "many",
         label: "$users"
       },
       reverse: {
@@ -41,7 +40,7 @@ const _schema = i.schema({
         has: "many",
         label: "collections",
       }
-    }
+    },
     profile$users: {
       forward: {
         on: "profile",

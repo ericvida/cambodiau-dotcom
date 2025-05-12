@@ -63,7 +63,11 @@ export class ProgressProcessor
 					
 	def calcProgress _library
 		# Use Store's updateProgress method, then update this object with the result
-		const progressData = STORE.updateProgress(_library)
+		STORE.updateProgress(_library)
+		
+		# Get the progress data for the current writing system
+		const system = STORE.get('writing_system', 'khmer')
+		const progressData = STORE.getProgressForSystem(system)
 		
 		# Update library properties
 		this.library.weight_learned = progressData..library..weight_learned || 0

@@ -21,7 +21,7 @@ const DEFAULT_STATE = {
 	lesson_nav: yes
 	phrase_nav: yes
 	right_bar: yes
-	khmer_writing: yes
+	writing_system: 'khmer' # 'khmer' or 'phonetic'
 	
 	# Navigation state
 	cid: 0
@@ -31,14 +31,14 @@ const DEFAULT_STATE = {
 	active_word: 'ជា'
 	
 	# User data
-	user_learned: {}
-	progress: {
-		library: {weight_learned: 0}
-	}
+	user_words: {} # Format: { "word": { khmer: true|false, phonetic: true|false } }
+	progress_khmer: { library: {weight_learned: 0} }
+	progress_phonetic: { library: {weight_learned: 0} }
 	
 	# Timestamps for sync management
-	updated_at: 0
+	updated_progress_at: 0
 	last_sync_at: 0
+	created_at: 0
 }
 
 ### Utility functions
@@ -105,6 +105,9 @@ export class Store
 				const savedState = imba.locals[LOCAL_DB_NAME]
 				state = deepCopy(savedState)
 				console.log("Loaded state from local storage")
+				
+				# Initialize app with default values if needed
+				console.log("Loaded state from local storage")
 			else
 				# Use defaults
 				resetState!
@@ -116,7 +119,7 @@ export class Store
 	def resetState
 		# Reset the state to default values"""
 		state = deepCopy(DEFAULT_STATE)
-		state.updated_at = Date.now!
+		state.updated_progress_at = Date.now!
 		persistState!
 	
 	def initInstantDB
@@ -209,7 +212,7 @@ export class Store
 		current[lastKey] = value
 		
 		# Update timestamp and persist
-		state.updated_at = Date.now!
+		state.updated_progress_at = Date.now!
 		persistState!
 		
 		# Queue for sync if signed in
@@ -244,21 +247,34 @@ export class Store
 		try
 			# Group all changes into a single transaction
 			let profileUpdate = {
-				updated_at: timestamp
+				updated_progress_at: timestamp
 			}
+			
+			# List of properties that should NOT be synced to InstantDB
+			const localOnlyProps = ['active_word', 'cid', 'lid', 'pid', 'wid']
+			
 			for own key, item of syncQueue
-				# Add to the profile update object
 				# Extract the leaf property name from the path
 				const pathParts = item.path.split('.')
 				const leafProperty = pathParts[pathParts.length - 1]
-				profileUpdate[leafProperty] = item.value
-			
-			# Process user_learned and progress specially
-			if state.user_learned
-				profileUpdate.user_learned = state.user_learned
 				
-			if state.progress
-				profileUpdate.progress = state.progress
+				# Only add properties that should be synced
+				if !localOnlyProps.includes(leafProperty)
+					profileUpdate[leafProperty] = item.value
+			
+			# Process user_words specially - this is important to sync
+			if state.user_words
+				profileUpdate.user_words = state.user_words
+				
+			# Sync both progress objects separately
+			if state.progress_khmer
+				profileUpdate.progress_khmer = state.progress_khmer
+				
+			if state.progress_phonetic
+				profileUpdate.progress_phonetic = state.progress_phonetic
+				
+			# Always sync writing_system as it affects progress tracking
+			profileUpdate.writing_system = state.writing_system
 			
 			# Check if we already have a profile ID stored
 			if state.profileId
@@ -276,7 +292,8 @@ export class Store
 				batch.push(
 					tx.profile[profileId].update({
 						...profileUpdate,
-						id: profileId
+						id: profileId,
+						created_at: timestamp # Add creation timestamp for new profiles
 					}).link({$users: state.user.id})
 				)
 				# Store the new profile ID for future updates
@@ -312,16 +329,24 @@ export class Store
 						# Store the profile ID for future updates
 						state.profileId = profile.id
 						
-						# Update user learning data
-						if profile.user_learned
-							state.user_learned = {...state.user_learned, ...profile.user_learned}
+						# Update user words data
+						if profile.user_words
+							state.user_words = {...state.user_words, ...profile.user_words}
 						
-						# Update progress data
-						if profile.progress
-							state.progress = {...state.progress, ...profile.progress}
+						# Update progress data for khmer
+						if profile.progress_khmer
+							state.progress_khmer = {...state.progress_khmer || {}, ...profile.progress_khmer}
+							
+						# Update progress data for phonetic
+						if profile.progress_phonetic
+							state.progress_phonetic = {...state.progress_phonetic || {}, ...profile.progress_phonetic}
 						
 						# Update last received timestamp
-						state.last_sync_at = profile.updated_at || Date.now!
+						state.last_sync_at = profile.updated_progress_at || Date.now!
+						
+						# Store created_at if available
+						if profile.created_at and !state.created_at
+							state.created_at = profile.created_at
 			
 			persistState!
 		catch error
@@ -412,33 +437,63 @@ export class Store
 		# Toggle right sidebar"""
 		set('right_bar', !state.right_bar)
 		return state.right_bar
+		
+	def setWritingSystem system
+		# Set writing system to 'khmer' or 'phonetic'
+		if !system or (system isnt 'khmer' and system isnt 'phonetic')
+			console.warn('Invalid writing system:', system)
+			return state.writing_system or 'khmer'
+		
+		set('writing_system', system)
+		return system no
+	
+	def toggleWritingSystem
+		# Toggle between 'khmer' and 'phonetic' writing systems
+		const newSystem = state.writing_system === 'khmer' ? 'phonetic' : 'khmer'
+		return setWritingSystem(newSystem)
 	
 	# ========================
 	# Learning progress tracking
 	# ========================
 	
-	def toggleLearnedWord word
-		# Toggle whether a word has been learned"""
+	def toggleLearnedWord word, writing_system = null
+		# Toggle whether a word has been learned
+		# writing_system can be 'khmer', 'phonetic', or null (uses current setting)
 		if !word
 			return
+
+		# Determine which writing system to toggle, with fallback to default
+		const system = writing_system || state.writing_system || 'khmer'
+		
+		if system !== 'khmer' && system !== 'phonetic'
+			console.warn('Invalid writing system:', system)
+			return
+		
+		const user_words = {...state.user_words || {}}
+		
+		# Initialize the word entry if it doesn't exist
+		if !user_words[word]
+			user_words[word] = { khmer: no, phonetic: no }
 			
-		const learned = {...state.user_learned || {}}
+		# Toggle the writing system
+		user_words[word][system] = !user_words[word][system]
 		
-		if learned.hasOwnProperty(word)
-			delete learned[word]
-		else
-			learned[word] = yes
+		# Update state
+		set('user_words', user_words)
 		
-		set('user_learned', learned)
-		return !!learned[word]
+		return user_words[word][system]
 	
-	def hasLearnedWord word
-		# Check if a word has been learned"""
+	def hasLearnedWord word, writing_system = null
+		# Check if a word has been learned
+		# writing_system can be 'khmer', 'phonetic', or null (uses current setting)
 		if !word
 			return false
 		
-		# Use proper Imba optional chaining syntax (.. is optional chaining in Imba)
-		return !!state..user_learned[word]
+		# Determine which writing system to check, with fallback to default
+		const system = writing_system || state.writing_system || 'khmer'
+		
+		# Check if the word is learned in the specified writing system
+		return state.user_words..[word]..[system] === true
 	
 	def updateProgress library
 		# Update learning progress based on library data"""
@@ -447,16 +502,23 @@ export class Store
 			return
 		
 		try
-			# Create a deep copy of the current progress to modify
-			const progress = deepCopy(state.progress || {})
-			progress.library = progress.library || {}
+			# Get current writing system, with fallback to default
+			const system = state.writing_system || 'khmer'
+			
+			# Select the appropriate progress object based on writing system
+			const progressKey = system === 'khmer' ? 'progress_khmer' : 'progress_phonetic'
+			const progress = deepCopy(state[progressKey] || { library: {} })
 			
 			# Calculate library-level progress
 			let libraryWeightLearned = 0
 			let libraryUniqueWords = 0
 			let libraryUniqueWordsLearned = 0
 			
-			const learned = state.user_learned || {}
+			# Get words learned in the current writing system
+			const user_words = state.user_words || {}
+			# Create a helper function to check if a word is learned in the current system
+			def isWordLearned word
+				return user_words[word]..[system] === true
 			
 			# Process collections
 			if library.collections
@@ -468,7 +530,7 @@ export class Store
 					
 					# Process words in this collection
 					for own word, wordData of collection.words || {}
-						if learned[word]
+						if isWordLearned(word)
 							colWeightLearned += (wordData.weight || 0)
 							colUniqueWordsLearned++
 					
@@ -499,7 +561,7 @@ export class Store
 					
 					# Process words in this lesson
 					for own word, wordData of lesson.words || {}
-						if learned[word]
+						if isWordLearned(word)
 							lesWeightLearned += (wordData.weight || 0)
 							lesUniqueWordsLearned++
 					
@@ -525,7 +587,7 @@ export class Store
 					
 					# Process words in this phrase
 					for own word, wordData of phrase.words || {}
-						if learned[word]
+						if isWordLearned(word)
 							phrWeightLearned += (wordData.weight || 0)
 							phrUniqueWordsLearned++
 					
@@ -543,7 +605,12 @@ export class Store
 			
 			# Update library progress
 			libraryUniqueWords = library.unique || 0
-			libraryUniqueWordsLearned = Object.keys(learned).length
+			
+			# Count words learned in current system
+			libraryUniqueWordsLearned = 0
+			for own word, data of user_words
+				if data[system]
+					libraryUniqueWordsLearned++
 			
 			progress.library.weight_learned = libraryWeightLearned
 			progress.library.unique_learned = libraryUniqueWordsLearned
@@ -556,12 +623,38 @@ export class Store
 				then Math.round((libraryUniqueWordsLearned / libraryUniqueWords) * 100)
 				else 0
 			
-			# Set the updated progress
-			set('progress', progress)
+			# Set the updated progress for the specific writing system
+			set(progressKey, progress)
 			return progress
 		catch error
 			console.error("Error updating progress:", error)
-			return state.progress
+			return getProgressForSystem()
+	
+	def getProgressForSystem writing_system = null
+		# Get progress data for the specified writing system or current one
+		const system = writing_system || state.writing_system || 'khmer'
+		
+		if system === 'khmer'
+			return state.progress_khmer || { library: { weight_learned: 0 } }
+		elif system === 'phonetic'
+			return state.progress_phonetic || { library: { weight_learned: 0 } }
+		else
+			console.warn('Invalid writing system for progress:', system)
+			return { library: { weight_learned: 0 } }
+	
+	def getTotalProgress
+		# Get total progress combining both writing systems
+		const khmerProgress = getProgressForSystem('khmer')
+		const phoneticProgress = getProgressForSystem('phonetic')
+		
+		const totalProgress = {
+			library: {
+				weight_learned: (khmerProgress.library..weight_learned || 0) + (phoneticProgress.library..weight_learned || 0),
+				unique_learned: (khmerProgress.library..unique_learned || 0) + (phoneticProgress.library..unique_learned || 0)
+			}
+		}
+		
+		return totalProgress
 	
 	# ========================
 	# Word reference utilities
