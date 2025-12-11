@@ -1,57 +1,54 @@
 import './global.imba'
-import './app-dashboard.imba'
+# import './app-dashboard.imba'
 tag App
 	css d:vtc
 	magic_code = ''
-	@observable email_input = STATE_MANAGER.get('email_input', '')
+	email_input = ''
 	
-	@autorun def persistEmailInput
-		if STATE_MANAGER.get('email_input') != email_input
-			STATE_MANAGER.set('email_input', email_input)
-			UI.syncFromStore!
+	
 			
 	def mount
-		# The Store is initialized in its constructor
-		# Sync the data from store
-		UI.syncFromStore!
 		
+		# CLOUD_MANAGER.pullFromCloud!
+		LL UI
 		# Calculate initial progress
-		PROGRESS.calcProgress(LIBRARY)
+		# CLOUD_MANAGER.calcProgress(LIBRARY)
 		
 		# If user is logged in, force a profile sync to ensure latest data
-		if STATE_MANAGER.get('user')
-			NOTE.gray("User logged in on app mount, ensuring data is fresh")
-			STATE_MANAGER.getUserProfile().then(do(result)
-					NOTE.gray("App mount profile sync complete:", result)
-					# Make sure to sync data again after profile sync
-					UI.syncFromStore!
-					# Recalculate progress with fresh data
-					PROGRESS.calcProgress(LIBRARY)
-				).catch(do(error)
-					console.error("App mount profile sync failed:", error)
-				)
+		# if CLOUD_MANAGER.get('user')
+		# 	NOTE.gray("User logged in on app mount, ensuring data is fresh")
+		# 	CLOUD_MANAGER.getUserProfile().then(do(result)
+		# 			NOTE.gray("App mount profile sync complete:", result)
+		# 			# Make sure to sync data again after profile sync
+		# 			CLOUD_MANAGER.pullFromCloud!
+		# 			# Recalculate progress with fresh data
+		# 			CLOUD_MANAGER.calcProgress(LIBRARY, state.writing_system)
+		# 		).catch(do(error)
+		# 			console.error("App mount profile sync failed:", error)
+		# 		)
 	<self>
 		css bg:gray1 d:flex gap:2em
-		
-		unless STATE_MANAGER.get('user')
+		if UI.user is 'guest'
+			<guest-page> 'guest page'
+		else
 			<div.col>
 				if INSTANT_APP_ID is 'REPLACE_WITH_YOUR_PUBLIC_APP_ID'
 					<p> 'Please set your InstantDB App ID on line 1 in ENV.imba'
 				else
-					if STATE_MANAGER..state..sentCode?
+					if UI.user is 'code sent'
 						<p> "Check your email for the magic code."
 						<div.row>
 							<input type="text" bind=magic_code placeholder="Enter magic code">
-							<button @click=UI.loginWithCode(magic_code)> "Login"
+							<button @click=UI_MANAGER.loginWithCode(magic_code)> "Login"
 					else
 						<p> "Please enter your email and click 'get code' to receive a magic code."
 						<div.row>
 							<input [w:auto] type="text" bind=email_input placeholder="Enter your email">
-							<button[px:1em] @click=UI.sendMagicCode!> "get code"
+							<button[px:1em] @click=UI_MANAGER.sendMagicCode(email_input)> "get code"
 		
-		else # When user is logged in
-			# <div>
-			# 	<p> "Crush it {STATE_MANAGER.get('user.email', '').split('@').shift!}!"
-			# 	<button @click=(STATE_MANAGER.logout!, email_input = '')> "logout"
-			<app-dashboard>
+		# else # When user is logged in
+		# 	# <div>
+		# 	# 	<p> "Crush it {CLOUD_MANAGER.get('user.email', '').split('@').shift!}!"
+		# 	# 	<button @click=(CLOUD_MANAGER.logout!, email_input = '')> "logout"
+		# 	<app-dashboard>
 imba.mount <App>

@@ -14,14 +14,12 @@ is calculated in the constructor of the progress class.
 
 class Api
 	def toggleLearned word
-		STATE_MANAGER.toggleLearnedWord(word)
-		PROGRESS.calcProgress LIBRARY
+		CLOUD_MANAGER.toggleLearnedWord(word)
 		# After toggling the word, ensure local state is updated
-		# UI.syncFromStore!
 		imba.commit!
 		
 	def hasLearned word
-		return STATE_MANAGER.hasLearnedWord(word)
+		return CLOUD_MANAGER.hasLearnedWord(word)
 	def calcAllProgressFlat
 		### TODO
 		Make word refs be generated at LIBRARY.imba at static level, not here.
@@ -122,35 +120,35 @@ class Api
 	# API[epic=API, seq=7] SAVE
 	def save
 		# Use Store's saveToLocalStorage method instead
-		STATE_MANAGER.saveToLocalStorage!
+		CLOUD_MANAGER.saveToLocalStorage!
 	
 	# API[epic=API, seq=7] LOAD
 	def load
 		# Use Store's data directly
-		UI.syncFromStore!
+		CLOUD_MANAGER.pullFromCloud!
 
 	# API[epic=FrontEnd, seq=8] vida
 	def toggleIpa
-		STATE_MANAGER.toggleIpa!
-		UI.syncFromStore!
+		CLOUD_MANAGER.toggleIpa!
+		CLOUD_MANAGER.pullFromCloud!
 		
 	# API[epic=FrontEnd, seq=8] AUTH
 	def toggleAuth
 		# Use the Store for authentication state
-		if STATE_MANAGER.get('login?') == yes
-			STATE_MANAGER.logout!
+		if CLOUD_MANAGER.get('login?') == yes
+			CLOUD_MANAGER.logout!
 		else
 			# Show login screen
-			STATE_MANAGER.set('login?', no)
-		UI.syncFromStore!
+			CLOUD_MANAGER.set('login?', no)
+		CLOUD_MANAGER.pullFromCloud!
 		
 	# API[epic=FrontEnd, seq=9] DARKMODE
 	def toggleDark
-		const isDark = STATE_MANAGER.toggleDarkMode!
+		const isDark = CLOUD_MANAGER.toggleDarkMode!
 		if isDark
 		then setDarkmode!
 		else unsetDarkmode!
-		UI.syncFromStore!
+		CLOUD_MANAGER.pullFromCloud!
 	def setDarkmode
 		let root = document.getElementsByTagName('html')[0]
 		root.flags.add('mod-darkmode')
@@ -160,14 +158,14 @@ class Api
 	# API[epic=FrontEnd, seq=10] LOGIN
 	def logIn
 		# Use Store for authentication
-		STATE_MANAGER.set('login?', yes)
-		UI.syncFromStore!
+		CLOUD_MANAGER.set('login?', yes)
+		CLOUD_MANAGER.pullFromCloud!
 			
 	# API[epic=FrontEnd, seq=11] LOGOUT
 	def logOut
 		# Use Store for logout
-		STATE_MANAGER.logout!
-		UI.syncFromStore!
+		CLOUD_MANAGER.logout!
+		CLOUD_MANAGER.pullFromCloud!
 
 	def search needle, haystack
 		let haystackLength = haystack.length # tlen
@@ -207,8 +205,8 @@ tag app-dashboard
 		&.open
 			ml:0px
 	def build 
-		UI.initLocal!
-		PROGRESS.calcProgress LIBRARY
+		UI_MANAGER.initLocal!
+		CLOUD_MANAGER.getCurrentWritingSystemProgress!
 		imba.commit!
 		APP.save!
 	def render
@@ -218,7 +216,7 @@ tag app-dashboard
 				@hotkey("shift+i|v")=APP.toggleIpa!
 				@hotkey("shift+c+l")=APP.clear!
 				@hotkey("shift+a")=APP.toggleAuth! # TODO: delete in production
-				@hotkey('enter|s')=APP.toggleLearned(STATE_MANAGER.get('active_word'))
+				@hotkey('enter|s')=APP.toggleLearned(CLOUD_MANAGER.get('active_word'))
 			>
 			# if router.pathname is "/login"
 			# 	<login-page[o@off:0% y@off:-200px ease:2dur] ease route="/login">
@@ -379,24 +377,24 @@ tag app-dictionary
 			<.row[order:0] @click=APP.toggleIpa!>
 				<span> "khmer"
 				<span> 
-					if STATE_MANAGER.get('ipa') then "ipa" else "vida"
+					if CLOUD_MANAGER.get('ipa') then "ipa" else "vida"
 				<span> "google"
 			for own word, info of dictionary
 				if FUZZY.search(query, word) | FUZZY.search(query, info..vida) | FUZZY.search(query, info..google) | FUZZY.search(query, info..ipa)
-					<div.row .learned=(STATE_MANAGER.hasLearnedWord(word)) @click=(STATE_MANAGER.set('active_word', word), UI.syncFromStore!)>
+					<div.row .learned=(CLOUD_MANAGER.hasLearnedWord(word)) @click=(CLOUD_MANAGER.set('active_word', word), CLOUD_MANAGER.pullFromCloud!, APP!)>
 						# if info..rank then <span.mono> info..rank else <span.err> '-'
 						<a href="http://sealang.net/api/api.pl?query={word}&service=dictionary" target="_blank"> 
 							<span.khmer> "{word}"
-						if STATE_MANAGER.get('ipa')
+						if CLOUD_MANAGER.get('ipa')
 							if info..ipa then <span.mono> info..ipa else <span.err> 'ipa coming soon'
 						else
-							if (info?.vida)
-								<span.mono> info?.vida
-							elif (info?.vida_auto)
-								<span.mono.err> info?.vida_auto 
+							if (info..vida)
+								<span.mono> info..vida
+							elif (info..vida_auto)
+								<span.mono.err> info..vida_auto 
 							else
 								<span.err> 'vida coming soon'
-						if info?.google	then <span> info?.google else <span.err> '-'
+						if info..google	then <span> info..google else <span.err> '-'
 
 
 tag info-page
@@ -496,8 +494,8 @@ tag PhoneticVowels
 			@hover
 				bg:hue4 @darkmode:hue6
 	def activeWord word
-		STATE_MANAGER.set('active_word', char[word][2])
-		UI.syncFromStore!
+		CLOUD_MANAGER.set('active_word', char[word][2])
+		CLOUD_MANAGER.pullFromCloud!
 		APP.save!
 	
 	def render
@@ -505,8 +503,8 @@ tag PhoneticVowels
 			<nav>
 				<button @click=APP.toggleIpa!> 
 					"Phonetic System: "
-					if STATE_MANAGER.get('ipa') then "IPA" else "Vida"
-			if STATE_MANAGER.get('ipa') === true
+					if CLOUD_MANAGER.get('ipa') then "IPA" else "Vida"
+			if CLOUD_MANAGER.get('ipa') === true
 				ipa = 1
 			else
 				ipa = 0
@@ -608,13 +606,13 @@ tag CourseCard
 		cursor:pointer
 	def calcUniqueLearned unique
 		# Use the progress system to calculate unique learned words
-		const system = STATE_MANAGER.get('writing_system', 'khmer')
+		const system = CLOUD_MANAGER.get('writing_system', 'source')
 		const progress = 
-			if system === 'khmer' 
-			then UI.local.progress_khmer
-			else UI.local.progress_phonetic
+			if system === 'source' 
+			then UI.progress_khmer
+			else UI.progress_phonetic
 		
-		return progress?.library?.unique_learned || 0
+		return progress..library..unique_learned || 0
 	def render
 		let col_item = PROGRESS[collection.key]
 		<self.card> 
@@ -632,14 +630,14 @@ tag CourseCard
 tag right-bar
 	def routed params
 		rt = params
-		STATE_MANAGER.set('rt', rt)
+		CLOUD_MANAGER.set('rt', rt)
 		APP.save!
 	def render
 		<self>
-			const activeWord = STATE_MANAGER.get('active_word')
+			const activeWord = CLOUD_MANAGER.get('active_word')
 			if activeWord
 				<WordCard.card>
-				if dictionary[activeWord]?.google
+				if dictionary[activeWord]..google
 					<DefinitionCard.card>
 				<SpellingCard.card>
 			<ShortcutCard.card>
@@ -674,33 +672,33 @@ tag PhoneticsCard
 	<self.card>
 		<h2> "Phonetics"
 		<p.phonetics>
-			if UI.local.ipa
+			if UI.ipa
 				for word in phrase.phrase
 					let obj = dictionary[word]
-					if obj?.ipa or obj?.vida or obj?.vida_auto or word
-						<span> obj?.ipa or obj?.vida or obj?.vida_auto or word
+					if obj..ipa or obj..vida or obj..vida_auto or word
+						<span> obj..ipa or obj..vida or obj..vida_auto or word
 					else
 						<span> "n/a"
 						<> EE word, "no phonetics available"
 			else
 				for word in phrase.phrase
 					let obj = dictionary[word]
-					if obj?.vida or obj?.vida_auto or obj?.ipa or word
-						<span> obj?.vida or obj?.vida_auto or obj?.ipa or word
+					if obj..vida or obj..vida_auto or obj..ipa or word
+						<span> obj..vida or obj..vida_auto or obj..ipa or word
 					unless obj..vida or obj..vida_auto or obj..ipa or word
 						<span> "n/a"
 						<> EE word, "no phonetics available"
 
 # TAG[epic=NAV, seq=24] WordNav
 tag WordNav
-	# NOTE: now uses STATE_MANAGER directly instead of UI.local
+	# NOTE: now uses CLOUD_MANAGER directly instead of UI.local
 	def routed params
 		rt = params
 		# Update the global route state to keep navigation in sync
-		STATE_MANAGER.set('rt', rt)
+		CLOUD_MANAGER.set('rt', rt)
 		phrase = LIBRARY.phrases[[rt.cid,rt.lid,rt.pid].join('-')]
-		STATE_MANAGER.set('active_word', phrase.kh_array[rt.wid])
-		UI.syncFromStore!
+		CLOUD_MANAGER.set('active_word', phrase.kh_array[rt.wid])
+		CLOUD_MANAGER.pullFromCloud!
 		# Update UI components that depend on route state
 		imba.commit()
 		APP.save!
@@ -745,7 +743,7 @@ tag WordNav
 				bxs:0px 0px 0px 4px amber2 inset @darkmode:0px 0px 0px 4px amber2/10 inset
 
 	def render
-		# @click=(UI.local.active_word = khccmer_word)
+		# @click=(UI.active_word = khccmer_word)
 		<self>
 			# TAG[epic=SHORTCUTS, seq=25] Word & Lesson Shortcuts
 			<global 
@@ -756,8 +754,8 @@ tag WordNav
 			>
 			<audio$word_audio src="" type="audio/mpeg">
 			# Toggle between Khmer and phonetic writing systems
-			<ToggleSwitch .active=(STATE_MANAGER.get('writing_system', 'khmer') === 'phonetic') @click.toggleKhmer [align-self:end]> 
-				if STATE_MANAGER.get('writing_system', 'khmer') === 'phonetic'
+			<ToggleSwitch .active=(CLOUD_MANAGER.get('writing_system', 'source') === 'phonetic') @click.toggleKhmer [align-self:end]> 
+				if CLOUD_MANAGER.get('writing_system', 'source') === 'phonetic'
 					"phonetics"
 				else
 					<span [ff:mono]> "khmer"
@@ -771,9 +769,9 @@ tag WordNav
 					let no_phonetics = false
 					let display_word = word
 					if in_dict 
-						if STATE_MANAGER.get('writing_system', 'khmer') === 'khmer'
+						if CLOUD_MANAGER.get('writing_system', 'source') === 'source'
 							display_word = word
-						elif STATE_MANAGER.get('ipa')
+						elif CLOUD_MANAGER.get('ipa')
 							if !!ipa
 								display_word = ipa
 						else
@@ -785,22 +783,22 @@ tag WordNav
 								no_phonetics = true
 								display_word
 					<.word 
-						.active=(word is STATE_MANAGER.get('active_word')) 
+						.active=(word is CLOUD_MANAGER.get('active_word')) 
 						route-to="/learn/{phrase.cid}/{phrase.lid}/{phrase.pid}/{word_index}" 
-						.known=STATE_MANAGER.hasLearnedWord(word) 
+						.known=CLOUD_MANAGER.hasLearnedWord(word) 
 						.not_in_dict=!in_dict
 						.no_phonetics=no_phonetics
 						@dblclick.playWord($word_audio, word) 
 						@mousedown.pressAndHold(word, 1s)
 						@mouseup.stopTimer
-						.khmer=(STATE_MANAGER.get('writing_system', 'khmer') === 'khmer')
+						.khmer=(CLOUD_MANAGER.get('writing_system', 'source') === 'source')
 						> display_word
 	def toggleKhmer
 		# Toggle between Khmer and phonetic writing systems
-		STATE_MANAGER.toggleWritingSystem()
+		CLOUD_MANAGER.toggleWritingSystem()
 		
 		# Update local data and save
-		UI.syncFromStore!
+		CLOUD_MANAGER.pullFromCloud!
 		APP.save!
 	# Goes to the next word in the phrase
 	
@@ -817,7 +815,7 @@ tag WordNav
 			nextPhrase!
 		else
 			let next_word_i = inc(rt.wid)
-			STATE_MANAGER.set('active_word', phrase.kh_array[next_word_i])
+			CLOUD_MANAGER.set('active_word', phrase.kh_array[next_word_i])
 			goTo rt.cid, rt.lid, rt.pid, next_word_i
 		APP.save!
 
@@ -858,7 +856,7 @@ tag WordNav
 			prevPhraseLastWord!
 		else
 			let prev_wid = dec(rt.wid)
-			STATE_MANAGER.set('active_word', phrase.kh_array[prev_wid])
+			CLOUD_MANAGER.set('active_word', phrase.kh_array[prev_wid])
 			goTo rt.cid, rt.lid, rt.pid, prev_wid
 		APP.save!
 	def prevPhraseLastWord
@@ -923,7 +921,7 @@ tag WordNav
 	def goTo c, l, p, w
 		# Update the route state before navigation
 		let rt = {cid: c, lid: l, pid: p || 1, wid: w || 0}
-		STATE_MANAGER.set('rt', rt)
+		CLOUD_MANAGER.set('rt', rt)
 		
 		# Then navigate
 		if w
@@ -954,7 +952,7 @@ tag WordNav
 		return res
 
 	def handleHold word
-		APP.toggleLearned(STATE_MANAGER.get('active_word'))
+		APP.toggleLearned(CLOUD_MANAGER.get('active_word'))
 		stopTimer!
 		resetTimer!
 		imba.commit!
@@ -963,8 +961,8 @@ tag WordNav
 	elapsed = 0 # NOTE: used
 	
 	def pressAndHold word, duration
-		STATE_MANAGER.set('active_word', word)
-		UI.syncFromStore!
+		CLOUD_MANAGER.set('active_word', word)
+		CLOUD_MANAGER.pullFromCloud!
 		#interval = setInterval(&, step) do
 			if elapsed >= duration 
 			then (handleHold!)
@@ -1027,14 +1025,14 @@ tag WordCard
 		fitty($fit, fit_settings)
 	def render
 		<self>
-			const activeWord = STATE_MANAGER.get('active_word', '')
+			const activeWord = CLOUD_MANAGER.get('active_word', '')
 			let vida = dictionary[activeWord]..vida
 			let vida_auto = dictionary[activeWord]..vida_auto
 			let ipa = dictionary[activeWord]..ipa
 			<a$fit.fit.khmer title="Click to search this word on sealang.net dictionary." href="http://sealang.net/api/api.pl?query={activeWord}&service=dictionary" target="_blank"> 
 				activeWord
 			<.phonetic-wrapper[d:hflex ai:center gap:0.5sp] @click=APP.toggleIpa!>
-				const useIpa = STATE_MANAGER.get('ipa', false)
+				const useIpa = CLOUD_MANAGER.get('ipa', false)
 				if useIpa
 					<span[fs:xs c:gray5]> "ipa"
 					if ipa
@@ -1049,7 +1047,7 @@ tag WordCard
 						<div.phonetic> vida_auto
 					else
 						<div.phonetic> "unavailable"
-			<ToggleSwitch .active=STATE_MANAGER.hasLearnedWord(activeWord) @click=APP.toggleLearned(activeWord)> "learned"
+			<ToggleSwitch .active=CLOUD_MANAGER.hasLearnedWord(activeWord) @click=APP.toggleLearned(activeWord)> "learned"
 			if AUDIO.hasOwnProperty(activeWord)
 				<AudioPlayer>
 
@@ -1088,7 +1086,7 @@ tag AudioPlayer
 		if manual
 			word = manual
 		else
-			word = STATE_MANAGER.get('active_word', '')
+			word = CLOUD_MANAGER.get('active_word', '')
 		<audio$track @ended.commit src=AUDIO[word] type="audio/mpeg" preload="auto">
 		
 		<.button-wrapper[d:hflex ai:center]>
@@ -1108,7 +1106,7 @@ tag AudioPlayer
 # CARD[epic=CARD, seq=31] DefinitionCard
 tag DefinitionCard
 	<self>
-		const activeWord = STATE_MANAGER.get('active_word', '')
+		const activeWord = CLOUD_MANAGER.get('active_word', '')
 		const word_object = dictionary[activeWord]
 		if word_object..def !== false
 			<h2> "Definition"
@@ -1272,7 +1270,7 @@ tag SpellingCard
 				kh_leg + kh_aang + kh_eaq + kh_bantok_piir + kh_treisap + kh_s_stress +	kh_c_stress + kh_v + kh_c +	'.', 'g'
 			
 			# let REGlegClusters = /(្[កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ])+/gi
-			const activeWord = STATE_MANAGER.get('active_word', '')
+			const activeWord = CLOUD_MANAGER.get('active_word', '')
 			let testword = activeWord
 			let groups = testword.match regtest
 			for item in groups
@@ -1307,13 +1305,13 @@ tag lesson-nav
 			updateActiveLid()
 		
 	def updateActiveLid
-		currentLid = Number(STATE_MANAGER.state.rt..lid || rt..lid || 0)
+		currentLid = Number(CLOUD_MANAGER.state.rt..lid || rt..lid || 0)
 		imba.commit()
 	
 	def routed params
 		rt = params
 		# Make sure we update the global route state
-		STATE_MANAGER.set('rt', rt)
+		CLOUD_MANAGER.set('rt', rt)
 		updateActiveLid()
 		APP.save!
 	
@@ -1324,9 +1322,9 @@ tag lesson-nav
 	
 	def render
 		<self>
-			let routed_collection = LIBRARY.collections[STATE_MANAGER.state.rt..cid || rt..cid]
+			let routed_collection = LIBRARY.collections[CLOUD_MANAGER.state.rt..cid || rt..cid]
 			for own l_key, _lesson of LIBRARY.lessons
-				# Use both local rt and STATE_MANAGER.state.rt to make it more resilient
+				# Use both local rt and CLOUD_MANAGER.state.rt to make it more resilient
 				<lesson-nav-item 
 					.active=isActive(_lesson.lid)
 					route-to="/learn/{_lesson.cid}/{_lesson.lid}/1/0" 
@@ -1379,7 +1377,7 @@ tag phrase-nav
 	def routed params
 		rt = params
 		# Update the global route state to keep navigation in sync
-		STATE_MANAGER.set('rt', rt)
+		CLOUD_MANAGER.set('rt', rt)
 		# Tell all lesson-nav instances to update their active state
 		imba.commit!
 		APP.save!

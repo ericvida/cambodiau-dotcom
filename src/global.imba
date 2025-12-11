@@ -24,6 +24,7 @@ class Note
 		if enabled
 			color = "black"
 			console.log("%c{message} (noteblack)", "color:{color}")
+			
 global.NOTE = new Note true
 NOTE.gray ['hello', 'world']
 import '../ENV.imba'
@@ -43,17 +44,18 @@ global.LL = console.log
 global.WW = console.warn
 global.EE = console.error
 
-import {StateManager} from './global/StateManager.imba' # Initializes and sets global.STATE_MANAGER
-import {UiManager} from './global/UiManager.imba'
+import {CloudManager} from './global/CloudManager.imba' # Initializes and sets global.CLOUD_MANAGER
+import {UiManager, Ui} from './global/UiManager.imba'
 import {bible_collection} from "./global/_raw_data/bible_collection.imba"
 import {LibraryProcessor} from './global/LibraryProcessor.imba'
 import {ProgressProcessor} from './global/ProgressProcessor.imba'
 
 global.AUDIO = audio
 global.IMAGES = image_references
-global.STATE_MANAGER = new StateManager
-global.UI = new UiManager
 global.LIBRARY = new LibraryProcessor [bible_collection]
 global.PROGRESS = new ProgressProcessor LIBRARY
+global.UI = new Ui
+global.UI_MANAGER = new UiManager
+global.CLOUD_MANAGER = new CloudManager
 global.FUZZY = new Fuzzy
 global.PH = PH

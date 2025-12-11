@@ -25,7 +25,7 @@ tag app-top
 		# ui.darkmode = !ui.darkmode
 		
 		let root = document.getElementsByTagName( 'html' )[0]
-		if UI.local.dark
+		if UI.dark
 		then root.flags.add('mod-darkmode')
 		else root.flags.remove('mod-darkmode')
 	<self>

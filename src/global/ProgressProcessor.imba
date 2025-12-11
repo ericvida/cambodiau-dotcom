@@ -6,7 +6,7 @@ export class ProgressProcessor
 		initProgressProps(_library)
 		
 		# Calculate progress using the new store
-		calcProgress(_library)
+
 		
 	def initProgressProps _library
 		# Initialize library properties
@@ -61,29 +61,11 @@ export class ProgressProcessor
 						weight_progress: 0
 					}
 					
-	def calcProgress _library
-		# Calculate progress for both writing systems
-		if !_library
-			console.warn("Cannot calculate progress: No library data provided")
-			return this
-			
-		NOTE.gray("Calculating progress for both writing systems")
-		STATE_MANAGER.updateProgress(_library, 'khmer')
-		STATE_MANAGER.updateProgress(_library, 'phonetic')
-		
-		# Update the display with the current writing system's data
-		const system = STATE_MANAGER.get('writing_system', 'khmer')
-		NOTE.gray("Using writing system for display:", system)
-		updateDisplayFromSystem(system, _library)
-		
-		# Force UI update
-		imba.commit!
-		
-		return this
+	
 		
 	def updateDisplayFromSystem system, _library = null
 		# Get the progress data for the specified writing system
-		const progressData = STATE_MANAGER.getProgressForSystem(system)
+		const progressData = CLOUD_MANAGER.getProgressForSystem(system)
 		
 		NOTE.gray("Updating display from system:", system, 
 			"Progress data weight learned:", progressData..library..weight_learned)

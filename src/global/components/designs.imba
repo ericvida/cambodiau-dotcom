@@ -66,7 +66,7 @@ tag student-portal
 		w:100vw
 		d:block
 	def render
-		<self.open=UI.local.sidebar>
+		<self.open=UI_MANAGER.local.sidebar>
 			<left-bar>
 			<.page[ofy:scroll h:100vh]> 
 				<student-portal-topbar>
@@ -104,14 +104,14 @@ tag student-portal-topbar
 	css .menu-open l:0
 	
 	def toggleMenu
-		UI.local.sidebar = !UI.local.sidebar
+		UI.sidebar = !UI.sidebar
 		db.save!
 	
 	def toggleDarkmode
-		UI.local.darkmode = !UI.local.darkmode
+		UI.darkmode = !UI.darkmode
 		
 		let root = document.getElementsByTagName( 'html' )[0]
-		if UI.local.darkmode 
+		if UI.darkmode 
 		then root.flags.add('dark')
 		else root.flags.remove('dark')
 		
